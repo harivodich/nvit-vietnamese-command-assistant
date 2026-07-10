@@ -1,6 +1,122 @@
-contacts: []
-locations: []
-songs: []
-artists: []
-reminder_texts: []
-datetimes: []
+contacts:
+  - mẹ
+  - má
+  - mạ
+  - bố
+  - ba
+  - tía
+  - anh nam
+  - chị linh
+  - em an
+  - cô lan
+  - chú hùng
+  - bác sĩ minh
+  - sếp hải
+  - bạn phương
+  - đồng nghiệp
+  - ông nội
+  - bà ngoại
+  - anh tuấn
+  - chị mai
+  - bạn khánh
+
+# Các số dưới đây chỉ dùng cho dữ liệu tổng hợp, không đại diện người thật.
+phone_numbers:
+  - "090 000 0000"
+  - "091 111 1111"
+  - "032 222 2222"
+  - "038 888 8888"
+  - "070 000 0000"
+  - "076 666 6666"
+  - "077 777 7777"
+  - "078 888 8888"
+  - "079 999 9999"
+  - "081 111 1111"
+  - "082 222 2222"
+  - "083 333 3333"
+  - "084 444 4444"
+  - "085 555 5555"
+
+locations:
+  - hà nội
+  - hải phòng
+  - hạ long
+  - thái nguyên
+  - vinh
+  - đồng hới
+  - huế
+  - đà nẵng
+  - hội an
+  - quy nhơn
+  - nha trang
+  - buôn ma thuột
+  - đà lạt
+  - sài gòn
+  - thủ đức
+  - biên hòa
+  - cần thơ
+  - long xuyên
+
+music_catalog:
+  - song: nắng ấm xa dần
+    artist: sơn tùng
+  - song: em của ngày hôm qua
+    artist: sơn tùng
+  - song: nối vòng tay lớn
+    artist: trịnh công sơn
+  - song: một cõi đi về
+    artist: khánh ly
+  - song: để mị nói cho mà nghe
+    artist: hoàng thùy linh
+  - song: đi để trở về
+    artist: soobin hoàng sơn
+  - song: tháng tư là lời nói dối của em
+    artist: hà anh tuấn
+  - song: có chắc yêu là đây
+    artist: sơn tùng
+  - song: lạc trôi
+    artist: sơn tùng
+  - song: phía sau một cô gái
+    artist: soobin hoàng sơn
+
+reminder_texts:
+  - gọi mẹ
+  - uống thuốc
+  - kiểm tra email
+  - họp với nhóm
+  - nộp báo cáo
+  - đón con
+  - mua sữa
+  - gửi tài liệu
+  - tập thể dục
+  - tưới cây
+  - thanh toán hóa đơn
+  - gọi lại cho khách hàng
+
+datetimes:
+  - mai lúc 7 giờ sáng
+  - ngày mai lúc 8 giờ
+  - hôm nay lúc 6 giờ chiều
+  - tối nay lúc 9 giờ
+  - 15 phút nữa
+  - 30 phút nữa
+  - 2 tiếng nữa
+  - thứ hai tuần sau lúc 8 giờ sáng
+  - ngày 4 tháng 5 lúc 10 giờ
+  - sáng mai
+  - trưa mai
+  - chiều thứ sáu
+  - tối thứ bảy
+  - 45 phút nữa
+  - 3 tiếng nữa
+  - 6 giờ sáng mai
+  - 7 giờ tối mai
+  - đầu giờ chiều
+  - cuối ngày hôm nay
+
+weather_times:
+  - hôm nay
+  - ngày mai
+  - tối nay
+  - cuối tuần này
+  - bây giờ

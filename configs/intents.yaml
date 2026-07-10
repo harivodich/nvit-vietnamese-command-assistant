@@ -15,8 +15,8 @@ intents:
     keywords: [thời tiết, nhiệt độ]
     examples: ["thời tiết ở hà nội hôm nay thế nào"]
   play_music:
-    required_slots: [song]
-    optional_slots: [artist]
+    required_slots: []
+    optional_slots: [song, artist]
     keywords: [mở nhạc, phát bài]
     examples: ["mở bài nắng ấm xa dần"]
   call_contact:

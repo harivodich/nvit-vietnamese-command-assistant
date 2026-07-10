@@ -1,0 +1,89 @@
+{
+  "annotation_quality": {
+    "auto_mapped": 994,
+    "template_generated": 1372
+  },
+  "by_split_intent": {
+    "test": {
+      "ask_weather": 90,
+      "call_contact": 66,
+      "play_music": 90,
+      "set_alarm": 81,
+      "set_reminder": 64
+    },
+    "train": {
+      "ask_weather": 382,
+      "call_contact": 294,
+      "play_music": 406,
+      "set_alarm": 271,
+      "set_reminder": 270
+    },
+    "validation": {
+      "ask_weather": 78,
+      "call_contact": 66,
+      "play_music": 84,
+      "set_alarm": 57,
+      "set_reminder": 67
+    }
+  },
+  "by_split_region": {
+    "test": {
+      "central": 72,
+      "north": 72,
+      "south": 72,
+      "standard": 175
+    },
+    "train": {
+      "central": 330,
+      "north": 304,
+      "south": 312,
+      "standard": 677
+    },
+    "validation": {
+      "central": 70,
+      "north": 70,
+      "south": 70,
+      "standard": 142
+    }
+  },
+  "errors": [],
+  "files": {
+    "test_central.jsonl": 72,
+    "test_north.jsonl": 72,
+    "test_south.jsonl": 72,
+    "test_standard.jsonl": 175,
+    "train.jsonl": 1623,
+    "validation.jsonl": 352
+  },
+  "intents": {
+    "ask_weather": 550,
+    "call_contact": 426,
+    "play_music": 580,
+    "set_alarm": 409,
+    "set_reminder": 401
+  },
+  "regions": {
+    "central": 472,
+    "north": 446,
+    "south": 454,
+    "standard": 994
+  },
+  "sources": {
+    "massive": 994,
+    "synthetic": 1372
+  },
+  "splits": {
+    "test": 391,
+    "train": 1623,
+    "validation": 352
+  },
+  "total": 2366,
+  "variants": {
+    "no_diacritics": 686,
+    "regional": 686,
+    "translated": 994
+  },
+  "warnings": [
+    "chưa có transcript vùng miền do người nói thật/reviewer gán nhãn; regional set hiện là template"
+  ]
+}

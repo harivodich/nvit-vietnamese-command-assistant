@@ -2,18 +2,46 @@ variants:
   north:
     giời: trời
     zời: trời
+    nhá: nhé
+    hộ tôi: giúp tôi
+    tớ: tôi
   central:
     răng: sao
     mô: đâu
     tê: kia
     ni: này
+    chừ: bây giờ
+    bữa ni: hôm nay
+    mạ: mẹ
+    eng: anh
+    nớ: đó
+    ri: thế này
+    hỉ: nhé
+    tui: tôi
   south:
     hông: không
     hổng: không
+    hem: không
     dzô: vào
     vô: vào
+    bữa nay: hôm nay
+    dùm: giúp
+    giùm: giúp
+    nghen: nhé
+    hen: nhé
+    má: mẹ
+    tía: bố
+    tui: tôi
 stt_replacements:
   hom nay: hôm nay
   ngay mai: ngày mai
   bao thuc: báo thức
   thoi tiet: thời tiết
+  nhac toi: nhắc tôi
+  goi cho: gọi cho
+  mo nhac: mở nhạc
+  may gio: mấy giờ
+  bay gio: bây giờ
+  sai gon: sài gòn
+  da nang: đà nẵng
+  ha noi: hà nội

@@ -1,0 +1,34 @@
+{
+  "annotation_quality": {
+    "auto_mapped": 994,
+    "template_generated": 1372
+  },
+  "files": {
+    "test_central.jsonl": 72,
+    "test_north.jsonl": 72,
+    "test_south.jsonl": 72,
+    "test_standard.jsonl": 175,
+    "train.jsonl": 1623,
+    "validation.jsonl": 352
+  },
+  "intents": {
+    "ask_weather": 550,
+    "call_contact": 426,
+    "play_music": 580,
+    "set_alarm": 409,
+    "set_reminder": 401
+  },
+  "massive_input_sha256": "9dfff36bac20067085d836c30f1a617de968c16fd81bf4c5b802ddd637ab131a",
+  "regions": {
+    "central": 472,
+    "north": 446,
+    "south": 454,
+    "standard": 994
+  },
+  "seed": 42,
+  "sources": {
+    "massive": 994,
+    "synthetic": 1372
+  },
+  "total": 2366
+}

@@ -13,7 +13,7 @@ class StrEnum(str, Enum):
 
     def __str__(self) -> str:
         """Trả về giá trị chuỗi để serialize enum sang JSON dễ dàng."""
-        return self.value
+        return str(self.value)
 
 
 class Intent(StrEnum):
@@ -26,6 +26,7 @@ class Intent(StrEnum):
 
 
 class Region(StrEnum):
+    STANDARD = "standard"
     NORTH = "north"
     CENTRAL = "central"
     SOUTH = "south"
@@ -45,6 +46,7 @@ class SlotName(StrEnum):
 class DataSource(StrEnum):
     SYNTHETIC = "synthetic"
     MANUAL = "manual"
+    MASSIVE = "massive"
     WEB_MINED = "web_mined"
     OLD_PROJECT = "old_project"
     ASR_NOISE = "asr_noise"
@@ -57,6 +59,15 @@ class VariantType(StrEnum):
     ASR_NOISE = "asr_noise"
     FORMAL = "formal"
     CASUAL = "casual"
+    TRANSLATED = "translated"
+
+
+class AnnotationQuality(StrEnum):
+    """Mức độ tin cậy của nhãn để báo cáo chất lượng dataset minh bạch."""
+
+    REVIEWED = "reviewed"
+    AUTO_MAPPED = "auto_mapped"
+    TEMPLATE_GENERATED = "template_generated"
 
 
 class ParseRequest(BaseModel):
@@ -104,7 +115,8 @@ class DatasetSample(BaseModel):
         Intent.SET_REMINDER: (frozenset({SlotName.REMINDER_TEXT.value}),),
         Intent.SET_ALARM: (frozenset({SlotName.DATETIME.value}),),
         Intent.ASK_WEATHER: (frozenset(),),
-        Intent.PLAY_MUSIC: (frozenset({SlotName.SONG.value}),),
+        # Câu "mở nhạc" hợp lệ ngay cả khi người dùng không nói tên bài hát.
+        Intent.PLAY_MUSIC: (frozenset(),),
         Intent.CALL_CONTACT: (
             frozenset({SlotName.CONTACT_NAME.value}),
             frozenset({SlotName.PHONE_NUMBER.value}),
@@ -112,12 +124,23 @@ class DatasetSample(BaseModel):
     }
 
     id: str = Field(min_length=1)
+    group_id: str = Field(min_length=1)
     text: str = Field(min_length=1)
     region: Region
     intent: Intent
     slots: dict[str, Any] = Field(default_factory=dict)
     source: DataSource
+    source_ref: str | None = None
     variant_type: VariantType
+    annotation_quality: AnnotationQuality
+
+    @field_validator("id", "group_id", "text")
+    @classmethod
+    def reject_blank_strings(cls, value: str) -> str:
+        """Từ chối ID, group ID hoặc câu lệnh chỉ gồm khoảng trắng."""
+        if not value.strip():
+            raise ValueError("value must not be blank")
+        return value
 
     @field_validator("intent")
     @classmethod
@@ -152,6 +175,11 @@ class DatasetSample(BaseModel):
         if not any(group.issubset(slot_names) for group in valid_groups):
             expected_groups = [sorted(group) for group in valid_groups]
             raise ValueError(f"missing required slot group: one of {expected_groups}")
+        if self.source in {DataSource.MASSIVE, DataSource.OLD_PROJECT, DataSource.WEB_MINED}:
+            if not self.source_ref:
+                raise ValueError("external or legacy samples must have source_ref")
+        if self.source is DataSource.MASSIVE and self.region is not Region.STANDARD:
+            raise ValueError("MASSIVE samples must use standard region because accent is not labeled")
         return self
 
 

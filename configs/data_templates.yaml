@@ -1,6 +1,132 @@
 templates:
-  set_reminder: []
-  set_alarm: []
-  ask_weather: []
-  play_music: []
-  call_contact: []
+  set_reminder:
+    - "{datetime} nhắc tôi {reminder_text}"
+    - "nhắc tôi {reminder_text} vào {datetime}"
+    - "{datetime} nhớ báo tôi {reminder_text}"
+    - "đừng quên nhắc mình {reminder_text} {datetime}"
+    - "tạo lời nhắc {reminder_text} cho {datetime}"
+  set_alarm:
+    - "đặt báo thức lúc {datetime}"
+    - "{datetime} gọi tôi dậy"
+    - "cài báo thức cho {datetime}"
+    - "đặt chuông báo vào {datetime}"
+    - "hẹn giờ {datetime}"
+  ask_weather:
+    - "thời tiết ở {location} {weather_time} thế nào"
+    - "{weather_time} ở {location} có mưa không"
+    - "dự báo thời tiết {location} {weather_time}"
+    - "nhiệt độ tại {location} {weather_time} bao nhiêu"
+    - "{location} {weather_time} trời có lạnh không"
+  play_music:
+    - "mở nhạc giúp tôi"
+    - "mở bài {song}"
+    - "phát bài {song} của {artist}"
+    - "cho tôi nghe nhạc của {artist}"
+    - "bật bài {song} lên"
+  call_contact:
+    - "gọi cho {contact_name}"
+    - "gọi điện cho {contact_name}"
+    - "liên lạc với {contact_name} giúp tôi"
+    - "gọi số {phone_number}"
+    - "bấm máy gọi {phone_number}"
+
+regional_templates:
+  north:
+    set_reminder:
+      - "{datetime} nhắc tớ {reminder_text} nhé"
+      - "nhắc hộ tôi {reminder_text} vào {datetime}"
+      - "đến {datetime} nhớ báo tớ {reminder_text} nhá"
+      - "{datetime} nhớ việc {reminder_text} hộ tôi"
+    set_alarm:
+      - "{datetime} gọi tớ dậy nhé"
+      - "đặt chuông {datetime} hộ tôi"
+      - "cài báo thức {datetime} giúp tớ"
+      - "hẹn giờ đến {datetime} nhá"
+    ask_weather:
+      - "{weather_time} ngoài {location} giời thế nào"
+      - "ở {location} {weather_time} có mưa không nhỉ"
+      - "xem giúp tớ thời tiết {location} {weather_time} nhé"
+      - "nhiệt độ {location} {weather_time} khoảng bao nhiêu nhỉ"
+    play_music:
+      - "mở bài {song} cho tớ nghe nhé"
+      - "bật nhạc của {artist} hộ tôi"
+      - "phát bài {song} của {artist} cho tớ"
+      - "cho tớ nghe bài {song} của {artist} nhá"
+      - "nghe {song} của {artist} cùng tớ nhé"
+      - "mở nhạc {artist} cho tớ nghe"
+    call_contact:
+      - "gọi cho {contact_name} hộ tôi"
+      - "bấm số {phone_number} giúp tớ"
+      - "liên lạc với {contact_name} giúp tớ nhé"
+      - "gọi điện cho {contact_name} nhá"
+      - "quay số {phone_number} hộ tôi"
+      - "nối máy với {contact_name} giúp tớ"
+      - "gọi lại cho {contact_name} nhé"
+      - "liên hệ số {phone_number} hộ tôi"
+      - "thực hiện cuộc gọi tới {phone_number} nhá"
+  central:
+    set_reminder:
+      - "{datetime} nhắc tui {reminder_text} với hỉ"
+      - "bữa ni nhớ nhắc tui {reminder_text}"
+      - "đến {datetime} nhớ báo tui {reminder_text} hỉ"
+      - "{datetime} nhớ việc {reminder_text} giùm tui"
+    set_alarm:
+      - "{datetime} kêu tui dậy với hỉ"
+      - "chừ đặt chuông {datetime} giùm tui"
+      - "cài báo thức {datetime} cho tui với"
+      - "hẹn giờ tới {datetime} hỉ"
+    ask_weather:
+      - "chừ ngoài {location} trời răng rồi"
+      - "bữa ni ở {location} có mưa không"
+      - "coi giùm tui thời tiết {location} {weather_time} với"
+      - "nhiệt độ {location} {weather_time} răng rồi hỉ"
+    play_music:
+      - "mở bài {song} cho tui nghe với"
+      - "phát nhạc của {artist} đi hỉ"
+      - "bật bài {song} của {artist} cho tui với"
+      - "cho tui nghe bài {song} của {artist} hỉ"
+      - "nghe {song} của {artist} với tui hỉ"
+      - "mở nhạc {artist} cho tui nghe với"
+    call_contact:
+      - "gọi cho {contact_name} giùm tui với"
+      - "bấm số {phone_number} cho tui hỉ"
+      - "liên lạc với {contact_name} cho tui với"
+      - "gọi điện cho {contact_name} đi hỉ"
+      - "quay số {phone_number} giùm tui"
+      - "nối máy với {contact_name} cho tui hỉ"
+      - "gọi lại cho {contact_name} với hỉ"
+      - "liên hệ số {phone_number} giùm tui"
+      - "thực hiện cuộc gọi tới {phone_number} cho tui với"
+  south:
+    set_reminder:
+      - "{datetime} nhắc tui {reminder_text} dùm nghen"
+      - "bữa nay nhớ nhắc tui {reminder_text} hen"
+      - "đến {datetime} nhớ báo tui {reminder_text} nghen"
+      - "{datetime} nhớ việc {reminder_text} giùm tui hen"
+    set_alarm:
+      - "{datetime} kêu tui dậy dùm nghen"
+      - "đặt báo thức {datetime} giùm tui"
+      - "cài chuông {datetime} cho tui hen"
+      - "hẹn giờ tới {datetime} dùm nghen"
+    ask_weather:
+      - "bữa nay ở {location} trời sao ta"
+      - "ở {location} {weather_time} có mưa hông"
+      - "coi dùm tui thời tiết {location} {weather_time} nghen"
+      - "nhiệt độ {location} {weather_time} cỡ bao nhiêu ta"
+    play_music:
+      - "mở bài {song} cho tui nghe nghen"
+      - "bật nhạc của {artist} lên dùm"
+      - "phát bài {song} của {artist} dùm tui"
+      - "cho tui nghe bài {song} của {artist} nghen"
+      - "nghe {song} của {artist} với tui nghen"
+      - "mở nhạc {artist} cho tui nghe hen"
+    call_contact:
+      - "gọi cho {contact_name} dùm tui"
+      - "bấm số {phone_number} giùm tui nghen"
+      - "liên lạc với {contact_name} dùm tui hen"
+      - "gọi điện cho {contact_name} nghen"
+      - "quay số {phone_number} giùm tui"
+      - "nối máy với {contact_name} dùm tui hen"
+      - "gọi lại cho {contact_name} nghen"
+      - "liên hệ số {phone_number} giùm tui"
+      - "thực hiện cuộc gọi tới {phone_number} dùm nghen"
