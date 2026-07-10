@@ -1,0 +1,6 @@
+templates:
+  set_reminder: []
+  set_alarm: []
+  ask_weather: []
+  play_music: []
+  call_contact: []

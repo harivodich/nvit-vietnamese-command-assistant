@@ -5,8 +5,25 @@ build-backend = "setuptools.build_meta"
 [project]
 name = "nvit-vietnamese-command-assistant"
 version = "0.1.0"
-description = "Learning project for Vietnamese spoken-command understanding."
+description = "Vietnamese spoken-command understanding assistant."
 readme = "README.md"
 requires-python = ">=3.10"
-dependencies = []
+dependencies = [
+    "pydantic>=2.7.0",
+    "pyyaml>=6.0.0",
+]
 
+[project.optional-dependencies]
+dev = [
+    "pytest>=8.2.0",
+    "ruff>=0.5.0",
+    "mypy>=1.10.0",
+]
+
+[tool.ruff]
+line-length = 100
+target-version = "py310"
+
+[tool.mypy]
+python_version = "3.10"
+strict = true

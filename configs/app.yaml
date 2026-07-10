@@ -1,0 +1,11 @@
+log_level: INFO
+confidence_threshold: 0.45
+random_seed: 42
+model:
+  intent_classifier_path: models/intent_classifier.joblib
+  label_map_path: models/intent_label_map.json
+data:
+  min_total_samples: 1200
+  train_ratio: 0.7
+  validation_ratio: 0.15
+  test_ratio: 0.15

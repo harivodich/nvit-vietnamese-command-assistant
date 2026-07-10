@@ -1,0 +1,19 @@
+variants:
+  north:
+    giời: trời
+    zời: trời
+  central:
+    răng: sao
+    mô: đâu
+    tê: kia
+    ni: này
+  south:
+    hông: không
+    hổng: không
+    dzô: vào
+    vô: vào
+stt_replacements:
+  hom nay: hôm nay
+  ngay mai: ngày mai
+  bao thuc: báo thức
+  thoi tiet: thời tiết

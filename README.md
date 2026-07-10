@@ -8,7 +8,7 @@ Input chính là transcript tiếng Việt; audio chỉ là phần mở rộng s
 
 Intent dự kiến: `set_reminder`, `set_alarm`, `ask_weather`, `play_music`, `call_contact`.
 
-Slots dự kiến: `datetime`, `location`, `song`, `artist`, `contact_name`, `reminder_text`.
+Slots dự kiến: `datetime`, `location`, `song`, `artist`, `contact_name`, `phone_number`, `reminder_text`.
 
 ```text
 Text transcript (hoặc audio adapter)
@@ -24,7 +24,7 @@ Text transcript (hoặc audio adapter)
 ```text
 configs/                         cấu hình intent, vùng miền và data templates
 data/raw_sources/                nguồn tham khảo chưa gán nhãn
-data/samples/                    JSONL train/test đã được kiểm tra
+data/samples/                    JSONL train/validation/test đã được kiểm tra
 models/                          model artifact cục bộ
 reports/                         báo cáo evaluation
 scripts/                         generate, validate, train, evaluate, demo
@@ -47,3 +47,8 @@ tests/                           unit và integration tests
 7. Metrics/evaluation; ASR chỉ thêm khi NLU core ổn định.
 
 Mỗi phase xác định rõ input/output, implementation, test và tiêu chí hoàn thành trước khi chuyển sang phase tiếp theo.
+
+## Trạng thái triển khai
+
+- Ngày 1 — Contract và config: đang triển khai.
+- Các phase NLU, dataset, API, evaluation và ASR: chưa triển khai.

@@ -1,0 +1,28 @@
+intents:
+  set_reminder:
+    required_slots: [reminder_text]
+    optional_slots: [datetime]
+    keywords: [nhắc, nhớ]
+    examples: ["mai nhắc tôi gọi mẹ"]
+  set_alarm:
+    required_slots: [datetime]
+    optional_slots: []
+    keywords: [báo thức, hẹn giờ]
+    examples: ["đặt báo thức lúc 6 giờ sáng"]
+  ask_weather:
+    required_slots: []
+    optional_slots: [location, datetime]
+    keywords: [thời tiết, nhiệt độ]
+    examples: ["thời tiết ở hà nội hôm nay thế nào"]
+  play_music:
+    required_slots: [song]
+    optional_slots: [artist]
+    keywords: [mở nhạc, phát bài]
+    examples: ["mở bài nắng ấm xa dần"]
+  call_contact:
+    required_slot_groups:
+      - [contact_name]
+      - [phone_number]
+    optional_slots: [contact_name, phone_number]
+    keywords: [gọi, liên lạc]
+    examples: ["gọi cho mẹ"]
