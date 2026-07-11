@@ -16,7 +16,6 @@ variants:
     eng: anh
     nớ: đó
     ri: thế này
-    hỉ: nhé
     tui: tôi
   south:
     hông: không
@@ -27,8 +26,6 @@ variants:
     bữa nay: hôm nay
     dùm: giúp
     giùm: giúp
-    nghen: nhé
-    hen: nhé
     má: mẹ
     tía: bố
     tui: tôi
@@ -45,3 +42,20 @@ stt_replacements:
   sai gon: sài gòn
   da nang: đà nẵng
   ha noi: hà nội
+  # Không thay `coi` đơn lẻ vì no-diacritics của `cõi` cũng là `coi`.
+  coi thời tiết: xem thời tiết
+
+# Tiểu từ cuối câu phụ thuộc ý định phát ngôn, không thể thay một-từ-một.
+# Code chỉ thay khi nhận ra đây là câu hỏi hoặc một câu yêu cầu/nhắc nhở.
+contextual_particles:
+  central:
+    hỉ:
+      question: nhỉ
+      request: nhé
+  south:
+    nghen:
+      question: nhỉ
+      request: nhé
+    hen:
+      question: nhỉ
+      request: nhé

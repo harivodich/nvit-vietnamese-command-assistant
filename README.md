@@ -96,8 +96,37 @@ thật.
 
 Commit liên quan: `Xây dựng và hoàn thiện dataset`.
 
-### Phần chưa triển khai
+### Ngày 3 — Chuẩn hóa tiếng Việt và biến thể vùng miền
 
-Ngày 3 trở đi mới bắt đầu normalizer, intent classifier, slot extraction, pipeline, API,
-evaluation và ASR. Chưa có model được huấn luyện hay kết quả đánh giá mô hình để tránh nhầm
-lẫn giữa việc chuẩn bị dataset và việc hoàn thành hệ thống NLU.
+Đã bổ sung normalizer rule-based đọc `configs/regional_variants.yaml`. Thành phần này chuẩn
+hóa Unicode, khoảng trắng, lỗi STT có trong từ điển và biến thể từ vựng Bắc/Trung/Nam. Cụm dài
+được thay trước cụm ngắn; kết quả kèm `matched_variants` để truy vết rule. Region chỉ được suy
+luận khi tín hiệu rõ ràng, còn tín hiệu mâu thuẫn trả về `unknown` thay vì đoán bừa.
+
+Tiểu từ cuối câu như `hỉ`, `hen`, `nghen` được xử lý theo ngữ cảnh: câu hỏi chuẩn về `nhỉ`,
+câu yêu cầu/nhắc nhở chuẩn về `nhé`, còn không đủ tín hiệu thì giữ nguyên. Dataset JSONL gốc
+không bị viết đè; script audit áp dụng normalizer lên toàn bộ sample để phát hiện collision sau
+preprocess. Ngày train và runtime sau này đều phải gọi cùng normalizer trước classifier.
+
+Normalizer được kiểm tra bằng 34 câu command-domain độc lập ở
+`data/normalization_challenge.jsonl`, bao phủ ba vùng, lỗi STT, tiểu từ ngữ cảnh và cả năm
+intent. Nguồn, license và giới hạn tái sử dụng nằm trong `data/NORMALIZATION_SOURCES.md`.
+
+Preprocess tạo artifact tái lập trong `data/preprocessed/` nhưng không commit artifact này: JSONL
+gốc vẫn là nguồn audit. Train/validation được deduplicate theo `normalized_text` để không tăng
+trọng số vì câu vùng miền trở thành giống nhau; test giữ nguyên bề mặt để đo độ bền thật. Report
+hiện tại có 2.335 input preprocess từ 2.366 sample gốc. Review native speaker và audio không thể
+tự tạo bằng code; protocol, consent và tiêu chí acceptance ở `data/NATIVE_REVIEW_PROTOCOL.md`.
+
+Thử thủ công:
+
+```powershell
+python scripts/normalize_text.py "Bữa ni ở Huế trời răng rồi hỉ"
+python scripts/audit_normalization.py --data-dir data/samples
+python scripts/evaluate_normalizer.py
+python scripts/preprocess_dataset.py --input-dir data/samples
+```
+
+Ngày 4 trở đi mới bắt đầu intent classifier, sau đó slot extraction, pipeline, API, evaluation
+và ASR. Chưa có model được huấn luyện hay kết quả đánh giá mô hình để tránh nhầm lẫn giữa việc
+chuẩn bị dữ liệu/normalization và việc hoàn thành hệ thống NLU.

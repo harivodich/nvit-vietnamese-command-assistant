@@ -3,6 +3,7 @@ __pycache__/
 *.py[cod]
 .pytest_cache/
 .pytest_tmp/
+data/preprocessed/
 .ruff_cache/
 .mypy_cache/
 .env

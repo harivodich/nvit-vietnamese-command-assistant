@@ -183,6 +183,24 @@ class DatasetSample(BaseModel):
         return self
 
 
+class PreprocessedSample(BaseModel):
+    """Một sample giữ nguyên nguồn gốc và bổ sung text/slot sau preprocess."""
+
+    original: DatasetSample
+    normalized_text: str = Field(min_length=1)
+    normalized_slots: dict[str, Any] = Field(default_factory=dict)
+    normalizer_region: Region
+    matched_variants: list[str] = Field(default_factory=list)
+
+    @field_validator("normalized_text")
+    @classmethod
+    def reject_blank_normalized_text(cls, text: str) -> str:
+        """Không cho artifact preprocess chứa câu trống."""
+        if not text.strip():
+            raise ValueError("normalized_text must not be blank")
+        return text
+
+
 class EvaluationResult(BaseModel):
     """Contract cho báo cáo metric được tạo ở phase evaluation."""
 

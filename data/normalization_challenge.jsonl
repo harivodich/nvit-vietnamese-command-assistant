@@ -1,0 +1,34 @@
+{"id":"north_01","region":"north","category":"regional_lexicon","input":"ngoài hà nội giời thế nào nhá?","expected":"ngoài hà nội trời thế nào nhé?"}
+{"id":"north_02","region":"north","category":"regional_lexicon","input":"zời tối nay có mưa không nhá?","expected":"trời tối nay có mưa không nhé?"}
+{"id":"north_03","region":"north","category":"regional_lexicon","input":"mở nhạc hộ tôi nhá","expected":"mở nhạc giúp tôi nhé"}
+{"id":"north_04","region":"north","category":"regional_lexicon","input":"tớ muốn nghe bài lạc trôi","expected":"tôi muốn nghe bài lạc trôi"}
+{"id":"north_05","region":"north","category":"regional_lexicon","input":"nhắc tớ uống thuốc nhá","expected":"nhắc tôi uống thuốc nhé"}
+{"id":"north_06","region":"north","category":"regional_lexicon","input":"đặt báo thức cho tớ lúc 6 giờ nhá","expected":"đặt báo thức cho tôi lúc 6 giờ nhé"}
+{"id":"central_01","region":"central","category":"particle_question","input":"chừ ngoài huế trời răng rồi hỉ","expected":"bây giờ ngoài huế trời sao rồi nhỉ"}
+{"id":"central_02","region":"central","category":"particle_request","input":"bữa ni nhắc tui uống thuốc hỉ","expected":"hôm nay nhắc tôi uống thuốc nhé"}
+{"id":"central_03","region":"central","category":"regional_lexicon","input":"coi thời tiết ở mô hỉ","expected":"xem thời tiết ở đâu nhỉ"}
+{"id":"central_04","region":"central","category":"particle_request","input":"đặt báo thức chừ lúc 6 giờ hỉ","expected":"đặt báo thức bây giờ lúc 6 giờ nhé"}
+{"id":"central_05","region":"central","category":"regional_lexicon","input":"eng gọi mạ giúp tui","expected":"anh gọi mẹ giúp tôi"}
+{"id":"central_06","region":"central","category":"regional_lexicon","input":"đến tê nhắc tui gọi mạ","expected":"đến kia nhắc tôi gọi mẹ"}
+{"id":"central_07","region":"central","category":"regional_lexicon","input":"câu ri có răng?","expected":"câu thế này có sao?"}
+{"id":"central_08","region":"central","category":"particle_question","input":"bữa ni ở mô có mưa hỉ","expected":"hôm nay ở đâu có mưa nhỉ"}
+{"id":"south_01","region":"south","category":"particle_question","input":"bữa nay ở sài gòn có mưa hông nghen?","expected":"hôm nay ở sài gòn có mưa không nhỉ?"}
+{"id":"south_02","region":"south","category":"particle_request","input":"mở nhạc cho tui nghe nghen","expected":"mở nhạc cho tôi nghe nhé"}
+{"id":"south_03","region":"south","category":"particle_request","input":"gọi má dùm tui hen","expected":"gọi mẹ giúp tôi nhé"}
+{"id":"south_04","region":"south","category":"regional_lexicon","input":"coi thời tiết ở cần thơ dùm tui","expected":"xem thời tiết ở cần thơ giúp tôi"}
+{"id":"south_05","region":"south","category":"regional_lexicon","input":"dzô lịch nhắc tui họp bữa nay","expected":"vào lịch nhắc tôi họp hôm nay"}
+{"id":"south_06","region":"south","category":"particle_request","input":"tía gọi lại cho má nghen","expected":"bố gọi lại cho mẹ nhé"}
+{"id":"south_07","region":"south","category":"particle_question","input":"hem có mưa hông hen?","expected":"không có mưa không nhỉ?"}
+{"id":"south_08","region":"south","category":"particle_request","input":"vô nhắc tui uống thuốc nghen","expected":"vào nhắc tôi uống thuốc nhé"}
+{"id":"stt_01","region":"standard","category":"stt_phrase","input":"hom nay mở nhạc","expected":"hôm nay mở nhạc"}
+{"id":"stt_02","region":"standard","category":"stt_phrase","input":"ngay mai báo thức","expected":"ngày mai báo thức"}
+{"id":"stt_03","region":"standard","category":"stt_phrase","input":"thoi tiet ở da nang","expected":"thời tiết ở đà nẵng"}
+{"id":"stt_04","region":"standard","category":"stt_phrase","input":"nhac toi gọi cho mẹ","expected":"nhắc tôi gọi cho mẹ"}
+{"id":"stt_05","region":"standard","category":"stt_phrase","input":"goi cho mẹ","expected":"gọi cho mẹ"}
+{"id":"stt_06","region":"standard","category":"stt_phrase","input":"mo nhac của sơn tùng","expected":"mở nhạc của sơn tùng"}
+{"id":"stt_07","region":"standard","category":"stt_phrase","input":"may gio rồi","expected":"mấy giờ rồi"}
+{"id":"stt_08","region":"standard","category":"stt_phrase","input":"bay gio ở sai gon","expected":"bây giờ ở sài gòn"}
+{"id":"mixed_01","region":"south","category":"stt_and_regional","input":"bữa nay thoi tiet ở sai gon có mưa hông nghen?","expected":"hôm nay thời tiết ở sài gòn có mưa không nhỉ?"}
+{"id":"mixed_02","region":"central","category":"stt_and_regional","input":"bữa ni thoi tiet ở da nang răng rồi hỉ","expected":"hôm nay thời tiết ở đà nẵng sao rồi nhỉ"}
+{"id":"mixed_03","region":"north","category":"stt_and_regional","input":"tớ muốn mo nhac hộ tôi nhá","expected":"tôi muốn mở nhạc giúp tôi nhé"}
+{"id":"mixed_04","region":"south","category":"stt_and_regional","input":"goi cho má dùm tui nghen","expected":"gọi cho mẹ giúp tôi nhé"}
