@@ -1,0 +1,14 @@
+# Các câu ranh giới do dự án định nghĩa; không được đưa vào test split chính thức.
+cases:
+  - id: immediate_contact
+    text: "gọi mẹ ngay đi"
+    intent: call_contact
+  - id: scheduled_contact
+    text: "6h gọi mẹ"
+    intent: set_reminder
+  - id: wake_up
+    text: "gọi tôi dậy lúc 6h"
+    intent: set_alarm
+  - id: explicit_scheduled_contact
+    text: "nhắc tôi gọi mẹ lúc 6h"
+    intent: set_reminder

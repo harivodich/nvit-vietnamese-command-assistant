@@ -50,10 +50,10 @@ Mỗi phase xác định rõ input/output, implementation, test và tiêu chí h
 
 ## Dataset
 
-Dataset hiện có 2.366 sample, được build từ MASSIVE tiếng Việt đã lọc chất lượng và template lexical Bắc/Trung/Nam có biến thể không dấu. Seed reminder đã review từ project cũ được giữ làm nguồn audit; nếu gần với test MASSIVE, validator sẽ loại khỏi final split để bảo toàn tính độc lập. Chi tiết license, provenance và các nguồn bị loại nằm trong `data/SOURCES.md`.
+Dataset hiện có 2.388 sample: MASSIVE tiếng Việt đã lọc, template lexical Bắc/Trung/Nam và 22 hard-case đã review từ error analysis. Validation/test giữ nguyên khi bổ sung hard-case vào train. Chi tiết license, provenance và các nguồn bị loại nằm trong `data/SOURCES.md`.
 
 ```text
-train:       1.623
+train:       1.645
 validation:    352
 test:          391
 ```
@@ -80,11 +80,11 @@ Commit liên quan: `Hoàn thiện contract, cấu hình nền tảng`.
 
 ### Ngày 2 — Xây dựng và kiểm định dataset
 
-Đã tạo dataset JSONL có thể build lại với 2.366 mẫu cho đủ 5 intent. Nguồn dữ liệu gồm
+Đã tạo dataset JSONL với 2.388 mẫu cho đủ 5 intent. Nguồn dữ liệu gồm
 MASSIVE `vi-VN` đã lọc chất lượng và template lexical Bắc/Trung/Nam do dự án kiểm soát.
 Mỗi mẫu có intent, slot, region, nguồn gốc, loại biến thể và chất lượng annotation rõ ràng.
 
-Dataset được chia thành train 1.623, validation 352 và test 391. Validator kiểm tra schema,
+Dataset được chia thành train 1.645, validation 352 và test 391. Validator kiểm tra schema,
 slot có xuất hiện trong câu, trùng nguyên văn, trùng khi bỏ dấu, leakage `group_id` và câu
 gần giống giữa các split. Template cùng family và các biến thể cùng nhóm luôn nằm trong một
 split; các group quá giống split ưu tiên hơn sẽ bị loại. Build lại từ cùng nguồn cho kết quả
@@ -115,7 +115,7 @@ intent. Nguồn, license và giới hạn tái sử dụng nằm trong `data/NOR
 Preprocess tạo artifact tái lập trong `data/preprocessed/` nhưng không commit artifact này: JSONL
 gốc vẫn là nguồn audit. Train/validation được deduplicate theo `normalized_text` để không tăng
 trọng số vì câu vùng miền trở thành giống nhau; test giữ nguyên bề mặt để đo độ bền thật. Report
-hiện tại có 2.335 input preprocess từ 2.366 sample gốc. Review native speaker và audio không thể
+hiện tại có 2.357 output preprocess từ 2.388 sample gốc. Review native speaker và audio không thể
 tự tạo bằng code; protocol, consent và tiêu chí acceptance ở `data/NATIVE_REVIEW_PROTOCOL.md`.
 
 Thử thủ công:
@@ -127,6 +127,26 @@ python scripts/evaluate_normalizer.py
 python scripts/preprocess_dataset.py --input-dir data/samples
 ```
 
-Ngày 4 trở đi mới bắt đầu intent classifier, sau đó slot extraction, pipeline, API, evaluation
-và ASR. Chưa có model được huấn luyện hay kết quả đánh giá mô hình để tránh nhầm lẫn giữa việc
-chuẩn bị dữ liệu/normalization và việc hoàn thành hệ thống NLU.
+### Ngày 4 — Intent classifier baseline
+
+Đã huấn luyện baseline TF-IDF word/character n-gram kết hợp Logistic Regression. Ba candidate
+được fit trên train và chọn duy nhất bằng macro-F1 validation; test bị khóa hoàn toàn khi chọn
+model. Candidate `word_1_2_char_3_5` đạt macro-F1 0.9654 và accuracy 0.9688 trên 352 sample
+validation. Artifact, label map, candidate report và từng lỗi validation được lưu để phân tích.
+Report có precision, recall, F1 theo từng intent; macro/weighted F1; confusion matrix; ROC/PR curve
+one-vs-rest; log-loss, Brier score, ECE và reliability curve. Các metric và biểu đồ này đều là
+validation; chưa công bố metric test ở phase này.
+
+Một benchmark semantic độc lập dùng embedding local `multilingual-e5-small` (384 chiều) và Logistic
+Regression cũng được chạy trên đúng validation. Kết quả macro-F1 0.8949, thấp hơn TF-IDF 0.9654;
+đặc biệt recall `set_alarm` chỉ 0.5789. Vì vậy runtime giữ TF-IDF + Logistic Regression; E5 được
+giữ như thí nghiệm tái lập và bằng chứng lựa chọn model, không được đưa vào runtime chỉ vì là
+transformer. Xem `reports/model_comparison_report.json` và `reports/semantic_intent_report.json`.
+
+```powershell
+python scripts/train_intent.py
+```
+
+Fine-tune transformer chưa phải lựa chọn mặc định: chỉ thực hiện sau khi phân tích failure của
+baseline và có benchmark native-speaker/audio phù hợp. Ngày 5 tiếp tục slot extraction, sau đó
+pipeline, API, evaluation cuối cùng và ASR.

@@ -5,6 +5,7 @@ templates:
     - "{datetime} nhớ báo tôi {reminder_text}"
     - "đừng quên nhắc mình {reminder_text} {datetime}"
     - "tạo lời nhắc {reminder_text} cho {datetime}"
+    - "{datetime} {reminder_text}"
   set_alarm:
     - "đặt báo thức lúc {datetime}"
     - "{datetime} gọi tôi dậy"
@@ -37,6 +38,7 @@ regional_templates:
       - "nhắc hộ tôi {reminder_text} vào {datetime}"
       - "đến {datetime} nhớ báo tớ {reminder_text} nhá"
       - "{datetime} nhớ việc {reminder_text} hộ tôi"
+      - "{datetime} {reminder_text} nhé"
     set_alarm:
       - "{datetime} gọi tớ dậy nhé"
       - "đặt chuông {datetime} hộ tôi"
@@ -70,6 +72,7 @@ regional_templates:
       - "bữa ni nhớ nhắc tui {reminder_text}"
       - "đến {datetime} nhớ báo tui {reminder_text} hỉ"
       - "{datetime} nhớ việc {reminder_text} giùm tui"
+      - "{datetime} {reminder_text} với hỉ"
     set_alarm:
       - "{datetime} kêu tui dậy với hỉ"
       - "chừ đặt chuông {datetime} giùm tui"
@@ -103,6 +106,7 @@ regional_templates:
       - "bữa nay nhớ nhắc tui {reminder_text} hen"
       - "đến {datetime} nhớ báo tui {reminder_text} nghen"
       - "{datetime} nhớ việc {reminder_text} giùm tui hen"
+      - "{datetime} {reminder_text} nghen"
     set_alarm:
       - "{datetime} kêu tui dậy dùm nghen"
       - "đặt báo thức {datetime} giùm tui"

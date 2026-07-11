@@ -25,3 +25,7 @@ MASSIVE không có nhãn accent nên được gắn `region=standard`, không su
 ## Đích gọi điện
 
 Lệnh `call_contact` chấp nhận một trong hai slot: `contact_name` hoặc `phone_number`. Tên liên hệ phù hợp khi ứng dụng có danh bạ; số điện thoại là fallback cho lệnh đọc số trực tiếp. Việc tra cứu/sử dụng danh bạ thật nằm ngoài core NLU và sẽ chỉ được mock trong phạm vi challenge.
+
+## Ranh giới gọi điện, nhắc việc và báo thức
+
+`call_contact` chỉ dùng cho yêu cầu gọi ngay. Khi câu có thời điểm tương lai để thực hiện một việc bên ngoài hệ thống, intent là `set_reminder`, kể cả việc đó là gọi điện. `set_alarm` chỉ dùng khi mục đích là đánh thức/cảnh báo chính người dùng. Ví dụ: `gọi mẹ ngay đi` là `call_contact`; `6h gọi mẹ` và `nhắc tôi gọi mẹ lúc 6h` là `set_reminder`; `gọi tôi dậy lúc 6h` là `set_alarm`. Các câu ranh giới này được lưu ở `configs/intent_boundary_cases.yaml`; chúng không nằm trong test split và được dùng làm regression/audit riêng.

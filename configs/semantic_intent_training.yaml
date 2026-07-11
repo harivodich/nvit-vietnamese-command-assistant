@@ -1,0 +1,9 @@
+seed: 42
+batch_size: 16
+candidates:
+  - name: e5_l2_c_0_1
+    c: 0.1
+  - name: e5_l2_c_1
+    c: 1.0
+  - name: e5_l2_c_10
+    c: 10.0

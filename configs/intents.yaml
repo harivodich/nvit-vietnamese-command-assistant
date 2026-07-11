@@ -4,21 +4,25 @@ intents:
     optional_slots: [datetime]
     keywords: [nhắc, nhớ]
     examples: ["mai nhắc tôi gọi mẹ"]
+    patterns: ['\bnhắc\b', 'lời nhắc', 'nhớ việc', 'nhớ báo', 'đừng quên']
   set_alarm:
     required_slots: [datetime]
     optional_slots: []
     keywords: [báo thức, hẹn giờ]
     examples: ["đặt báo thức lúc 6 giờ sáng"]
+    patterns: ['báo thức', 'hẹn giờ', '\b(gọi|kêu|đánh thức)\b.*\bdậy\b']
   ask_weather:
     required_slots: []
     optional_slots: [location, datetime]
     keywords: [thời tiết, nhiệt độ]
     examples: ["thời tiết ở hà nội hôm nay thế nào"]
+    patterns: ['thời tiết', 'nhiệt độ', 'dự báo', 'có mưa', '\btrời\b.*\b(sao|thế nào|răng)\b']
   play_music:
     required_slots: []
     optional_slots: [song, artist]
     keywords: [mở nhạc, phát bài]
     examples: ["mở bài nắng ấm xa dần"]
+    patterns: ['mở nhạc', 'bật nhạc', 'phát bài', 'mở bài', 'nghe bài', 'nhạc của']
   call_contact:
     required_slot_groups:
       - [contact_name]
@@ -26,3 +30,4 @@ intents:
     optional_slots: [contact_name, phone_number]
     keywords: [gọi, liên lạc]
     examples: ["gọi cho mẹ"]
+    patterns: ['gọi cho', 'gọi điện', 'liên lạc', 'quay số', 'bấm số', 'nối máy', 'liên hệ số']

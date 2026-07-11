@@ -1,0 +1,22 @@
+seed: 42
+selection_metric: macro_f1
+candidates:
+  - name: word_1_2
+    word_ngram_range: [1, 2]
+    word_min_df: 1
+    use_char_features: false
+    c: 2.0
+  - name: word_1_2_char_3_5
+    word_ngram_range: [1, 2]
+    word_min_df: 1
+    use_char_features: true
+    char_ngram_range: [3, 5]
+    char_min_df: 2
+    c: 2.0
+  - name: word_1_3_char_2_5
+    word_ngram_range: [1, 3]
+    word_min_df: 1
+    use_char_features: true
+    char_ngram_range: [2, 5]
+    char_min_df: 2
+    c: 3.0
