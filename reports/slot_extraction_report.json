@@ -1,0 +1,279 @@
+{
+  "failure_count": 19,
+  "failures": [
+    {
+      "expected": {
+        "datetime": "năm"
+      },
+      "id": "massive_vi_alarm_set_1914",
+      "intent": "set_alarm",
+      "predicted": {
+        "datetime": "năm giờ"
+      },
+      "text": "báo thức tôi lúc năm giờ"
+    },
+    {
+      "expected": {
+        "datetime": "hai giờ kể từ bây giờ"
+      },
+      "id": "massive_vi_alarm_set_7043",
+      "intent": "set_alarm",
+      "predicted": {
+        "datetime": "trong hai giờ kể từ bây giờ"
+      },
+      "text": "vui lòng đặt báo thức trong hai giờ kể từ bây giờ"
+    },
+    {
+      "expected": {
+        "datetime": "cuối tuần",
+        "reminder_text": "xem phim ngoài trời"
+      },
+      "id": "massive_vi_calendar_set_6823",
+      "intent": "set_reminder",
+      "predicted": {
+        "datetime": "cuối tuần này",
+        "reminder_text": "xem phim ngoài trời"
+      },
+      "text": "nhắc tôi đi xem phim ngoài trời cuối tuần này"
+    },
+    {
+      "expected": {
+        "datetime": "một giờ trước cuộc họp mà tôi có vào sáng ngày mai",
+        "reminder_text": "cuộc họp"
+      },
+      "id": "massive_vi_calendar_set_6963",
+      "intent": "set_reminder",
+      "predicted": {
+        "datetime": "sáng ngày mai",
+        "reminder_text": "cuộc họp"
+      },
+      "text": "vui lòng nhắc tôi một giờ trước cuộc họp mà tôi có vào sáng ngày mai"
+    },
+    {
+      "expected": {
+        "datetime": "mười phút",
+        "reminder_text": "đi làm"
+      },
+      "id": "massive_vi_calendar_set_8039",
+      "intent": "set_reminder",
+      "predicted": {
+        "datetime": "sau mười phút nữa",
+        "reminder_text": "đi làm"
+      },
+      "text": "vui lòng đặt lời nhắc tôi đi làm sau mười phút nữa"
+    },
+    {
+      "expected": {
+        "datetime": "thứ ba lúc ba giờ chiều",
+        "reminder_text": "nghỉ hưu"
+      },
+      "id": "massive_vi_calendar_set_8160",
+      "intent": "set_reminder",
+      "predicted": {
+        "datetime": "thứ ba lúc ba giờ chiều",
+        "reminder_text": "cuộc họp"
+      },
+      "text": "tôi cần phải được nhắc rằng có một cuộc họp cho việc nghỉ hưu của minh tạo lời nhắc vào thứ ba lúc ba giờ chiều"
+    },
+    {
+      "expected": {
+        "datetime": "tối nay nhắc tôi cuộc hẹn ngày mai",
+        "reminder_text": "cuộc hẹn"
+      },
+      "id": "massive_vi_calendar_set_8263",
+      "intent": "set_reminder",
+      "predicted": {
+        "datetime": "ngày mai",
+        "reminder_text": "cuộc hẹn"
+      },
+      "text": "tối nay nhắc tôi cuộc hẹn ngày mai"
+    },
+    {
+      "expected": {
+        "datetime": "thứ năm",
+        "reminder_text": "việc nộp đơn xin thị thực"
+      },
+      "id": "massive_vi_calendar_set_9023",
+      "intent": "set_reminder",
+      "predicted": {
+        "datetime": "thứ năm này",
+        "reminder_text": "việc nộp đơn xin thị thực"
+      },
+      "text": "tạo lời nhắc cho việc nộp đơn xin thị thực vào ngày thứ năm này"
+    },
+    {
+      "expected": {},
+      "id": "massive_vi_play_music_11332",
+      "intent": "play_music",
+      "predicted": {
+        "artist": "tệp dancing mới nhất"
+      },
+      "text": "tìm và tạo một danh sách phát của tệp dancing mới nhất"
+    },
+    {
+      "expected": {
+        "artist": "mỹ tâm"
+      },
+      "id": "massive_vi_play_music_3724",
+      "intent": "play_music",
+      "predicted": {
+        "artist": "mỹ tâm",
+        "song": "người hãy quên em đi"
+      },
+      "text": "làm ơn mở người hãy quên em đi của mỹ tâm"
+    },
+    {
+      "expected": {},
+      "id": "massive_vi_play_music_5763",
+      "intent": "play_music",
+      "predicted": {
+        "artist": "mỹ tâm"
+      },
+      "text": "phát nhạc mỹ tâm"
+    },
+    {
+      "expected": {},
+      "id": "massive_vi_play_music_6044",
+      "intent": "play_music",
+      "predicted": {
+        "song": "người hãy quên em đi"
+      },
+      "text": "tiếp theo phát bài hát người hãy quên em đi"
+    },
+    {
+      "expected": {
+        "artist": "r. b."
+      },
+      "id": "massive_vi_play_music_741",
+      "intent": "play_music",
+      "predicted": {},
+      "text": "phát các bài hát từ r. b. và soul genre"
+    },
+    {
+      "expected": {},
+      "id": "massive_vi_weather_query_2040",
+      "intent": "ask_weather",
+      "predicted": {
+        "datetime": "một ngày"
+      },
+      "text": "một ngày nắng là gì"
+    },
+    {
+      "expected": {
+        "location": "bình dương"
+      },
+      "id": "massive_vi_weather_query_375",
+      "intent": "ask_weather",
+      "predicted": {
+        "datetime": "bây giờ",
+        "location": "bình dương"
+      },
+      "text": "có phải trời đang nắng ở bình dương bây giờ không"
+    },
+    {
+      "expected": {},
+      "id": "massive_vi_weather_query_3880",
+      "intent": "ask_weather",
+      "predicted": {
+        "datetime": "bây giờ"
+      },
+      "text": "thời tiết bây giờ thế nào"
+    },
+    {
+      "expected": {
+        "datetime": "hai mươi bảy tháng ba hai ngàn không trăm mười bảy"
+      },
+      "id": "massive_vi_weather_query_5376",
+      "intent": "ask_weather",
+      "predicted": {
+        "datetime": "ngày hai mươi bảy tháng ba hai ngàn không trăm mười bảy"
+      },
+      "text": "làm ơn cho tôi xem thời tiết vào ngày hai mươi bảy tháng ba hai ngàn không trăm mười bảy"
+    },
+    {
+      "expected": {},
+      "id": "massive_vi_weather_query_5621",
+      "intent": "ask_weather",
+      "predicted": {
+        "datetime": "bây giờ"
+      },
+      "text": "nhiệt độ bây giờ"
+    },
+    {
+      "expected": {
+        "datetime": "tuần"
+      },
+      "id": "massive_vi_weather_query_99",
+      "intent": "ask_weather",
+      "predicted": {},
+      "text": "dự báo thời tiết cho tuần là gì"
+    }
+  ],
+  "micro": {
+    "f1": 0.964735516372796,
+    "false_negative": 11,
+    "false_positive": 17,
+    "precision": 0.9575,
+    "recall": 0.9720812182741116,
+    "support": 394,
+    "true_positive": 383
+  },
+  "per_slot": {
+    "artist": {
+      "f1": 0.9655172413793104,
+      "false_negative": 1,
+      "false_positive": 2,
+      "precision": 0.9545454545454546,
+      "recall": 0.9767441860465116,
+      "support": 43,
+      "true_positive": 42
+    },
+    "datetime": {
+      "f1": 0.9421487603305784,
+      "false_negative": 9,
+      "false_positive": 12,
+      "precision": 0.9344262295081968,
+      "recall": 0.95,
+      "support": 180,
+      "true_positive": 171
+    },
+    "location": {
+      "f1": 1.0,
+      "false_negative": 0,
+      "false_positive": 0,
+      "precision": 1.0,
+      "recall": 1.0,
+      "support": 29,
+      "true_positive": 29
+    },
+    "phone_number": {
+      "f1": 1.0,
+      "false_negative": 0,
+      "false_positive": 0,
+      "precision": 1.0,
+      "recall": 1.0,
+      "support": 66,
+      "true_positive": 66
+    },
+    "reminder_text": {
+      "f1": 0.9850746268656716,
+      "false_negative": 1,
+      "false_positive": 1,
+      "precision": 0.9850746268656716,
+      "recall": 0.9850746268656716,
+      "support": 67,
+      "true_positive": 66
+    },
+    "song": {
+      "f1": 0.9,
+      "false_negative": 0,
+      "false_positive": 2,
+      "precision": 0.8181818181818182,
+      "recall": 1.0,
+      "support": 9,
+      "true_positive": 9
+    }
+  },
+  "slot_exact_match": 0.9460227272727273,
+  "total_samples": 352
+}

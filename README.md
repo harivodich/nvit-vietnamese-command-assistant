@@ -150,3 +150,40 @@ python scripts/train_intent.py
 Fine-tune transformer chưa phải lựa chọn mặc định: chỉ thực hiện sau khi phân tích failure của
 baseline và có benchmark native-speaker/audio phù hợp. Ngày 5 tiếp tục slot extraction, sau đó
 pipeline, API, evaluation cuối cùng và ASR.
+
+### Ngày 5 — Trích xuất slot và pipeline NLU
+
+Đã xây dựng `RegexSlotExtractor` theo từng intent để không gán nhầm slot giữa các loại lệnh.
+`datetime` được nhận diện bằng từ điển và regex thời gian; số điện thoại được nhận diện bằng
+regex; địa điểm, liên hệ, bài hát và nghệ sĩ dùng phép dò biên từ với ưu tiên cụm dài nhất.
+Riêng `reminder_text` được tạo bằng cách loại trigger nhắc việc, thời gian và tiểu từ lịch sự
+khỏi câu đã chuẩn hóa. Mỗi slot kèm dấu vết match để có thể giải thích kết quả.
+
+`NLUPipeline` nối một luồng thống nhất cho runtime:
+
+```text
+ParseRequest
+  -> VietnameseNormalizer
+  -> TF-IDF + Logistic Regression intent classifier
+  -> RegexSlotExtractor theo intent vừa dự đoán
+  -> ParseResult gồm intent, confidence, slots và matched_features
+```
+
+Các action thật, câu phản hồi tự nhiên, CLI và FastAPI chưa nằm trong core này; chúng thuộc Ngày 6.
+Ngày 5 có hard-case cho thời gian dạng số/chữ, “rưỡi”, “kém”, số điện thoại viết/đọc, transcript
+không dấu, entity ngoài catalog và trường hợp không được sinh entity giả từ playlist. Pipeline kiểm
+tra nhóm slot bắt buộc; nếu báo thức, lời nhắc hoặc cuộc gọi thiếu đối tượng cần thiết thì trả về
+yêu cầu bổ sung thay vì giả vờ đã hiểu đủ.
+
+Extractor được đánh giá độc lập trên 352 mẫu validation bằng intent thật, để lỗi intent không làm
+nhiễu phép đo slot. Kết quả hiện tại: exact-match 0.9460, micro precision 0.9575, recall 0.9721 và
+F1 0.9647. Location/phone đạt F1 1.0; reminder 0.9851; artist 0.9655; datetime 0.9421; song 0.9.
+19 failure còn lại được giữ trong report, chủ yếu là ranh giới annotation dịch từ MASSIVE như
+nhãn `năm` trong câu `năm giờ`; không thêm rule riêng để học thuộc các sai khác surface này.
+
+```powershell
+python scripts/evaluate_slots.py
+```
+
+Báo cáo đầy đủ nằm ở `reports/slot_extraction_report.json`. Đây là metric validation để phát triển;
+test vẫn được khóa đến đánh giá cuối cùng ở Ngày 7.

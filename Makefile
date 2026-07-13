@@ -1,4 +1,4 @@
-.PHONY: install test lint typecheck data augment-intent validate-data normalize audit-normalization evaluate-normalizer preprocess train-intent train-semantic-intent
+.PHONY: install test lint typecheck data augment-intent validate-data normalize audit-normalization evaluate-normalizer preprocess train-intent train-semantic-intent evaluate-slots
 
 install:
 	python -m pip install -e ".[dev]"
@@ -40,3 +40,6 @@ train-intent:
 
 train-semantic-intent:
 	python scripts/train_semantic_intent.py --encoder-dir E:/models/multilingual-e5-small
+
+evaluate-slots:
+	python scripts/evaluate_slots.py
