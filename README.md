@@ -48,6 +48,39 @@ tests/                           unit và integration tests
 
 Mỗi phase xác định rõ input/output, implementation, test và tiêu chí hoàn thành trước khi chuyển sang phase tiếp theo.
 
+## Chạy demo
+
+Cài project và dependency:
+
+```powershell
+python -m pip install -e ".[dev]"
+```
+
+Chạy một câu lệnh end-to-end bằng CLI:
+
+```powershell
+python scripts/run_assistant.py "gọi cho mẹ"
+python scripts/run_assistant.py --json "Bữa ni ở Huế trời răng rồi hỉ"
+```
+
+Khởi động API:
+
+```powershell
+python -m uvicorn nvit_assistant.api:app --app-dir src --host 127.0.0.1 --port 8000
+```
+
+Swagger UI ở `http://127.0.0.1:8000/docs`; health check ở `/health`; `POST /parse` nhận:
+
+```json
+{
+  "text": "nhắc tôi uống thuốc lúc 8 giờ",
+  "region_hint": "standard"
+}
+```
+
+Mọi action hiện đều có `status=mocked`: demo không gọi điện, đặt báo thức, truy vấn thời tiết
+hay phát nhạc thật.
+
 ## Dataset
 
 Dataset hiện có 2.388 sample: MASSIVE tiếng Việt đã lọc, template lexical Bắc/Trung/Nam và 22 hard-case đã review từ error analysis. Validation/test giữ nguyên khi bổ sung hard-case vào train. Chi tiết license, provenance và các nguồn bị loại nằm trong `data/SOURCES.md`.
@@ -187,3 +220,25 @@ python scripts/evaluate_slots.py
 
 Báo cáo đầy đủ nằm ở `reports/slot_extraction_report.json`. Đây là metric validation để phát triển;
 test vẫn được khóa đến đánh giá cuối cùng ở Ngày 7.
+
+### Ngày 6 — Mock action, CLI và FastAPI
+
+Đã thêm `MockActionRouter` cho đủ năm intent. Router tạo payload deterministic và phản hồi tiếng
+Việt nhưng không chạm API/thiết bị/danh bạ thật; trạng thái `mocked` được ghi rõ trong contract để
+không thể hiểu nhầm demo đã thực thi action thật. Pipeline chỉ gọi router sau hai cổng an toàn:
+confidence phải đạt ngưỡng và nhóm slot bắt buộc phải đầy đủ. Nếu thiếu giờ báo thức hoặc đích gọi,
+hệ thống yêu cầu bổ sung; nếu confidence thấp, intent chuyển thành `unknown` và action không chạy.
+
+Ngưỡng confidence 0.45 được kiểm tra bằng model train-only trên validation, không dùng test. Ngưỡng
+này giữ coverage 0.9432 (332/352 câu), selective accuracy 0.9910, còn 3 lỗi được chấp nhận; so với
+không dùng gate là 11 lỗi. Chi tiết các ngưỡng lân cận nằm trong
+`reports/confidence_gate_report.json` và có thể tái lập bằng:
+
+```powershell
+python scripts/evaluate_confidence_gate.py
+```
+
+CLI và FastAPI đều gọi cùng `build_pipeline`, vì vậy model, normalizer, slot config, threshold và
+action router không bị lệch giữa hai entrypoint. API nạp model đúng một lần trong lifespan, cung cấp
+`GET /health` và `POST /parse`; request sai hoặc text rỗng được Pydantic/FastAPI trả HTTP 422.
+Integration test chạy model artifact thật, API bằng ASGI test client và CLI bằng subprocess thật.

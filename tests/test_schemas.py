@@ -24,6 +24,11 @@ def test_parse_request_rejects_blank_text() -> None:
         ParseRequest(text="   ")
 
 
+def test_parse_request_rejects_unreasonably_long_command() -> None:
+    with pytest.raises(ValidationError):
+        ParseRequest(text="a" * 501)
+
+
 def test_dataset_sample_rejects_unknown_slot() -> None:
     with pytest.raises(ValidationError, match="unknown slot names"):
         DatasetSample(

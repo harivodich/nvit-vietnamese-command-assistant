@@ -70,10 +70,26 @@ class AnnotationQuality(StrEnum):
     TEMPLATE_GENERATED = "template_generated"
 
 
+class ActionType(StrEnum):
+    """Loại hành động mà adapter thật có thể triển khai trong tương lai."""
+
+    CREATE_REMINDER = "create_reminder"
+    SET_ALARM = "set_alarm"
+    QUERY_WEATHER = "query_weather"
+    PLAY_MUSIC = "play_music"
+    CALL = "call"
+
+
+class ActionStatus(StrEnum):
+    """Trạng thái action; challenge hiện chỉ thực thi ở chế độ giả lập."""
+
+    MOCKED = "mocked"
+
+
 class ParseRequest(BaseModel):
     """Dữ liệu đầu vào cho pipeline parse từ CLI hoặc API."""
 
-    text: str = Field(min_length=1)
+    text: str = Field(min_length=1, max_length=500)
     region_hint: Region | None = None
 
     @field_validator("text")
@@ -88,8 +104,8 @@ class ParseRequest(BaseModel):
 class ActionResult(BaseModel):
     """Kết quả của action giả lập hoặc action thật trong tương lai."""
 
-    type: str
-    status: str
+    type: ActionType
+    status: ActionStatus
     payload: dict[str, Any] = Field(default_factory=dict)
 
 

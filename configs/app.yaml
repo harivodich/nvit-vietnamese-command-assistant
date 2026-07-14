@@ -4,6 +4,9 @@ random_seed: 42
 model:
   intent_classifier_path: models/intent_classifier.joblib
   label_map_path: models/intent_label_map.json
+nlu:
+  regional_variants_path: configs/regional_variants.yaml
+  slot_values_path: configs/slot_values.yaml
 data:
   min_total_samples: 1200
   train_ratio: 0.7

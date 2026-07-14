@@ -29,3 +29,25 @@ Lệnh `call_contact` chấp nhận một trong hai slot: `contact_name` hoặc 
 ## Ranh giới gọi điện, nhắc việc và báo thức
 
 `call_contact` chỉ dùng cho yêu cầu gọi ngay. Khi câu có thời điểm tương lai để thực hiện một việc bên ngoài hệ thống, intent là `set_reminder`, kể cả việc đó là gọi điện. `set_alarm` chỉ dùng khi mục đích là đánh thức/cảnh báo chính người dùng. Ví dụ: `gọi mẹ ngay đi` là `call_contact`; `6h gọi mẹ` và `nhắc tôi gọi mẹ lúc 6h` là `set_reminder`; `gọi tôi dậy lúc 6h` là `set_alarm`. Các câu ranh giới này được lưu ở `configs/intent_boundary_cases.yaml`; chúng không nằm trong test split và được dùng làm regression/audit riêng.
+
+## Action và ranh giới an toàn
+
+Challenge chỉ dùng action giả lập. `MockActionRouter` tạo payload cùng response để chứng minh luồng
+end-to-end, nhưng không gọi điện, đặt lịch, truy vấn thời tiết hay phát nhạc thật. Mọi kết quả đều có
+`status=mocked`. Pipeline không gọi action nếu thiếu slot bắt buộc hoặc confidence thấp. Interface
+`ActionRouter` được giữ nhỏ để có thể thay bằng adapter thiết bị thật mà không sửa NLU.
+
+## Confidence gate
+
+Ngưỡng 0.45 được chọn trên validation bằng đúng candidate TF-IDF train-only; test không được đọc.
+Trên 352 câu validation, gate chấp nhận 332 câu (coverage 0.9432), selective accuracy 0.9910 và
+chấp nhận 3 lỗi, so với 11 lỗi khi không gate. Gate đồng thời từ chối nhầm 12 câu đúng, là trade-off
+được chấp nhận để demo không thực thi action khi model thiếu chắc chắn. Báo cáo giữ toàn bộ sweep từ
+0.0 đến 0.7 để quyết định có thể audit và thay đổi theo chi phí sai của sản phẩm thật.
+
+## CLI và API
+
+CLI và FastAPI dùng chung runtime factory thay vì tự lắp dependency. FastAPI lazy-load model một lần
+trong lifespan; CLI load một lần cho mỗi process. API chỉ có health và parse, chưa thêm database,
+authentication, queue hay external integration vì các phần đó không giúp chứng minh chất lượng NLU
+trong phạm vi challenge.

@@ -1,4 +1,4 @@
-.PHONY: install test lint typecheck data augment-intent validate-data normalize audit-normalization evaluate-normalizer preprocess train-intent train-semantic-intent evaluate-slots
+.PHONY: install test lint typecheck data augment-intent validate-data normalize audit-normalization evaluate-normalizer preprocess train-intent train-semantic-intent evaluate-slots evaluate-confidence run serve
 
 install:
 	python -m pip install -e ".[dev]"
@@ -43,3 +43,12 @@ train-semantic-intent:
 
 evaluate-slots:
 	python scripts/evaluate_slots.py
+
+evaluate-confidence:
+	python scripts/evaluate_confidence_gate.py
+
+run:
+	python scripts/run_assistant.py "$(TEXT)"
+
+serve:
+	python -m uvicorn nvit_assistant.api:app --app-dir src --host 127.0.0.1 --port 8000
