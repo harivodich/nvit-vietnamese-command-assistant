@@ -44,7 +44,40 @@ def test_parse_does_not_execute_when_required_slot_is_missing(client: TestClient
     body = response.json()
     assert body["intent"] == "set_alarm"
     assert body["action"] is None
-    assert body["response"] == "Cần bổ sung slot bắt buộc: datetime."
+    assert body["response"] == "Bạn muốn đặt báo thức lúc nào?"
+
+
+@pytest.mark.parametrize(
+    ("text", "expected_slots", "expected_response"),
+    [
+        ("nhắc tôi", {}, "Bạn muốn mình nhắc việc gì?"),
+        ("gọi giúp tôi", {}, "Bạn muốn gọi cho ai hoặc gọi tới số điện thoại nào?"),
+        ("gọi tôi dậy", {}, "Bạn muốn đặt báo thức lúc nào?"),
+        ("nhắc tôi lúc 8 giờ", {"datetime": "8 giờ"}, "Bạn muốn mình nhắc việc gì?"),
+        ("gọi cho ai", {}, "Bạn muốn gọi cho ai hoặc gọi tới số điện thoại nào?"),
+    ],
+)
+def test_parse_clarifies_trigger_only_commands(
+    client: TestClient,
+    text: str,
+    expected_slots: dict[str, str],
+    expected_response: str,
+) -> None:
+    response = client.post("/parse", json={"text": text})
+
+    assert response.status_code == 200
+    body = response.json()
+    assert body["action"] is None
+    assert body["slots"] == expected_slots
+    assert body["response"] == expected_response
+
+
+def test_parse_blocks_negated_command(client: TestClient) -> None:
+    response = client.post("/parse", json={"text": "đừng gọi cho mẹ"})
+
+    assert response.status_code == 200
+    assert response.json()["intent"] == "unknown"
+    assert response.json()["action"] is None
 
 
 @pytest.mark.parametrize(
@@ -54,9 +87,39 @@ def test_parse_does_not_execute_when_required_slot_is_missing(client: TestClient
         {"text": "   "},
         {"text": "a" * 501},
         {"text": "gọi cho mẹ", "region_hint": "west"},
+        {"text": "gọi cho mẹ", "region": "south"},
     ],
 )
 def test_parse_rejects_invalid_request(client: TestClient, payload: dict[str, str]) -> None:
     response = client.post("/parse", json=payload)
 
     assert response.status_code == 422
+
+
+def test_production_lifespan_builds_pipeline_once(monkeypatch: pytest.MonkeyPatch) -> None:
+    calls = 0
+    pipeline = build_pipeline(ROOT)
+
+    def fake_build_pipeline() -> object:
+        nonlocal calls
+        calls += 1
+        return pipeline
+
+    monkeypatch.setattr("nvit_assistant.api.build_pipeline", fake_build_pipeline)
+    with TestClient(create_app()) as production_client:
+        assert production_client.get("/health").json()["status"] == "ready"
+        assert production_client.post("/parse", json={"text": "gọi cho mẹ"}).status_code == 200
+
+    assert calls == 1
+
+
+def test_production_lifespan_fails_fast_when_artifact_is_missing(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    def fail_build_pipeline() -> object:
+        raise FileNotFoundError("missing model artifact")
+
+    monkeypatch.setattr("nvit_assistant.api.build_pipeline", fail_build_pipeline)
+    with pytest.raises(FileNotFoundError, match="missing model artifact"):
+        with TestClient(create_app()):
+            pass

@@ -3,7 +3,6 @@
 from __future__ import annotations
 
 from contextlib import asynccontextmanager
-from pathlib import Path
 from typing import AsyncIterator
 
 from fastapi import FastAPI, Request
@@ -11,9 +10,6 @@ from fastapi import FastAPI, Request
 from nvit_assistant.nlu.pipeline import NLUPipeline
 from nvit_assistant.runtime import build_pipeline
 from nvit_assistant.schemas import ParseRequest, ParseResult
-
-
-PROJECT_ROOT = Path(__file__).resolve().parents[2]
 
 
 def create_app(pipeline: NLUPipeline | None = None) -> FastAPI:
@@ -24,7 +20,7 @@ def create_app(pipeline: NLUPipeline | None = None) -> FastAPI:
         if pipeline is not None:
             app.state.pipeline = pipeline
         else:
-            app.state.pipeline = build_pipeline(PROJECT_ROOT)
+            app.state.pipeline = build_pipeline()
         yield
 
     application = FastAPI(

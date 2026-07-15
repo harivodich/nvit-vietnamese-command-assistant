@@ -1,5 +1,5 @@
 from nvit_assistant.dataset_builder import (
-    combine_spans,
+    combine_temporal_spans,
     map_massive_row,
     parse_annotated_utterance,
     split_group_ids,
@@ -28,7 +28,20 @@ def test_parse_annotated_utterance_preserves_slot_offsets() -> None:
     )
 
     assert text == "cài báo thức ngày mai lúc sáu giờ sáng"
-    assert combine_spans(text, spans, {"date", "time"}) == "ngày mai lúc sáu giờ sáng"
+    assert combine_temporal_spans(text, spans, {"date", "time"}) == (
+        "ngày mai lúc sáu giờ sáng"
+    )
+
+
+def test_temporal_spans_do_not_swallow_event_between_them() -> None:
+    text, spans = parse_annotated_utterance(
+        "[timeofday : tối nay] nhắc tôi [event_name : cuộc hẹn] [date : ngày mai]"
+    )
+
+    assert combine_temporal_spans(text, spans, {"date", "time", "timeofday"}) == [
+        "tối nay",
+        "ngày mai",
+    ]
 
 
 def test_map_massive_alarm_keeps_provenance_and_standard_region() -> None:
@@ -78,7 +91,19 @@ def test_group_split_is_deterministic_and_exclusive() -> None:
 
 
 def test_template_family_split_keeps_all_three_splits() -> None:
-    assignments = split_template_indexes(4, seed=42, scope="set_alarm")
+    templates = [
+        "gọi cho {contact_name}",
+        "bấm số {phone_number}",
+        "liên hệ {contact_name}",
+        "quay số {phone_number}",
+        "nối máy với {contact_name}",
+        "thực hiện cuộc gọi tới {phone_number}",
+    ]
+    assignments = split_template_indexes(templates, seed=42, scope="call_contact")
 
     assert set(assignments.values()) == {"train", "validation", "test"}
-    assert split_template_indexes(4, seed=42, scope="set_alarm") == assignments
+    assert split_template_indexes(templates, seed=42, scope="call_contact") == assignments
+    for split in ("train", "validation", "test"):
+        selected = [template for index, template in enumerate(templates) if assignments[index] == split]
+        assert any("{contact_name}" in template for template in selected)
+        assert any("{phone_number}" in template for template in selected)

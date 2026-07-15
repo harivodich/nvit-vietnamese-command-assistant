@@ -18,6 +18,8 @@ Tải MASSIVE 1.0 từ URL chính thức được ghi trong `SOURCES.md`, giải
 ```powershell
 python scripts/build_dataset.py --massive-jsonl path/to/vi-VN.jsonl
 python scripts/validate_data.py --data-dir data/samples
+python scripts/audit_normalization.py --data-dir data/samples
+python scripts/build_slot_lexicon.py
 ```
 
 Dataset đã build được commit để reviewer có thể chạy validation/evaluation mà không cần tải lại nguồn ngoài.

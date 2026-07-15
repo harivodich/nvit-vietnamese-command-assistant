@@ -29,6 +29,11 @@ def test_parse_request_rejects_unreasonably_long_command() -> None:
         ParseRequest(text="a" * 501)
 
 
+def test_parse_request_rejects_unknown_fields_instead_of_ignoring_typo() -> None:
+    with pytest.raises(ValidationError, match="Extra inputs are not permitted"):
+        ParseRequest.model_validate({"text": "gọi cho mẹ", "region": "south"})
+
+
 def test_dataset_sample_rejects_unknown_slot() -> None:
     with pytest.raises(ValidationError, match="unknown slot names"):
         DatasetSample(
@@ -52,6 +57,37 @@ def test_dataset_sample_requires_intent_slot() -> None:
             text="đặt báo thức lúc 6 giờ",
             region=Region.NORTH,
             intent=Intent.SET_ALARM,
+            source=DataSource.MANUAL,
+            variant_type=VariantType.ACCENTED,
+            annotation_quality=AnnotationQuality.REVIEWED,
+        )
+
+
+@pytest.mark.parametrize("invalid_value", ["", "   ", [], [""]])
+def test_dataset_sample_rejects_empty_slot_values(invalid_value: object) -> None:
+    with pytest.raises(ValidationError):
+        DatasetSample(
+            id="sample-empty-slot",
+            group_id="group-empty-slot",
+            text="gọi cho mẹ",
+            region=Region.SOUTH,
+            intent=Intent.CALL_CONTACT,
+            slots={"contact_name": invalid_value},
+            source=DataSource.MANUAL,
+            variant_type=VariantType.ACCENTED,
+            annotation_quality=AnnotationQuality.REVIEWED,
+        )
+
+
+def test_dataset_sample_rejects_slot_from_another_intent() -> None:
+    with pytest.raises(ValidationError, match="slots not allowed"):
+        DatasetSample(
+            id="sample-wrong-slot",
+            group_id="group-wrong-slot",
+            text="đặt báo thức lúc 6 giờ ở Hà Nội",
+            region=Region.NORTH,
+            intent=Intent.SET_ALARM,
+            slots={"datetime": "6 giờ", "location": "Hà Nội"},
             source=DataSource.MANUAL,
             variant_type=VariantType.ACCENTED,
             annotation_quality=AnnotationQuality.REVIEWED,

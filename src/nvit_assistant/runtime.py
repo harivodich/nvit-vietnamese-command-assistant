@@ -2,17 +2,23 @@
 
 from __future__ import annotations
 
+import json
+import os
 from dataclasses import dataclass
+from importlib.metadata import version
 from pathlib import Path
 from typing import Any
 
 import yaml
 
 from nvit_assistant.actions import MockActionRouter
-from nvit_assistant.nlu.intent_classifier import load_classifier
+from nvit_assistant.nlu.action_gate import CommandActionGate
 from nvit_assistant.nlu.normalizer import VietnameseNormalizer
 from nvit_assistant.nlu.pipeline import NLUPipeline
+from nvit_assistant.nlu.runtime_intent_classifier import IntentClassifier, load_classifier
 from nvit_assistant.nlu.slot_extractor import RegexSlotExtractor
+from nvit_assistant.nlu.slot_lexicon import sha256_file, validate_slot_lexicon_provenance
+from nvit_assistant.schemas import Intent
 
 
 @dataclass(frozen=True)
@@ -21,8 +27,10 @@ class RuntimeSettings:
 
     confidence_threshold: float
     intent_classifier_path: Path
+    label_map_path: Path
     regional_variants_path: Path
     slot_values_path: Path
+    slot_lexicon_path: Path
 
 
 def _mapping(value: Any, field_name: str) -> dict[str, Any]:
@@ -38,6 +46,73 @@ def _relative_path(root: Path, value: Any, field_name: str) -> Path:
         raise ValueError(f"{field_name} phải là chuỗi đường dẫn")
     path = Path(value)
     return path if path.is_absolute() else (root / path).resolve()
+
+
+def resolve_project_root(explicit_root: Path | None = None) -> Path:
+    """Tìm repo root từ tham số, biến môi trường, cwd rồi mới tới source tree."""
+    environment_root = os.environ.get("NVIT_PROJECT_ROOT")
+    candidates = [
+        explicit_root,
+        Path(environment_root) if environment_root else None,
+        Path.cwd(),
+        Path(__file__).resolve().parents[2],
+    ]
+    for candidate in candidates:
+        if candidate is not None:
+            resolved = candidate.resolve()
+            if (resolved / "configs" / "app.yaml").is_file():
+                return resolved
+    raise FileNotFoundError(
+        "không tìm thấy configs/app.yaml; hãy chạy trong repo hoặc đặt NVIT_PROJECT_ROOT"
+    )
+
+
+def _require_file(path: Path, field_name: str) -> Path:
+    """Báo lỗi cấu hình dễ hiểu trước khi thư viện bên dưới phát sinh traceback dài."""
+    if not path.is_file():
+        raise FileNotFoundError(f"không tìm thấy {field_name}: {path}")
+    return path
+
+
+def _validate_classifier_labels(classifier: IntentClassifier, label_map_path: Path) -> None:
+    """Chặn model artifact và label map thuộc hai lần train khác nhau."""
+    raw: Any = json.loads(label_map_path.read_text(encoding="utf-8"))
+    if not isinstance(raw, list) or not all(isinstance(label, str) for label in raw):
+        raise ValueError("intent label map phải là list chuỗi")
+    configured_labels = sorted(raw)
+    model_labels = sorted(classifier.labels)
+    contract_labels = sorted(intent.value for intent in Intent if intent is not Intent.UNKNOWN)
+    if configured_labels != contract_labels:
+        raise ValueError("intent label map không khớp contract Intent")
+    if model_labels != configured_labels:
+        raise ValueError("intent classifier không khớp intent label map")
+
+
+def _validate_intent_artifact_provenance(
+    metadata_path: Path, expected_files: dict[str, Path]
+) -> None:
+    """Kiểm checksum trước khi joblib.load để bắt artifact cũ hoặc file bị đổi ngoài ý muốn."""
+    raw: Any = json.loads(metadata_path.read_text(encoding="utf-8"))
+    if not isinstance(raw, dict) or raw.get("schema_version") != 1:
+        raise ValueError("intent metadata phải có schema_version=1")
+    if raw.get("fit_split") != "train_plus_validation":
+        raise ValueError("intent metadata phải khai báo fit_split=train_plus_validation")
+    trained_sklearn_version = raw.get("sklearn_version")
+    runtime_sklearn_version = version("scikit-learn")
+    if trained_sklearn_version != runtime_sklearn_version:
+        raise ValueError(
+            "scikit-learn runtime không khớp version đã train artifact: "
+            f"{runtime_sklearn_version} != {trained_sklearn_version}"
+        )
+    recorded = raw.get("files_sha256")
+    if not isinstance(recorded, dict):
+        raise ValueError("intent metadata.files_sha256 phải là mapping")
+    for name, path in expected_files.items():
+        expected_hash = recorded.get(name)
+        if not isinstance(expected_hash, str) or expected_hash != sha256_file(path):
+            raise ValueError(
+                f"intent artifact không khớp checksum {name}; hãy chạy scripts/train_intent.py"
+            )
 
 
 def load_runtime_settings(config_path: Path, project_root: Path) -> RuntimeSettings:
@@ -57,21 +132,60 @@ def load_runtime_settings(config_path: Path, project_root: Path) -> RuntimeSetti
         intent_classifier_path=_relative_path(
             root, model.get("intent_classifier_path"), "model.intent_classifier_path"
         ),
+        label_map_path=_relative_path(root, model.get("label_map_path"), "model.label_map_path"),
         regional_variants_path=_relative_path(
             root, nlu.get("regional_variants_path"), "nlu.regional_variants_path"
         ),
         slot_values_path=_relative_path(root, nlu.get("slot_values_path"), "nlu.slot_values_path"),
+        slot_lexicon_path=_relative_path(
+            root, nlu.get("slot_lexicon_path"), "nlu.slot_lexicon_path"
+        ),
     )
 
 
-def build_pipeline(project_root: Path) -> NLUPipeline:
+def build_pipeline(project_root: Path | None = None) -> NLUPipeline:
     """Lắp pipeline hoàn chỉnh một lần; CLI/API không tự tạo dependency khác nhau."""
-    root = project_root.resolve()
+    root = resolve_project_root(project_root)
     settings = load_runtime_settings(root / "configs" / "app.yaml", root)
+    model_path = _require_file(
+        settings.intent_classifier_path, "intent classifier artifact"
+    )
+    label_map_path = _require_file(settings.label_map_path, "intent label map")
+    train_path = _require_file(root / "data" / "samples" / "train.jsonl", "train split")
+    validation_path = _require_file(
+        root / "data" / "samples" / "validation.jsonl", "validation split"
+    )
+    _validate_intent_artifact_provenance(
+        _require_file(model_path.with_suffix(".metadata.json"), "intent artifact metadata"),
+        {
+            "model": model_path,
+            "label_map": label_map_path,
+            "train": train_path,
+            "validation": validation_path,
+            "intent_training_config": _require_file(
+                root / "configs" / "intent_training.yaml", "intent training config"
+            ),
+            "regional_variants": _require_file(
+                settings.regional_variants_path, "regional variants config"
+            ),
+        },
+    )
+    classifier = load_classifier(model_path)
+    _validate_classifier_labels(classifier, label_map_path)
+    slot_lexicon_path = _require_file(settings.slot_lexicon_path, "slot lexicon")
+    validate_slot_lexicon_provenance(
+        slot_lexicon_path, train_path, settings.regional_variants_path
+    )
     return NLUPipeline(
-        normalizer=VietnameseNormalizer(settings.regional_variants_path),
-        intent_classifier=load_classifier(settings.intent_classifier_path),
-        slot_extractor=RegexSlotExtractor(settings.slot_values_path),
+        normalizer=VietnameseNormalizer(
+            _require_file(settings.regional_variants_path, "regional variants config")
+        ),
+        intent_classifier=classifier,
+        slot_extractor=RegexSlotExtractor(
+            _require_file(settings.slot_values_path, "slot values config"),
+            slot_lexicon_path,
+        ),
         action_router=MockActionRouter(),
+        action_gate=CommandActionGate(),
         confidence_threshold=settings.confidence_threshold,
     )

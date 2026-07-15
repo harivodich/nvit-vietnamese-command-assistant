@@ -1,137 +1,15 @@
 {
-  "changed": 1073,
+  "changed": 865,
   "cross_split_collisions": {},
   "detected_regions": {
-    "central": 473,
-    "north": 446,
-    "south": 455,
-    "standard": 992
+    "central": 438,
+    "north": 289,
+    "south": 379,
+    "standard": 988
   },
-  "normalized_collisions": 30,
-  "same_split_collisions": {
-    "cho tôi nghe bài em của ngày hôm qua của sơn tùng nhé": [
-      "train:regional_central_play_music_015",
-      "train:regional_north_play_music_001",
-      "train:regional_south_play_music_013"
-    ],
-    "cho tôi nghe bài một cõi đi về của khánh ly nhé": [
-      "train:regional_central_play_music_013",
-      "train:regional_south_play_music_000"
-    ],
-    "cho tôi nghe bài tháng tư là lời nói dối của em của hà anh tuấn nhé": [
-      "train:regional_north_play_music_013",
-      "train:regional_south_play_music_008"
-    ],
-    "cho tôi nghe bài đi để trở về của soobin hoàng sơn nhé": [
-      "train:regional_central_play_music_007",
-      "train:regional_north_play_music_012",
-      "train:regional_south_play_music_014"
-    ],
-    "cho tôi nghe bài để mị nói cho mà nghe của hoàng thùy linh nhé": [
-      "train:regional_north_play_music_006",
-      "train:regional_south_play_music_003"
-    ],
-    "gọi cho bạn khánh giúp tôi": [
-      "train:regional_north_call_contact_008",
-      "train:regional_south_call_contact_045"
-    ],
-    "gọi cho cô lan giúp tôi": [
-      "train:regional_north_call_contact_009",
-      "train:regional_south_call_contact_019"
-    ],
-    "gọi cho ông nội giúp tôi": [
-      "train:regional_north_call_contact_046",
-      "train:regional_south_call_contact_015"
-    ],
-    "gọi lại cho anh tuấn nhé": [
-      "train:regional_north_call_contact_038",
-      "train:regional_south_call_contact_017"
-    ],
-    "gọi lại cho ba nhé": [
-      "train:regional_north_call_contact_006",
-      "train:regional_south_call_contact_039"
-    ],
-    "gọi lại cho bác sĩ minh nhé": [
-      "train:regional_north_call_contact_001",
-      "train:regional_south_call_contact_009"
-    ],
-    "gọi lại cho cô lan nhé": [
-      "train:regional_north_call_contact_031",
-      "train:regional_south_call_contact_007"
-    ],
-    "gọi lại cho mẹ với nhé": [
-      "train:regional_central_call_contact_032",
-      "train:regional_central_call_contact_044"
-    ],
-    "gọi lại cho sếp hải nhé": [
-      "train:regional_north_call_contact_032",
-      "train:regional_south_call_contact_000"
-    ],
-    "gọi điện cho anh nam nhé": [
-      "train:regional_north_call_contact_026",
-      "train:regional_south_call_contact_003"
-    ],
-    "liên hệ số 079 999 9999 giúp tôi": [
-      "train:regional_north_call_contact_036",
-      "train:regional_south_call_contact_004"
-    ],
-    "liên hệ số 081 111 1111 giúp tôi": [
-      "train:regional_north_call_contact_021",
-      "train:regional_south_call_contact_018"
-    ],
-    "mở bài lạc trôi cho tôi nghe nhé": [
-      "train:regional_north_play_music_017",
-      "train:regional_south_play_music_019"
-    ],
-    "mở bài nối vòng tay lớn cho tôi nghe nhé": [
-      "train:regional_north_play_music_010",
-      "train:regional_south_play_music_005"
-    ],
-    "mở bài tháng tư là lời nói dối của em cho tôi nghe nhé": [
-      "train:regional_north_play_music_000",
-      "train:regional_south_play_music_016"
-    ],
-    "nghe lạc trôi của sơn tùng với tôi nhé": [
-      "train:regional_central_play_music_006",
-      "train:regional_south_play_music_015"
-    ],
-    "nghe nắng ấm xa dần của sơn tùng với tôi nhé": [
-      "train:regional_central_play_music_000",
-      "train:regional_south_play_music_007"
-    ],
-    "nghe nối vòng tay lớn của trịnh công sơn với tôi nhé": [
-      "train:regional_central_play_music_020",
-      "train:regional_south_play_music_020"
-    ],
-    "nghe tháng tư là lời nói dối của em của hà anh tuấn với tôi nhé": [
-      "train:regional_central_play_music_018",
-      "train:regional_south_play_music_002"
-    ],
-    "nghe đi để trở về của soobin hoàng sơn với tôi nhé": [
-      "train:regional_central_play_music_009",
-      "train:regional_south_play_music_011"
-    ],
-    "nối máy với bố giúp tôi nhé": [
-      "test:regional_south_call_contact_064",
-      "test:regional_south_call_contact_068"
-    ],
-    "quay số 032 222 2222 giúp tôi": [
-      "train:regional_north_call_contact_027",
-      "train:regional_south_call_contact_022"
-    ],
-    "quay số 038 888 8888 giúp tôi": [
-      "train:regional_north_call_contact_042",
-      "train:regional_south_call_contact_025"
-    ],
-    "đến trưa mai nhớ báo tôi gọi mẹ nhé": [
-      "train:regional_north_set_reminder_033",
-      "train:regional_south_set_reminder_011"
-    ],
-    "đến tối thứ bảy nhớ báo tôi gọi lại cho khách hàng nhé": [
-      "train:regional_central_set_reminder_027",
-      "train:regional_south_set_reminder_034"
-    ]
-  },
-  "total": 2366,
-  "unchanged": 1293
+  "near_similar_cross_split": [],
+  "normalized_collisions": 0,
+  "same_split_collisions": {},
+  "total": 2094,
+  "unchanged": 1229
 }

@@ -1,90 +1,123 @@
 {
   "annotation_quality": {
-    "auto_mapped": 994,
-    "reviewed": 22,
-    "template_generated": 1372
+    "auto_mapped": 969,
+    "reviewed": 19,
+    "template_generated": 1106
   },
   "by_split_intent": {
     "test": {
       "ask_weather": 90,
       "call_contact": 66,
-      "play_music": 90,
-      "set_alarm": 81,
+      "play_music": 84,
+      "set_alarm": 80,
       "set_reminder": 64
     },
     "train": {
-      "ask_weather": 382,
-      "call_contact": 298,
-      "play_music": 406,
-      "set_alarm": 272,
-      "set_reminder": 287
+      "ask_weather": 314,
+      "call_contact": 157,
+      "play_music": 403,
+      "set_alarm": 229,
+      "set_reminder": 260
     },
     "validation": {
       "ask_weather": 78,
-      "call_contact": 66,
+      "call_contact": 63,
       "play_music": 84,
       "set_alarm": 57,
-      "set_reminder": 67
+      "set_reminder": 65
     }
   },
   "by_split_region": {
     "test": {
-      "central": 72,
-      "north": 72,
-      "south": 72,
-      "standard": 175
-    },
-    "train": {
-      "central": 331,
-      "north": 305,
-      "south": 315,
-      "standard": 694
-    },
-    "validation": {
       "central": 70,
       "north": 70,
       "south": 70,
-      "standard": 142
+      "standard": 174
+    },
+    "train": {
+      "central": 298,
+      "north": 150,
+      "south": 240,
+      "standard": 675
+    },
+    "validation": {
+      "central": 70,
+      "north": 69,
+      "south": 68,
+      "standard": 140
+    }
+  },
+  "by_split_slot": {
+    "test": {
+      "artist": 46,
+      "contact_name": 36,
+      "datetime": 210,
+      "location": 34,
+      "phone_number": 30,
+      "reminder_text": 64,
+      "song": 42
+    },
+    "train": {
+      "artist": 161,
+      "contact_name": 83,
+      "datetime": 576,
+      "location": 102,
+      "phone_number": 74,
+      "reminder_text": 260,
+      "song": 112
+    },
+    "validation": {
+      "artist": 43,
+      "contact_name": 40,
+      "datetime": 178,
+      "location": 29,
+      "phone_number": 23,
+      "reminder_text": 65,
+      "song": 34
     }
   },
   "errors": [],
   "files": {
-    "test_central.jsonl": 72,
-    "test_north.jsonl": 72,
-    "test_south.jsonl": 72,
-    "test_standard.jsonl": 175,
-    "train.jsonl": 1645,
-    "validation.jsonl": 352
+    "test_central.jsonl": 70,
+    "test_north.jsonl": 70,
+    "test_south.jsonl": 70,
+    "test_standard.jsonl": 174,
+    "train.jsonl": 1363,
+    "validation.jsonl": 347
   },
   "intents": {
-    "ask_weather": 550,
-    "call_contact": 430,
-    "play_music": 580,
-    "set_alarm": 410,
-    "set_reminder": 418
+    "ask_weather": 482,
+    "call_contact": 286,
+    "play_music": 571,
+    "set_alarm": 366,
+    "set_reminder": 389
   },
+  "manifest_verified": true,
+  "native_speaker_reviewed": 0,
   "regions": {
-    "central": 473,
-    "north": 447,
-    "south": 457,
-    "standard": 1011
+    "central": 438,
+    "north": 289,
+    "south": 378,
+    "standard": 989
   },
   "sources": {
-    "manual": 22,
-    "massive": 994,
-    "synthetic": 1372
+    "manual": 19,
+    "massive": 969,
+    "synthetic": 1106
   },
   "splits": {
-    "test": 391,
-    "train": 1645,
-    "validation": 352
+    "test": 384,
+    "train": 1363,
+    "validation": 347
   },
-  "total": 2388,
+  "total": 2094,
   "variants": {
-    "casual": 12,
-    "no_diacritics": 691,
-    "regional": 691,
-    "translated": 994
+    "casual": 14,
+    "no_diacritics": 570,
+    "regional": 541,
+    "translated": 969
   },
-  "warnings": []
+  "warnings": [
+    "chưa có transcript/audio kèm provenance native_review; regional set hiện là template"
+  ]
 }

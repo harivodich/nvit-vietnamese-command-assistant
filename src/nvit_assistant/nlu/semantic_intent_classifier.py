@@ -7,7 +7,7 @@ from pathlib import Path
 from typing import Any, cast
 
 import numpy as np
-from sklearn.linear_model import LogisticRegression  # type: ignore[import-untyped]
+from sklearn.linear_model import LogisticRegression
 
 from nvit_assistant.nlu.intent_classifier import evaluate_pipeline, samples_to_xy
 from nvit_assistant.schemas import PreprocessedSample

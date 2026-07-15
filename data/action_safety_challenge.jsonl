@@ -1,0 +1,99 @@
+{"category":"out_of_domain","id":"ood_001","should_execute":false,"text":"xin chào bạn"}
+{"category":"out_of_domain","id":"ood_002","should_execute":false,"text":"bạn khỏe không"}
+{"category":"out_of_domain","id":"ood_003","should_execute":false,"text":"cảm ơn bạn nhiều"}
+{"category":"out_of_domain","id":"ood_004","should_execute":false,"text":"hôm nay tôi ăn cơm"}
+{"category":"out_of_domain","id":"ood_005","should_execute":false,"text":"kể cho tôi một câu chuyện"}
+{"category":"out_of_domain","id":"ood_006","should_execute":false,"text":"hai cộng hai bằng bao nhiêu"}
+{"category":"out_of_domain","id":"ood_007","should_execute":false,"text":"mở cửa giúp tôi"}
+{"category":"out_of_domain","id":"ood_008","should_execute":false,"text":"gọi món phở bò"}
+{"category":"out_of_domain","id":"ood_009","should_execute":false,"text":"tôi không muốn làm gì cả"}
+{"category":"non_action_statement","id":"statement_001","should_execute":false,"text":"tôi đang nghe nhạc"}
+{"category":"non_action_statement","id":"statement_002","should_execute":false,"text":"tôi thích nhạc jazz"}
+{"category":"non_action_statement","id":"statement_003","should_execute":false,"text":"tôi đã mua sữa"}
+{"category":"non_action_statement","id":"statement_004","should_execute":false,"text":"tôi vừa gọi cho mẹ"}
+{"category":"non_action_statement","id":"statement_005","should_execute":false,"text":"hôm nay trời đẹp quá"}
+{"category":"non_action_statement","id":"statement_006","should_execute":false,"text":"chuông cửa đang reo"}
+{"category":"non_action_statement","id":"statement_007","should_execute":false,"text":"đây là số điện thoại của tôi"}
+{"category":"non_action_statement","id":"statement_008","should_execute":false,"text":"tôi đã uống thuốc rồi"}
+{"category":"negated","id":"neg_001","should_execute":false,"text":"đừng gọi cho mẹ"}
+{"category":"negated","id":"neg_002","should_execute":false,"text":"không gọi cho mẹ"}
+{"category":"negated","id":"neg_003","should_execute":false,"text":"khỏi gọi cho anh nam"}
+{"category":"negated","id":"neg_004","should_execute":false,"text":"không mở nhạc"}
+{"category":"negated","id":"neg_005","should_execute":false,"text":"tôi không muốn nghe nhạc"}
+{"category":"negated","id":"neg_006","should_execute":false,"text":"đừng đặt báo thức"}
+{"category":"negated","id":"neg_007","should_execute":false,"text":"đừng nhắc tôi uống thuốc"}
+{"category":"unsupported","id":"unsupported_001","should_execute":false,"text":"hủy báo thức lúc 7 giờ"}
+{"category":"unsupported","id":"unsupported_002","should_execute":false,"text":"xóa lời nhắc uống thuốc"}
+{"category":"unsupported","id":"unsupported_003","should_execute":false,"text":"dừng phát nhạc"}
+{"category":"unsupported","id":"unsupported_004","should_execute":false,"text":"ngắt cuộc gọi cho mẹ"}
+{"category":"negated","id":"neg_008","should_execute":false,"text":"chưa cần nhắc tôi uống thuốc"}
+{"category":"negated","id":"neg_009","should_execute":false,"text":"không cần báo thức lúc 7 giờ"}
+{"category":"negated","id":"neg_010","should_execute":false,"text":"dung hoi thoi tiet hom nay"}
+{"category":"negated","id":"neg_011","should_execute":false,"text":"khong can xem du bao thoi tiet"}
+{"category":"unsupported","id":"unsupported_005","should_execute":false,"text":"bỏ báo thức 7 giờ"}
+{"category":"non_action_statement","id":"statement_009","should_execute":false,"text":"hôm qua trời mưa"}
+{"category":"non_action_statement","id":"statement_010","should_execute":false,"text":"mẹ đang nghe nhạc"}
+{"category":"non_action_statement","id":"statement_011","should_execute":false,"text":"cô ấy thích nhạc jazz"}
+{"category":"non_action_statement","id":"statement_012","should_execute":false,"text":"trời đẹp"}
+{"category":"non_action_statement","id":"statement_013","should_execute":false,"text":"trời đang mưa"}
+{"category":"non_action_statement","id":"statement_014","should_execute":false,"text":"mẹ nghe nhạc"}
+{"category":"non_action_statement","id":"statement_015","should_execute":false,"text":"tôi nghe nhạc mỗi ngày"}
+{"category":"negated","id":"neg_012","should_execute":false,"text":"không cần thời tiết hôm nay"}
+{"category":"negated","id":"neg_013","should_execute":false,"text":"không cần lời nhắc nữa"}
+{"category":"negated","id":"neg_014","should_execute":false,"text":"không muốn nhạc"}
+{"category":"negated","id":"neg_015","should_execute":false,"text":"không muốn thời tiết"}
+{"category":"non_action_statement","id":"statement_016","should_execute":false,"text":"tôi uống thuốc"}
+{"category":"non_action_statement","id":"statement_017","should_execute":false,"text":"tôi mua sữa"}
+{"category":"non_action_statement","id":"statement_018","should_execute":false,"text":"tôi gọi mẹ"}
+{"category":"incomplete_command","id":"incomplete_001","should_execute":false,"text":"nhắc tôi"}
+{"category":"incomplete_command","id":"incomplete_002","should_execute":false,"text":"nhắc tôi lúc 8 giờ"}
+{"category":"incomplete_command","id":"incomplete_003","should_execute":false,"text":"gọi tôi dậy"}
+{"category":"incomplete_command","id":"incomplete_004","should_execute":false,"text":"gọi cho ai"}
+{"category":"incomplete_command","id":"incomplete_005","should_execute":false,"text":"gọi số 123"}
+{"category":"incomplete_command","id":"incomplete_006","should_execute":false,"text":"6h gọi"}
+{"category":"supported","expected_intent":"set_reminder","id":"positive_001","should_execute":true,"text":"nhắc tôi uống thuốc lúc 8 giờ"}
+{"category":"supported","expected_intent":"set_reminder","id":"positive_002","should_execute":true,"text":"đừng quên nhắc tôi gọi mẹ tối nay"}
+{"category":"supported","expected_intent":"set_reminder","id":"positive_003","should_execute":true,"text":"6h gọi mẹ"}
+{"category":"supported","expected_intent":"set_alarm","id":"positive_004","should_execute":true,"text":"gọi tôi dậy lúc 7 giờ"}
+{"category":"supported","expected_intent":"set_alarm","id":"positive_005","should_execute":true,"text":"đặt báo thức 6 giờ rưỡi"}
+{"category":"supported","expected_intent":"ask_weather","id":"positive_006","should_execute":true,"text":"hôm nay ở huế có mưa không"}
+{"category":"supported","expected_intent":"ask_weather","id":"positive_007","should_execute":true,"text":"nhiệt độ hà nội bây giờ"}
+{"category":"supported","expected_intent":"play_music","id":"positive_008","should_execute":true,"text":"không biết bài lạc trôi có hay không, mở cho tôi nghe"}
+{"category":"supported","expected_intent":"play_music","id":"positive_009","should_execute":true,"text":"mở nhạc mỹ tâm"}
+{"category":"supported","expected_intent":"call_contact","id":"positive_010","should_execute":true,"text":"gọi cho mẹ"}
+{"category":"supported","expected_intent":"call_contact","id":"positive_011","should_execute":true,"text":"quay số 090 000 0000"}
+{"category":"supported","expected_intent":"set_alarm","id":"positive_012","should_execute":true,"text":"kêu tôi dậy lúc 6 giờ"}
+{"category":"supported","expected_intent":"call_contact","id":"positive_013","should_execute":true,"text":"gọi lại cho khách hàng"}
+{"category":"non_action_statement","id":"statement_019","should_execute":false,"text":"nhạc đang phát"}
+{"category":"non_action_statement","id":"statement_020","should_execute":false,"text":"bài hát này hay"}
+{"category":"non_action_statement","id":"statement_021","should_execute":false,"text":"nhiệt độ là 30 độ"}
+{"category":"non_action_statement","id":"statement_022","should_execute":false,"text":"hà nội đang mưa"}
+{"category":"non_action_statement","id":"statement_023","should_execute":false,"text":"ngoài trời đang mưa"}
+{"category":"non_action_statement","id":"statement_024","should_execute":false,"text":"mai có cuộc họp"}
+{"category":"incomplete_command","id":"incomplete_007","should_execute":false,"text":"nhắc tôi nhé"}
+{"category":"incomplete_command","id":"incomplete_008","should_execute":false,"text":"nhắc tôi lúc 8 giờ nhé"}
+{"category":"incomplete_command","id":"incomplete_009","should_execute":false,"text":"gọi cho ai vậy"}
+{"category":"incomplete_command","id":"incomplete_010","should_execute":false,"text":"gọi dậy"}
+{"category":"status_question","id":"status_001","should_execute":false,"text":"gọi mẹ chưa"}
+{"category":"status_question","id":"status_002","should_execute":false,"text":"đã gọi mẹ chưa"}
+{"category":"choice_question","id":"choice_001","should_execute":false,"text":"gọi mẹ hay bố"}
+{"category":"status_question","id":"status_003","should_execute":false,"text":"mở nhạc chưa"}
+{"category":"status_question","id":"status_004","should_execute":false,"text":"đã mở nhạc chưa"}
+{"category":"status_question","id":"status_005","should_execute":false,"text":"có mở nhạc không"}
+{"category":"status_question","id":"status_006","should_execute":false,"text":"nhạc đang phát à"}
+{"category":"status_question","id":"status_007","should_execute":false,"text":"đang phát nhạc à"}
+{"category":"status_question","id":"status_008","should_execute":false,"text":"có cần nhắc tôi uống thuốc không"}
+{"category":"status_question","id":"status_009","should_execute":false,"text":"đã nhắc tôi uống thuốc chưa"}
+{"category":"metadata_question","id":"metadata_001","should_execute":false,"text":"bài này tên gì"}
+{"category":"incomplete_command","id":"incomplete_011","should_execute":false,"text":"gọi mẹ dậy"}
+{"category":"supported","expected_intent":"set_alarm","id":"positive_014","should_execute":true,"text":"kêu em dậy lúc 6 giờ"}
+{"category":"status_question","id":"status_010","should_execute":false,"text":"mở nhạc phải không"}
+{"category":"status_question","id":"status_011","should_execute":false,"text":"nhạc có đang phát không"}
+{"category":"metadata_question","id":"metadata_002","should_execute":false,"text":"bài này của ai"}
+{"category":"status_question","id":"status_012","should_execute":false,"text":"nhắc tôi uống thuốc phải không"}
+{"category":"invalid_datetime","id":"invalid_datetime_001","should_execute":false,"text":"đặt báo thức -1 giờ"}
+{"category":"invalid_datetime","id":"invalid_datetime_002","should_execute":false,"text":"đặt báo thức 7 giờ 70 phút"}
+{"category":"invalid_phone","id":"invalid_phone_001","should_execute":false,"text":"gọi số 0 9 0 1 2 3 4 5 6 7 8 9"}
+{"category":"supported","expected_intent":"set_alarm","id":"positive_015","should_execute":true,"text":"gọi mẹ dậy lúc 6 giờ"}
+{"category":"supported","expected_intent":"call_contact","id":"positive_016","should_execute":true,"text":"gọi số không chín không một hai ba bốn năm sáu bảy"}
+{"category":"supported","expected_intent":"set_reminder","id":"positive_017","should_execute":true,"text":"đừng quên gọi mẹ lúc 6 giờ"}

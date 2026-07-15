@@ -56,7 +56,11 @@ def main() -> None:
         "annotation_quality": dict(sorted(Counter(sample.annotation_quality.value for sample in all_samples).items())),
         "augmentations": {"intent_hard_cases": {"source": str(args.source.relative_to(ROOT)), "samples": len(additions)}},
     }
-    (args.data_dir / "manifest.json").write_text(json.dumps(manifest, ensure_ascii=False, indent=2, sort_keys=True) + "\n", encoding="utf-8")
+    (args.data_dir / "manifest.json").write_text(
+        json.dumps(manifest, ensure_ascii=False, indent=2, sort_keys=True) + "\n",
+        encoding="utf-8",
+        newline="\n",
+    )
     print(json.dumps(manifest, ensure_ascii=False, indent=2, sort_keys=True))
 
 

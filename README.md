@@ -1,36 +1,42 @@
 # NVIT Vietnamese Command Assistant
 
-Repository triển khai hệ thống hiểu lệnh nói tiếng Việt theo hướng **text-first NLU**. Dự án được xây dựng theo từng phase, với kiểm thử và đánh giá rõ ràng ở mỗi giai đoạn.
+Repository triển khai hệ thống hiểu lệnh nói tiếng Việt theo hướng **text-first NLU**. Dự án được xây
+dựng theo từng phase, với kiểm thử và đánh giá rõ ràng ở mỗi giai đoạn. Trạng thái hiện tại nhận
+transcript; STT/TTS và action trên thiết bị thật chưa thuộc đường chạy chính.
 
 ## Mục tiêu cuối cùng
 
-Input chính là transcript tiếng Việt; audio chỉ là phần mở rộng sau cùng. Hệ thống sẽ trả về intent, slots, confidence, mock action và câu phản hồi. Core không dùng LLM runtime hay external API.
+Input chính là transcript tiếng Việt; audio là phần mở rộng sau cùng. Hệ thống trả về intent, slots,
+confidence, mock action và câu phản hồi. Core không dùng LLM runtime hay external inference API.
 
-Intent dự kiến: `set_reminder`, `set_alarm`, `ask_weather`, `play_music`, `call_contact`.
+Intent trong contract: `set_reminder`, `set_alarm`, `ask_weather`, `play_music`, `call_contact`.
 
-Slots dự kiến: `datetime`, `location`, `song`, `artist`, `contact_name`, `phone_number`, `reminder_text`.
+Slots trong contract: `datetime`, `location`, `song`, `artist`, `contact_name`, `phone_number`,
+`reminder_text`.
 
 ```text
-Text transcript (hoặc audio adapter)
+Text transcript
   -> Vietnamese normalization + regional handling
   -> intent classification
-  -> slot extraction
   -> confidence gate
-  -> mock action + CLI/API response
+  -> slot extraction theo intent được chấp nhận
+  -> action-safety gate
+  -> required-slot check
+  -> mock action, clarification hoặc safe rejection
 ```
 
 ## Kiến trúc
 
 ```text
 configs/                         cấu hình intent, vùng miền và data templates
-data/raw_sources/                nguồn tham khảo chưa gán nhãn
+data/raw_sources/                nguồn đầu vào đã tuyển chọn/gán nhãn để build và audit
 data/samples/                    JSONL train/validation/test đã được kiểm tra
 models/                          model artifact cục bộ
 reports/                         báo cáo evaluation
 scripts/                         generate, validate, train, evaluate, demo
 src/nvit_assistant/
   actions/                       mock action router
-  asr/                           optional audio-to-text adapter
+  asr/                           placeholder cho adapter audio-to-text, chưa có implementation
   eval/                          metric và evaluation runner
   nlu/                           normalizer, classifier, slots, pipeline
 tests/                           unit và integration tests
@@ -48,20 +54,45 @@ tests/                           unit và integration tests
 
 Mỗi phase xác định rõ input/output, implementation, test và tiêu chí hoàn thành trước khi chuyển sang phase tiếp theo.
 
-## Chạy demo
+## Cài đặt và chạy demo
 
-Cài project và dependency:
+Project khai báo Python `>=3.11`; môi trường local đã được kiểm tra bằng Python 3.12, còn CI chạy cả
+Python 3.11 và 3.12. scikit-learn được khóa ở 1.9.0 vì gắn trực tiếp với artifact; NumPy và joblib
+dùng khoảng phiên bản tương thích.
+Cài dependency runtime cho TF-IDF, CLI và API:
+
+```powershell
+python -m pip install -e .
+```
+
+Cài thêm công cụ test/lint/type check khi phát triển:
 
 ```powershell
 python -m pip install -e ".[dev]"
 ```
 
+Thí nghiệm E5 không nằm trong runtime mặc định. Chỉ cài extra nặng này khi cần tái tạo semantic
+benchmark:
+
+```powershell
+python -m pip install -e ".[semantic]"
+```
+
 Chạy một câu lệnh end-to-end bằng CLI:
 
 ```powershell
+nvit-assistant "gọi cho mẹ"
+nvit-assistant --json "Bữa ni ở Huế trời răng rồi hỉ"
+
+# Wrapper tương đương khi chạy trực tiếp từ source tree
 python scripts/run_assistant.py "gọi cho mẹ"
 python scripts/run_assistant.py --json "Bữa ni ở Huế trời răng rồi hỉ"
 ```
+
+Trước khi gọi `joblib.load`, runtime kiểm metadata và SHA-256 của artifact trong tệp provenance do pipeline
+huấn luyện tạo ra. Kiểm tra này phát hiện file bị thay thế hoặc metadata không khớp, nhưng không biến
+joblib thành định dạng an toàn: tuyệt đối không nhận và load artifact do người dùng tải lên vì quá
+trình deserialize có thể thực thi payload.
 
 Khởi động API:
 
@@ -81,14 +112,25 @@ Swagger UI ở `http://127.0.0.1:8000/docs`; health check ở `/health`; `POST /
 Mọi action hiện đều có `status=mocked`: demo không gọi điện, đặt báo thức, truy vấn thời tiết
 hay phát nhạc thật.
 
+Kiểm tra project:
+
+```powershell
+python -m pytest
+python -m ruff check .
+python -m mypy src
+```
+
 ## Dataset
 
-Dataset hiện có 2.388 sample: MASSIVE tiếng Việt đã lọc, template lexical Bắc/Trung/Nam và 22 hard-case đã review từ error analysis. Validation/test giữ nguyên khi bổ sung hard-case vào train. Chi tiết license, provenance và các nguồn bị loại nằm trong `data/SOURCES.md`.
+Dataset sau audit hiện có 2.094 sample: MASSIVE tiếng Việt đã lọc, template lexical Bắc/Trung/Nam và
+19 hard-case còn lại sau kiểm soát leakage. Nhãn `annotation_quality=reviewed` của 19 câu này chỉ có
+nghĩa annotation đã được rà soát nội bộ, không đồng nghĩa native-speaker review. Chi tiết license,
+provenance và các nguồn bị loại nằm trong `data/SOURCES.md`.
 
 ```text
-train:       1.645
-validation:    352
-test:          391
+train:       1.363
+validation:    347
+test:          384 = standard 174 + Bắc 70 + Trung 70 + Nam 70
 ```
 
 Build lại dataset sau khi tải MASSIVE 1.0 và giải nén `1.0/data/vi-VN.jsonl`:
@@ -96,9 +138,21 @@ Build lại dataset sau khi tải MASSIVE 1.0 và giải nén `1.0/data/vi-VN.js
 ```powershell
 python scripts/build_dataset.py --massive-jsonl path\to\vi-VN.jsonl
 python scripts/validate_data.py --data-dir data\samples
+python scripts/audit_normalization.py --data-dir data\samples
+python scripts/build_slot_lexicon.py
 ```
 
-Regional set hiện kiểm tra lexical variation trong transcript, chưa phải đánh giá audio accent của người nói thật. Giới hạn này được giữ nguyên trong validation report và `DECISIONS.md`.
+Slot lexicon phải được build **sau** dataset để chỉ học catalog từ train hiện tại, không đọc
+validation/test. Nếu data thay đổi, cần chạy lại preprocessing, huấn luyện và các report phụ thuộc.
+
+Test chưa được dùng để tính metric hoặc chọn model/rule/threshold. Sau đợt audit dữ liệu, định nghĩa
+test hiện tại được khóa bằng SHA-256
+`47cb9cf87cc53c5a210298453b4ae6ca75d045250c883bd5cca59709ddec9f2a`; mọi thay đổi hash phải được
+coi là thay đổi benchmark và ghi lại trước khi đánh giá cuối.
+
+Regional set hiện chỉ kiểm tra lexical variation trong text, chưa phải đánh giá audio accent của người
+nói thật. Đến trước Ngày 7, số sample/audio được native speaker review theo protocol chính thức là 0.
+Giới hạn này được ghi trong `data/NORMALIZATION_SOURCES.md` và `DECISIONS.md`.
 
 ## Trạng thái triển khai
 
@@ -113,19 +167,20 @@ Commit liên quan: `Hoàn thiện contract, cấu hình nền tảng`.
 
 ### Ngày 2 — Xây dựng và kiểm định dataset
 
-Đã tạo dataset JSONL với 2.388 mẫu cho đủ 5 intent. Nguồn dữ liệu gồm
+Đã tạo dataset JSONL với 2.094 mẫu cho đủ 5 intent. Nguồn dữ liệu gồm
 MASSIVE `vi-VN` đã lọc chất lượng và template lexical Bắc/Trung/Nam do dự án kiểm soát.
 Mỗi mẫu có intent, slot, region, nguồn gốc, loại biến thể và chất lượng annotation rõ ràng.
 
-Dataset được chia thành train 1.645, validation 352 và test 391. Validator kiểm tra schema,
+Dataset được chia thành train 1.363, validation 347 và test 384. Test gồm 174 câu standard và 70 câu
+cho mỗi vùng Bắc/Trung/Nam. Validator kiểm tra schema,
 slot có xuất hiện trong câu, trùng nguyên văn, trùng khi bỏ dấu, leakage `group_id` và câu
 gần giống giữa các split. Template cùng family và các biến thể cùng nhóm luôn nằm trong một
 split; các group quá giống split ưu tiên hơn sẽ bị loại. Build lại từ cùng nguồn cho kết quả
 checksum giống nhau.
 
-Đã chạy `pytest` (18 test), Ruff, mypy và validator trước khi push. Báo cáo hiện tại không có
-lỗi; giới hạn còn lại là dữ liệu vùng miền mới là text template, chưa phải transcript giọng nói
-thật.
+Validator, preprocessing, test, Ruff và mypy là các cổng kiểm tra trước khi chuyển phase. Giới hạn
+còn lại là dữ liệu vùng miền mới là text template, chưa phải transcript giọng nói thật. Test chưa
+được dùng để chọn model; hash của định nghĩa test sau audit được khóa như phần Dataset phía trên.
 
 Commit liên quan: `Xây dựng và hoàn thiện dataset`.
 
@@ -139,17 +194,19 @@ luận khi tín hiệu rõ ràng, còn tín hiệu mâu thuẫn trả về `unkn
 Tiểu từ cuối câu như `hỉ`, `hen`, `nghen` được xử lý theo ngữ cảnh: câu hỏi chuẩn về `nhỉ`,
 câu yêu cầu/nhắc nhở chuẩn về `nhé`, còn không đủ tín hiệu thì giữ nguyên. Dataset JSONL gốc
 không bị viết đè; script audit áp dụng normalizer lên toàn bộ sample để phát hiện collision sau
-preprocess. Ngày train và runtime sau này đều phải gọi cùng normalizer trước classifier.
+preprocess. Khi train và khi chạy runtime đều phải gọi cùng normalizer trước classifier.
 
-Normalizer được kiểm tra bằng 34 câu command-domain độc lập ở
-`data/normalization_challenge.jsonl`, bao phủ ba vùng, lỗi STT, tiểu từ ngữ cảnh và cả năm
-intent. Nguồn, license và giới hạn tái sử dụng nằm trong `data/NORMALIZATION_SOURCES.md`.
+Normalizer được kiểm tra bằng 35 câu command-domain ở `data/normalization_challenge.jsonl`, bao phủ
+ba vùng, lỗi STT, tiểu từ ngữ cảnh và cả năm intent. Đây là development regression set do dự án tự
+biên soạn và tách khỏi train/validation/test intent, không phải benchmark độc lập từ người dùng thật.
+Nguồn, license và giới hạn tái sử dụng nằm trong `data/NORMALIZATION_SOURCES.md`.
 
 Preprocess tạo artifact tái lập trong `data/preprocessed/` nhưng không commit artifact này: JSONL
-gốc vẫn là nguồn audit. Train/validation được deduplicate theo `normalized_text` để không tăng
-trọng số vì câu vùng miền trở thành giống nhau; test giữ nguyên bề mặt để đo độ bền thật. Report
-hiện tại có 2.357 output preprocess từ 2.388 sample gốc. Review native speaker và audio không thể
-tự tạo bằng code; protocol, consent và tiêu chí acceptance ở `data/NATIVE_REVIEW_PROTOCOL.md`.
+gốc vẫn là nguồn audit. Builder đã xử lý trùng và gần giống giữa split trước đó; preprocessing áp
+dụng cùng normalizer cho cả sáu file và chỉ cho phép deduplicate train/validation, không deduplicate
+test. Với snapshot hiện tại không còn collision mới: 2.094 input tạo 2.094 output, `dropped=0`.
+Review native speaker và audio không thể tự tạo bằng code; protocol, consent và tiêu chí acceptance
+ở `data/NATIVE_REVIEW_PROTOCOL.md`.
 
 Thử thủ công:
 
@@ -163,26 +220,35 @@ python scripts/preprocess_dataset.py --input-dir data/samples
 ### Ngày 4 — Intent classifier baseline
 
 Đã huấn luyện baseline TF-IDF word/character n-gram kết hợp Logistic Regression. Ba candidate
-được fit trên train và chọn duy nhất bằng macro-F1 validation; test bị khóa hoàn toàn khi chọn
-model. Candidate `word_1_2_char_3_5` đạt macro-F1 0.9654 và accuracy 0.9688 trên 352 sample
-validation. Artifact, label map, candidate report và từng lỗi validation được lưu để phân tích.
+được fit trên train và chọn trên 347 mẫu validation theo thứ tự ưu tiên: macro-F1, accuracy, rồi thứ
+tự khai báo trong config để tie-break có tính tái lập. Hai candidate có character n-gram cùng đạt
+macro-F1 0.9816543297 và accuracy 0.9827089337; `word_1_2_char_3_5` thắng vì đứng trước trong config.
+Weighted-F1 của candidate được chọn là 0.9825541936. Artifact, label map, candidate report và từng
+lỗi validation được lưu để phân tích.
 Report có precision, recall, F1 theo từng intent; macro/weighted F1; confusion matrix; ROC/PR curve
 one-vs-rest; log-loss, Brier score, ECE và reliability curve. Các metric và biểu đồ này đều là
 validation; chưa công bố metric test ở phase này.
 
-Một benchmark semantic độc lập dùng embedding local `multilingual-e5-small` (384 chiều) và Logistic
-Regression cũng được chạy trên đúng validation. Kết quả macro-F1 0.8949, thấp hơn TF-IDF 0.9654;
-đặc biệt recall `set_alarm` chỉ 0.5789. Vì vậy runtime giữ TF-IDF + Logistic Regression; E5 được
-giữ như thí nghiệm tái lập và bằng chứng lựa chọn model, không được đưa vào runtime chỉ vì là
-transformer. Xem `reports/model_comparison_report.json` và `reports/semantic_intent_report.json`.
+Metric chọn model phía trên đến từ candidate fit **chỉ trên train**. Sau khi candidate và threshold
+đã khóa, artifact dùng trong CLI/API được fit lại trên train + validation; không dùng artifact cuối này
+để báo ngược validation metric. Test vẫn chưa được dùng.
+
+Một thí nghiệm semantic tách biệt dùng embedding local `multilingual-e5-small` (384 chiều) và Logistic
+Regression cũng được chạy trên đúng 347 mẫu validation. Kết quả accuracy 0.8731988473 và macro-F1
+0.8605845611, thấp hơn TF-IDF trên cùng split. Vì vậy runtime giữ TF-IDF + Logistic Regression; E5
+được giữ như thí nghiệm tái lập và bằng chứng lựa chọn model, không được ensemble chỉ vì là
+transformer. Script nhận đường dẫn thư mục encoder E5 local qua `--encoder-dir`; report chỉ lưu model
+ID chính thức và fingerprint file, không lưu đường dẫn tuyệt đối phụ thuộc máy. Xem
+`reports/model_comparison_report.json` và
+`reports/semantic_intent_report.json`.
 
 ```powershell
 python scripts/train_intent.py
 ```
 
 Fine-tune transformer chưa phải lựa chọn mặc định: chỉ thực hiện sau khi phân tích failure của
-baseline và có benchmark native-speaker/audio phù hợp. Ngày 5 tiếp tục slot extraction, sau đó
-pipeline, API, evaluation cuối cùng và ASR.
+baseline và có benchmark dữ liệu thật phù hợp. Ngày 5 và Ngày 6 đã hoàn thành slot extraction,
+pipeline, mock action, CLI/API và safety gate. ASR vẫn ngoài phạm vi core text-first của challenge.
 
 ### Ngày 5 — Trích xuất slot và pipeline NLU
 
@@ -198,47 +264,75 @@ khỏi câu đã chuẩn hóa. Mỗi slot kèm dấu vết match để có thể
 ParseRequest
   -> VietnameseNormalizer
   -> TF-IDF + Logistic Regression intent classifier
-  -> RegexSlotExtractor theo intent vừa dự đoán
-  -> ParseResult gồm intent, confidence, slots và matched_features
+  -> confidence gate
+  -> RegexSlotExtractor theo intent được chấp nhận
+  -> action-safety gate
+  -> required-slot check
+  -> MockActionRouter hoặc clarification/safe rejection
+  -> ParseResult gồm intent, confidence, slots, matched_features, action và response
 ```
 
-Các action thật, câu phản hồi tự nhiên, CLI và FastAPI chưa nằm trong core này; chúng thuộc Ngày 6.
+Ngày 5 hoàn thành lõi normalizer → intent → slot; Ngày 6 bổ sung confidence/safety gate, mock action,
+câu phản hồi, CLI và FastAPI trên cùng pipeline. Action thật vẫn ngoài phạm vi.
 Ngày 5 có hard-case cho thời gian dạng số/chữ, “rưỡi”, “kém”, số điện thoại viết/đọc, transcript
 không dấu, entity ngoài catalog và trường hợp không được sinh entity giả từ playlist. Pipeline kiểm
 tra nhóm slot bắt buộc; nếu báo thức, lời nhắc hoặc cuộc gọi thiếu đối tượng cần thiết thì trả về
 yêu cầu bổ sung thay vì giả vờ đã hiểu đủ.
 
-Extractor được đánh giá độc lập trên 352 mẫu validation bằng intent thật, để lỗi intent không làm
-nhiễu phép đo slot. Kết quả hiện tại: exact-match 0.9460, micro precision 0.9575, recall 0.9721 và
-F1 0.9647. Location/phone đạt F1 1.0; reminder 0.9851; artist 0.9655; datetime 0.9421; song 0.9.
-19 failure còn lại được giữ trong report, chủ yếu là ranh giới annotation dịch từ MASSIVE như
-nhãn `năm` trong câu `năm giờ`; không thêm rule riêng để học thuộc các sai khác surface này.
+Extractor được đánh giá oracle trên 347 mẫu validation bằng intent thật, để lỗi intent không làm
+nhiễu phép đo slot. Snapshot hiện tại đạt exact match 0.9221902017 và micro precision/recall/F1
+0.9441747573. Theo nguồn, MASSIVE đạt micro-F1 0.8348623853, còn synthetic đạt 0.9834983498;
+khoảng cách này cho thấy template dễ hơn dữ liệu bản địa hóa và phải
+được trình bày như một giới hạn. Sau mỗi thay đổi data, slot config hoặc lexicon phải build lại lexicon
+từ train rồi tái tạo `reports/slot_extraction_report.json`.
+Một phần lỗi đến từ ranh giới annotation bản địa hóa MASSIVE như nhãn `năm` trong câu `năm giờ`;
+không thêm rule riêng để học thuộc từng surface validation.
 
 ```powershell
 python scripts/evaluate_slots.py
 ```
 
 Báo cáo đầy đủ nằm ở `reports/slot_extraction_report.json`. Đây là metric validation để phát triển;
-test vẫn được khóa đến đánh giá cuối cùng ở Ngày 7.
+chưa tính slot metric trên test.
 
 ### Ngày 6 — Mock action, CLI và FastAPI
 
 Đã thêm `MockActionRouter` cho đủ năm intent. Router tạo payload deterministic và phản hồi tiếng
 Việt nhưng không chạm API/thiết bị/danh bạ thật; trạng thái `mocked` được ghi rõ trong contract để
-không thể hiểu nhầm demo đã thực thi action thật. Pipeline chỉ gọi router sau hai cổng an toàn:
-confidence phải đạt ngưỡng và nhóm slot bắt buộc phải đầy đủ. Nếu thiếu giờ báo thức hoặc đích gọi,
-hệ thống yêu cầu bổ sung; nếu confidence thấp, intent chuyển thành `unknown` và action không chạy.
+không thể hiểu nhầm demo đã thực thi action thật. Pipeline chỉ gọi router sau confidence gate,
+action-safety gate và kiểm tra nhóm slot bắt buộc. Nếu thiếu giờ báo thức hoặc đích gọi, hệ thống yêu
+cầu bổ sung; nếu câu ngoài phạm vi, phủ định/hủy chưa được hỗ trợ hoặc confidence thấp, action không
+chạy.
 
-Ngưỡng confidence 0.45 được kiểm tra bằng model train-only trên validation, không dùng test. Ngưỡng
-này giữ coverage 0.9432 (332/352 câu), selective accuracy 0.9910, còn 3 lỗi được chấp nhận; so với
-không dùng gate là 11 lỗi. Chi tiết các ngưỡng lân cận nằm trong
+Ngưỡng confidence 0.35 được kiểm tra bằng model train-only trên 347 mẫu validation, không dùng test.
+Ngưỡng này chấp nhận 345/347 câu: coverage 0.9942363112, selective accuracy 0.9855072464 và 5 lỗi
+được chấp nhận. Coverage thấp nhất trong một intent là 0.9824561404. Chi tiết các ngưỡng lân cận nằm trong
 `reports/confidence_gate_report.json` và có thể tái lập bằng:
 
 ```powershell
 python scripts/evaluate_confidence_gate.py
 ```
 
+Confidence gate trên validation in-domain **không phải OOD detector**: model closed-set vẫn có thể tự
+tin với câu trò chuyện không thuộc năm intent. Vì vậy action-safety gate là policy riêng. Tập
+`data/action_safety_challenge.jsonl` và report tương ứng là development regression do dự án tự xây
+trong quá trình sửa rule; chúng không phải independent red-team/OOD benchmark và không bảo đảm an
+toàn production.
+
+Tập safety hiện có 99 case: 82 negative case cho false-action rate 0 và 17 positive case cho action
+recall 1. Trên 347 câu oracle validation, action gate chấp nhận đúng 346 câu (0.9971181556). Đây là số
+liệu development do rule và tập thử được xây cùng quá trình, không phải chứng nhận an toàn độc lập.
+
+```powershell
+python scripts/evaluate_action_safety.py
+```
+
 CLI và FastAPI đều gọi cùng `build_pipeline`, vì vậy model, normalizer, slot config, threshold và
 action router không bị lệch giữa hai entrypoint. API nạp model đúng một lần trong lifespan, cung cấp
 `GET /health` và `POST /parse`; request sai hoặc text rỗng được Pydantic/FastAPI trả HTTP 422.
 Integration test chạy model artifact thật, API bằng ASGI test client và CLI bằng subprocess thật.
+
+Các quyết định, phương án thay thế, giới hạn on-device và phần chưa làm được trình bày đầy đủ trong
+`DECISIONS.md`. Đến hết Ngày 6, audit dữ liệu/model/report đã hoàn tất và test chưa được dùng cho metric
+hoặc tuning. Ngày 7 chỉ chạy đánh giá cuối sau khi giữ nguyên code, data, threshold, cách tính metric
+và test hash đã công bố.

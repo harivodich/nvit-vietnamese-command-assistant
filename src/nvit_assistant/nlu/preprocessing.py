@@ -1,4 +1,4 @@
-"""Tạo artifact preprocess dùng chung cho train intent và runtime sau này."""
+"""Tạo artifact train/evaluation bằng cùng normalizer mà runtime áp dụng online."""
 
 from __future__ import annotations
 
@@ -93,8 +93,26 @@ def preprocess_dataset(
     input_dir: Path, output_dir: Path, normalizer: VietnameseNormalizer
 ) -> dict[str, Any]:
     """Tạo artifact preprocess deterministic; train/validation dedupe, test giữ nguyên."""
+    return preprocess_splits(
+        input_dir,
+        output_dir,
+        normalizer,
+        tuple(path.name for path in sorted(input_dir.glob("*.jsonl"))),
+    )
+
+
+def preprocess_splits(
+    input_dir: Path,
+    output_dir: Path,
+    normalizer: VietnameseNormalizer,
+    filenames: tuple[str, ...],
+) -> dict[str, Any]:
+    """Preprocess đúng các split được chỉ định để bước train không cần đọc test."""
     file_reports: dict[str, dict[str, int]] = {}
-    for input_path in sorted(input_dir.glob("*.jsonl")):
+    for filename in filenames:
+        input_path = input_dir / filename
+        if not input_path.is_file():
+            raise FileNotFoundError(f"không tìm thấy split cần preprocess: {input_path}")
         deduplicate = input_path.name in {"train.jsonl", "validation.jsonl"}
         file_reports[input_path.name] = preprocess_file(
             input_path,

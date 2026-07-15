@@ -30,5 +30,6 @@
 {"id":"stt_08","region":"standard","category":"stt_phrase","input":"bay gio ở sai gon","expected":"bây giờ ở sài gòn"}
 {"id":"mixed_01","region":"south","category":"stt_and_regional","input":"bữa nay thoi tiet ở sai gon có mưa hông nghen?","expected":"hôm nay thời tiết ở sài gòn có mưa không nhỉ?"}
 {"id":"mixed_02","region":"central","category":"stt_and_regional","input":"bữa ni thoi tiet ở da nang răng rồi hỉ","expected":"hôm nay thời tiết ở đà nẵng sao rồi nhỉ"}
+{"id":"standard_dental_01","region":"standard","category":"ambiguous_lexicon","input":"nhắc tôi lịch hẹn khám răng tuần tới","expected":"nhắc tôi lịch hẹn khám răng tuần tới"}
 {"id":"mixed_03","region":"north","category":"stt_and_regional","input":"tớ muốn mo nhac hộ tôi nhá","expected":"tôi muốn mở nhạc giúp tôi nhé"}
 {"id":"mixed_04","region":"south","category":"stt_and_regional","input":"goi cho má dùm tui nghen","expected":"gọi cho mẹ giúp tôi nhé"}

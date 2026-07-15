@@ -2,14 +2,19 @@
 
 from __future__ import annotations
 
+import hashlib
+import json
 import re
 import unicodedata
 from collections import Counter, defaultdict
 from difflib import SequenceMatcher
 from pathlib import Path
-from typing import Any, Iterable
+from typing import TYPE_CHECKING, Any, Iterable
 
 from nvit_assistant.schemas import DataSource, DatasetSample, Intent, Region
+
+if TYPE_CHECKING:
+    from nvit_assistant.nlu.normalizer import VietnameseNormalizer
 
 
 EXPECTED_FILES = {
@@ -27,6 +32,15 @@ TEST_REGION_BY_FILE = {
     "test_south.jsonl": Region.SOUTH,
 }
 NEAR_SIMILARITY_THRESHOLD = 0.88
+
+
+def _sha256_file(path: Path) -> str:
+    """Hash file theo bytes; `.gitattributes` khóa LF để checksum ổn định đa nền tảng."""
+    digest = hashlib.sha256()
+    with path.open("rb") as file:
+        for chunk in iter(lambda: file.read(1024 * 1024), b""):
+            digest.update(chunk)
+    return digest.hexdigest()
 
 
 def canonical_text(text: str) -> str:
@@ -73,11 +87,11 @@ def iter_slot_values(value: Any) -> Iterable[str]:
             yield from iter_slot_values(item)
 
 
-def masked_sample_text(sample: DatasetSample) -> str:
-    """Che surface slot để so sánh cấu trúc câu thay vì tên/giờ/địa điểm cụ thể."""
-    text = strip_diacritics(canonical_text(sample.text))
+def _masked_text(text: str, slots: dict[str, str | list[str]]) -> str:
+    """Che các surface slot trên một biểu diễn text đã chọn."""
+    text = strip_diacritics(canonical_text(text))
     replacements: list[tuple[str, str]] = []
-    for slot_name, slot_value in sample.slots.items():
+    for slot_name, slot_value in slots.items():
         for surface_value in iter_slot_values(slot_value):
             normalized_value = strip_diacritics(canonical_text(surface_value))
             if normalized_value:
@@ -86,6 +100,28 @@ def masked_sample_text(sample: DatasetSample) -> str:
         text = text.replace(surface_value, placeholder)
     text = re.sub(r"\b\d[\d\s]*\d\b", "<number>", text)
     return re.sub(r"\s+", " ", text).strip()
+
+
+def masked_sample_text(sample: DatasetSample) -> str:
+    """Che surface slot trên câu gốc để bắt duplicate cấu trúc dễ thấy."""
+    return _masked_text(sample.text, sample.slots)
+
+
+def normalized_masked_sample_text(
+    sample: DatasetSample, normalizer: VietnameseNormalizer
+) -> str:
+    """Tạo template trên đúng text sau normalize mà intent model sẽ nhìn thấy."""
+    normalized_text = normalizer.normalize(sample.text, sample.region).normalized_text
+    normalized_slots: dict[str, str | list[str]] = {}
+    for slot_name, raw_value in sample.slots.items():
+        values = raw_value if isinstance(raw_value, list) else [raw_value]
+        normalized_values = [
+            normalizer.normalize(value, sample.region).normalized_text for value in values
+        ]
+        normalized_slots[slot_name] = (
+            normalized_values if isinstance(raw_value, list) else normalized_values[0]
+        )
+    return _masked_text(normalized_text, normalized_slots)
 
 
 def are_near_similar(left: str, right: str, threshold: float = NEAR_SIMILARITY_THRESHOLD) -> bool:
@@ -108,11 +144,16 @@ def are_near_similar(left: str, right: str, threshold: float = NEAR_SIMILARITY_T
 def find_cross_split_near_duplicates(
     records: list[tuple[str, DatasetSample]],
     limit: int = 50,
+    normalizer: VietnameseNormalizer | None = None,
 ) -> list[tuple[str, str, str, str, float]]:
-    """Tìm các cặp template gần giống nằm ở hai split khác nhau."""
+    """Tìm template gần giống giữa split, tùy chọn trên text sau normalize."""
     templates_by_split: dict[str, dict[str, str]] = defaultdict(dict)
     for split, sample in records:
-        template = masked_sample_text(sample)
+        template = (
+            normalized_masked_sample_text(sample, normalizer)
+            if normalizer is not None
+            else masked_sample_text(sample)
+        )
         templates_by_split[split].setdefault(template, sample.id)
 
     results: list[tuple[str, str, str, str, float]] = []
@@ -152,7 +193,11 @@ def _distribution_ratio_errors(split_counts: Counter[str], total: int) -> list[s
     return errors
 
 
-def validate_dataset_dir(data_dir: Path, enforce_minimums: bool = True) -> dict[str, Any]:
+def validate_dataset_dir(
+    data_dir: Path,
+    enforce_minimums: bool = True,
+    normalizer: VietnameseNormalizer | None = None,
+) -> dict[str, Any]:
     """Chạy toàn bộ kiểm tra và trả report có errors/warnings thay vì dừng ở lỗi đầu."""
     files = sorted(path for path in data_dir.glob("*.jsonl") if path.is_file())
     errors: list[str] = []
@@ -173,11 +218,58 @@ def validate_dataset_dir(data_dir: Path, enforce_minimums: bool = True) -> dict[
         for sample in samples:
             records.append((path.name, logical_split, sample))
 
+    manifest_verified = False
+    manifest_path = data_dir / "manifest.json"
+    if not manifest_path.is_file():
+        if enforce_minimums:
+            errors.append("thiếu data/samples/manifest.json")
+    else:
+        try:
+            manifest: Any = json.loads(manifest_path.read_text(encoding="utf-8"))
+        except (json.JSONDecodeError, OSError) as exc:
+            errors.append(f"manifest.json không đọc được: {exc}")
+        else:
+            if not isinstance(manifest, dict):
+                errors.append("manifest.json phải là mapping")
+            else:
+                recorded_hashes = manifest.get("files_sha256")
+                if not isinstance(recorded_hashes, dict):
+                    errors.append("manifest.files_sha256 phải là mapping")
+                else:
+                    for filename in sorted(EXPECTED_FILES):
+                        path = data_dir / filename
+                        if path.is_file() and recorded_hashes.get(filename) != _sha256_file(path):
+                            errors.append(f"manifest checksum lệch: {filename}")
+                recorded_counts = manifest.get("files")
+                if not isinstance(recorded_counts, dict):
+                    errors.append("manifest.files phải là mapping")
+                else:
+                    actual_counts = Counter(filename for filename, _, _ in records)
+                    for filename in sorted(EXPECTED_FILES):
+                        if recorded_counts.get(filename) != actual_counts[filename]:
+                            errors.append(f"manifest sample count lệch: {filename}")
+                if manifest.get("total") != len(records):
+                    errors.append("manifest total không khớp số sample")
+                test_digest = hashlib.sha256()
+                for filename in sorted(
+                    name for name in EXPECTED_FILES if name.startswith("test_")
+                ):
+                    path = data_dir / filename
+                    if path.is_file():
+                        test_digest.update(filename.encode("utf-8"))
+                        test_digest.update(path.read_bytes())
+                if manifest.get("test_set_sha256") != test_digest.hexdigest():
+                    errors.append("manifest test_set_sha256 không khớp")
+                manifest_verified = not any(
+                    error.startswith("manifest") for error in errors
+                )
+
     ids: dict[str, str] = {}
     groups_by_split: dict[str, set[str]] = defaultdict(set)
     exact_fingerprints: dict[str, tuple[str, str]] = {}
     accentless_fingerprints: dict[str, tuple[str, str]] = {}
     source_refs: dict[str, str] = {}
+    normalized_texts_by_split: dict[tuple[str, str], str] = {}
 
     for filename, logical_split, sample in records:
         if sample.id in ids:
@@ -200,6 +292,17 @@ def validate_dataset_dir(data_dir: Path, enforce_minimums: bool = True) -> dict[
                 f"câu tương đương không dấu khác group: {sample.id} và {previous_accentless[1]}"
             )
         accentless_fingerprints[accentless] = (sample.group_id, sample.id)
+
+        if normalizer is not None:
+            normalized_text = normalizer.normalize(sample.text, sample.region).normalized_text
+            normalized_key = (logical_split, normalized_text)
+            previous_normalized = normalized_texts_by_split.get(normalized_key)
+            if previous_normalized is not None:
+                errors.append(
+                    "câu trùng trong cùng split sau normalize: "
+                    f"{sample.id} và {previous_normalized} ({logical_split})"
+                )
+            normalized_texts_by_split[normalized_key] = sample.id
 
         if sample.source_ref and sample.source in {
             DataSource.MASSIVE,
@@ -231,7 +334,8 @@ def validate_dataset_dir(data_dir: Path, enforce_minimums: bool = True) -> dict[
             errors.append(f"leakage group {group_id} xuất hiện ở nhiều split: {sorted(splits)}")
 
     near_duplicates = find_cross_split_near_duplicates(
-        [(logical_split, sample) for _, logical_split, sample in records]
+        [(logical_split, sample) for _, logical_split, sample in records],
+        normalizer=normalizer,
     )
     for left_split, left_id, right_split, right_id, score in near_duplicates:
         errors.append(
@@ -248,6 +352,11 @@ def validate_dataset_dir(data_dir: Path, enforce_minimums: bool = True) -> dict[
     variant_counts = Counter(sample.variant_type.value for sample in samples)
     split_intent_counts = Counter((split, sample.intent.value) for _, split, sample in records)
     split_region_counts = Counter((split, sample.region.value) for _, split, sample in records)
+    split_slot_counts = Counter(
+        (split, slot_name)
+        for _, split, sample in records
+        for slot_name in sample.slots
+    )
 
     if enforce_minimums:
         if len(samples) < 1200:
@@ -274,17 +383,25 @@ def validate_dataset_dir(data_dir: Path, enforce_minimums: bool = True) -> dict[
                         f"{test_breakdown[(region.value, intent.value)]}"
                     )
 
-    regional_reviewed = sum(
-        sample.annotation_quality.value == "reviewed"
-        and sample.region in {Region.NORTH, Region.CENTRAL, Region.SOUTH}
+        for split in ("validation", "test"):
+            for slot_name in sorted(DatasetSample.allowed_slots):
+                if split_slot_counts[(split, slot_name)] < 8:
+                    errors.append(
+                        f"{split} slot {slot_name} cần >=8 sample, hiện có "
+                        f"{split_slot_counts[(split, slot_name)]}"
+                    )
+
+    native_speaker_reviewed = sum(
+        bool(sample.source_ref and sample.source_ref.startswith("native_review:"))
         for sample in samples
     )
-    if regional_reviewed == 0:
+    if native_speaker_reviewed == 0:
         warnings.append(
-            "chưa có transcript vùng miền do người nói thật/reviewer gán nhãn; regional set hiện là template"
+            "chưa có transcript/audio kèm provenance native_review; regional set hiện là template"
         )
 
     return {
+        "manifest_verified": manifest_verified,
         "total": len(samples),
         "files": dict(sorted(Counter(filename for filename, _, _ in records).items())),
         "splits": dict(sorted(split_counts.items())),
@@ -307,6 +424,14 @@ def validate_dataset_dir(data_dir: Path, enforce_minimums: bool = True) -> dict[
             }
             for split in ("train", "validation", "test")
         },
+        "by_split_slot": {
+            split: {
+                slot_name: split_slot_counts[(split, slot_name)]
+                for slot_name in sorted(DatasetSample.allowed_slots)
+            }
+            for split in ("train", "validation", "test")
+        },
+        "native_speaker_reviewed": native_speaker_reviewed,
         "errors": errors,
         "warnings": warnings,
     }

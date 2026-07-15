@@ -43,8 +43,88 @@ def test_pipeline_returns_clarification_when_required_slot_is_missing(
     result = pipeline.parse(ParseRequest(text="đặt báo thức giúp tôi"))
     assert result.intent is Intent.SET_ALARM
     assert result.slots == {}
-    assert result.response == "Cần bổ sung slot bắt buộc: datetime."
+    assert result.response == "Bạn muốn đặt báo thức lúc nào?"
     assert "missing_required_slots:datetime" in result.matched_features
+
+
+def test_pipeline_asks_for_reminder_content_instead_of_using_pronoun_as_slot(
+    pipeline: NLUPipeline,
+) -> None:
+    result = pipeline.parse(ParseRequest(text="nhắc tôi"))
+
+    assert result.intent is Intent.SET_REMINDER
+    assert result.slots == {}
+    assert result.action is None
+    assert result.response == "Bạn muốn mình nhắc việc gì?"
+    assert "missing_required_slots:reminder_text" in result.matched_features
+
+
+def test_pipeline_routes_wake_up_phrase_to_alarm_and_asks_for_time(
+    pipeline: NLUPipeline,
+) -> None:
+    result = pipeline.parse(ParseRequest(text="gọi tôi dậy"))
+
+    assert result.intent is Intent.SET_ALARM
+    assert result.slots == {}
+    assert result.response == "Bạn muốn đặt báo thức lúc nào?"
+    assert any(feature.endswith("->set_alarm") for feature in result.matched_features)
+
+
+def test_pipeline_accepts_keu_as_alarm_boundary(pipeline: NLUPipeline) -> None:
+    result = pipeline.parse(ParseRequest(text="kêu tôi dậy lúc 6 giờ"))
+
+    assert result.intent is Intent.SET_ALARM
+    assert result.slots == {"datetime": "6 giờ"}
+
+
+@pytest.mark.parametrize("text", ["gọi dậy", "gọi em dậy", "kêu con dậy"])
+def test_pipeline_wake_up_without_time_asks_for_datetime(
+    pipeline: NLUPipeline, text: str
+) -> None:
+    result = pipeline.parse(ParseRequest(text=text))
+
+    assert result.intent is Intent.SET_ALARM
+    assert result.action is None
+    assert result.response == "Bạn muốn đặt báo thức lúc nào?"
+
+
+def test_pipeline_does_not_call_contact_in_wake_up_phrase(
+    pipeline: NLUPipeline,
+) -> None:
+    result = pipeline.parse(ParseRequest(text="gọi mẹ dậy"))
+
+    assert result.intent is Intent.SET_ALARM
+    assert result.action is None
+    assert result.response == "Bạn muốn đặt báo thức lúc nào?"
+
+
+def test_pipeline_routes_immediate_call_back_to_call_contact(
+    pipeline: NLUPipeline,
+) -> None:
+    result = pipeline.parse(ParseRequest(text="gọi lại cho khách hàng"))
+
+    assert result.intent is Intent.CALL_CONTACT
+    assert result.slots == {"contact_name": "khách hàng"}
+
+
+def test_pipeline_routes_spoken_phone_to_call_even_when_model_confuses_intent(
+    pipeline: NLUPipeline,
+) -> None:
+    result = pipeline.parse(
+        ParseRequest(text="gọi số không chín không một hai ba bốn năm sáu bảy")
+    )
+
+    assert result.intent is Intent.CALL_CONTACT
+    assert result.slots == {"phone_number": "0901234567"}
+
+
+def test_pipeline_keeps_dont_forget_call_as_reminder(
+    pipeline: NLUPipeline,
+) -> None:
+    result = pipeline.parse(ParseRequest(text="đừng quên gọi mẹ lúc 6 giờ"))
+
+    assert result.intent is Intent.SET_REMINDER
+    assert result.slots == {"datetime": "6 giờ", "reminder_text": "gọi mẹ"}
 
 
 def test_pipeline_executes_mock_action_only_when_slots_are_complete(

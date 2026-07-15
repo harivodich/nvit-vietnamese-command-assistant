@@ -2,38 +2,38 @@
   "files": {
     "test_central.jsonl": {
       "dropped": 0,
-      "input": 72,
-      "output": 72
+      "input": 70,
+      "output": 70
     },
     "test_north.jsonl": {
       "dropped": 0,
-      "input": 72,
-      "output": 72
+      "input": 70,
+      "output": 70
     },
     "test_south.jsonl": {
       "dropped": 0,
-      "input": 72,
-      "output": 72
+      "input": 70,
+      "output": 70
     },
     "test_standard.jsonl": {
       "dropped": 0,
-      "input": 175,
-      "output": 175
+      "input": 174,
+      "output": 174
     },
     "train.jsonl": {
-      "dropped": 31,
-      "input": 1623,
-      "output": 1592
+      "dropped": 0,
+      "input": 1363,
+      "output": 1363
     },
     "validation.jsonl": {
       "dropped": 0,
-      "input": 352,
-      "output": 352
+      "input": 347,
+      "output": 347
     }
   },
   "totals": {
-    "dropped": 31,
-    "input": 2366,
-    "output": 2335
+    "dropped": 0,
+    "input": 2094,
+    "output": 2094
   }
 }

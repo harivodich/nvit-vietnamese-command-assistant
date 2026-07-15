@@ -66,6 +66,23 @@ def evaluate_slot_extractor(
     per_slot: defaultdict[str, Counter[str]] = defaultdict(Counter)
     exact_matches = 0
     failures: list[dict[str, Any]] = []
+    breakdown_counts: defaultdict[tuple[str, str], Counter[str]] = defaultdict(Counter)
+
+    def update_breakdown(
+        dimension: str,
+        value: str,
+        true_positive_count: int,
+        false_positive_count: int,
+        false_negative_count: int,
+        exact: bool,
+    ) -> None:
+        """Cộng metric cho một lát cắt mà không nhân bản logic tính slot."""
+        counts = breakdown_counts[(dimension, value)]
+        counts["samples"] += 1
+        counts["exact"] += int(exact)
+        counts["tp"] += true_positive_count
+        counts["fp"] += false_positive_count
+        counts["fn"] += false_negative_count
 
     for sample in samples:
         expected = _slot_pairs(sample.normalized_slots)
@@ -85,7 +102,8 @@ def evaluate_slot_extractor(
             totals["fn"] += 1
             per_slot[slot_name]["fn"] += 1
 
-        if expected == predicted:
+        exact = expected == predicted
+        if exact:
             exact_matches += 1
         else:
             failures.append(
@@ -98,6 +116,30 @@ def evaluate_slot_extractor(
                 }
             )
 
+        dimensions = {
+            "source": sample.original.source.value,
+            "annotation_quality": sample.original.annotation_quality.value,
+            "intent": sample.original.intent.value,
+            "region": sample.original.region.value,
+        }
+        for dimension, value in dimensions.items():
+            update_breakdown(
+                dimension,
+                value,
+                len(true_positive),
+                len(false_positive),
+                len(false_negative),
+                exact,
+            )
+
+    breakdown: dict[str, dict[str, Any]] = defaultdict(dict)
+    for (dimension, value), counts in sorted(breakdown_counts.items()):
+        breakdown[dimension][value] = {
+            "total_samples": counts["samples"],
+            "slot_exact_match": _safe_ratio(counts["exact"], counts["samples"]),
+            "micro": _metrics(counts),
+        }
+
     return {
         "total_samples": len(samples),
         "slot_exact_match": _safe_ratio(exact_matches, len(samples)),
@@ -105,6 +147,7 @@ def evaluate_slot_extractor(
         "per_slot": {
             slot_name: _metrics(counts) for slot_name, counts in sorted(per_slot.items())
         },
+        "breakdown": dict(breakdown),
         "failure_count": len(failures),
         "failures": failures,
     }

@@ -77,6 +77,14 @@ def test_rejects_blank_text(normalizer: VietnameseNormalizer) -> None:
         normalizer.normalize("   ")
 
 
+def test_keeps_rang_in_dental_context(normalizer: VietnameseNormalizer) -> None:
+    result = normalizer.normalize("nhắc tôi lịch hẹn khám răng tuần tới")
+
+    assert result.normalized_text == "nhắc tôi lịch hẹn khám răng tuần tới"
+    assert result.region is Region.STANDARD
+    assert "răng -> sao" not in result.matched_variants
+
+
 def test_preserves_phone_number_and_time_surface(normalizer: VietnameseNormalizer) -> None:
     result = normalizer.normalize("gọi số 090 000 0000 lúc 6 giờ", Region.SOUTH)
 

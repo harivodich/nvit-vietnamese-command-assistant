@@ -17,7 +17,14 @@ QUESTION_CUE_PATTERN = re.compile(
     r"\?|\b(không|hông|hổng|hem|sao|răng|mấy|bao nhiêu|gì|đâu|chưa)\b"
 )
 REQUEST_CUE_PATTERN = re.compile(
-    r"\b(gọi|liên lạc|mở|bật|phát|nghe|nhắc|đặt|cài|hẹn|xem|coi|giúp|dùm|giùm|hãy|đừng)\b"
+    r"\b(gọi|kêu|liên lạc|mở|bật|phát|nghe|nhắc|đặt|cài|hẹn|xem|coi|giúp|dùm|giùm|hãy|đừng)\b"
+)
+AMBIGUOUS_RANG_MARKER = "\ue000"
+DENTAL_RANG_AFTER_VERB_PATTERN = re.compile(
+    r"(?<!\w)(?P<prefix>(?:khám|đánh|đau|nhổ|chữa|trám|niềng)\s+)răng(?!\w)"
+)
+DENTAL_RANG_BEFORE_NOUN_PATTERN = re.compile(
+    r"(?<!\w)răng(?P<suffix>\s+(?:miệng|hàm|khôn|cửa|sữa)(?!\w))"
 )
 
 
@@ -100,6 +107,16 @@ def replace_phrases(text: str, replacements: dict[str, str]) -> tuple[str, tuple
     return result, tuple(matched)
 
 
+def protect_ambiguous_rang(text: str) -> str:
+    """Che `răng` mang nghĩa nha khoa để không đổi nhầm thành đại từ hỏi miền Trung."""
+    protected = DENTAL_RANG_AFTER_VERB_PATTERN.sub(
+        rf"\g<prefix>{AMBIGUOUS_RANG_MARKER}", text
+    )
+    return DENTAL_RANG_BEFORE_NOUN_PATTERN.sub(
+        rf"{AMBIGUOUS_RANG_MARKER}\g<suffix>", protected
+    )
+
+
 def contextual_particle_target(text: str, source: str, targets: dict[str, str]) -> str | None:
     """Chọn dạng chuẩn cho tiểu từ ở cuối câu; không đủ ngữ cảnh thì giữ nguyên."""
     at_sentence_end = re.search(rf"(?<!\w){re.escape(source)}[?!.,]*\s*$", text)
@@ -131,6 +148,7 @@ class VietnameseNormalizer:
             raise ValueError("text không được chỉ gồm khoảng trắng")
 
         normalized_text, stt_matches = replace_phrases(normalized_text, self.stt_replacements)
+        normalized_text = protect_ambiguous_rang(normalized_text)
         active_regions = (
             (region_hint,)
             if region_hint in {Region.NORTH, Region.CENTRAL, Region.SOUTH}
@@ -167,6 +185,7 @@ class VietnameseNormalizer:
         normalized_text, contextual_matches = replace_phrases(
             normalized_text, contextual_replacements
         )
+        normalized_text = normalized_text.replace(AMBIGUOUS_RANG_MARKER, "răng")
 
         detected_region: Region
         if region_hint in {Region.NORTH, Region.CENTRAL, Region.SOUTH}:

@@ -1,8 +1,9 @@
 # Protocol review native speaker và thu audio
 
-Normalizing rule-based chỉ là baseline. Không được gắn nhãn `reviewed` cho câu/vocabulary nếu
-chưa có người nói bản địa xác nhận. File này là quy trình bắt buộc trước khi khẳng định hệ thống
-hỗ trợ phương ngữ thực tế.
+Normalizing rule-based chỉ là baseline. Trong schema dataset, `annotation_quality=reviewed` chỉ có
+nghĩa intent/slot đã được rà soát nội bộ; nó **không** phải bằng chứng native-speaker review. File này
+là quy trình riêng bắt buộc trước khi khẳng định mapping/câu đã được người bản địa xác nhận hoặc hệ
+thống hỗ trợ phương ngữ thực tế.
 
 ## Review text
 
@@ -11,7 +12,8 @@ hỗ trợ phương ngữ thực tế.
    không được đưa vào `variants` một-từ-một.
 3. Câu benchmark phải có đủ năm intent và ít nhất câu hỏi, câu yêu cầu, câu không dấu, lỗi STT.
 4. Không ghi tên, số điện thoại hoặc địa chỉ thật vào Git. Dùng `reviewer_code` và `consent_ref`.
-5. Chỉ khi hai reviewer đồng ý mới đổi trạng thái mapping/câu thành `reviewed`.
+5. Chỉ khi hai reviewer đồng ý mới ghi mapping/câu là `native_review_accepted` trong review log;
+   không suy diễn trạng thái này chỉ từ `annotation_quality` của JSONL.
 
 ## Thu audio cho phase ASR
 

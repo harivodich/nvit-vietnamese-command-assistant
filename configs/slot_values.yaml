@@ -57,10 +57,64 @@ locations:
   - biên hòa
   - cần thơ
   - long xuyên
+  - hà giang
+  - cao bằng
+  - bắc kạn
+  - lạng sơn
+  - tuyên quang
+  - lào cai
+  - điện biên
+  - lai châu
+  - sơn la
+  - yên bái
+  - hòa bình
+  - thái bình
+  - hải dương
+  - bắc ninh
+  - vĩnh phúc
+  - hưng yên
+  - nam định
+  - hà nam
+  - ninh bình
+  - bắc giang
+  - phú thọ
+  - quảng ninh
+  - thanh hóa
+  - nghệ an
+  - hà tĩnh
+  - quảng bình
+  - quảng trị
+  - thừa thiên huế
+  - quảng nam
+  - quảng ngãi
+  - bình định
+  - phú yên
+  - khánh hòa
+  - ninh thuận
+  - bình thuận
+  - kon tum
+  - gia lai
+  - đắk lắk
+  - đắk nông
+  - lâm đồng
+  - bình phước
+  - tây ninh
   - bình dương
-  - bãi biển
-  - khu dân cư
-  - phố cổ
+  - đồng nai
+  - bà rịa - vũng tàu
+  - tp hcm
+  - long an
+  - tiền giang
+  - bến tre
+  - trà vinh
+  - vĩnh long
+  - đồng tháp
+  - an giang
+  - kiên giang
+  - hậu giang
+  - sóc trăng
+  - bạc liêu
+  - cà mau
 
 music_catalog:
   - song: nắng ấm xa dần
@@ -83,60 +137,6 @@ music_catalog:
     artist: sơn tùng
   - song: phía sau một cô gái
     artist: soobin hoàng sơn
-  - song: người hãy quên em đi
-    artist: mỹ tâm
-  - song: hơn cả yêu
-    artist: đức phúc
-  - song: tìm lại
-    artist: bức tường
-  - song: mùa thu ngày khai trường
-    artist: hương ly
-
-# Entity độc lập dùng cho câu chỉ nêu nghệ sĩ hoặc bài hát, không nêu đủ một cặp.
-artists:
-  - anh thúy
-  - bích phương
-  - bức tường
-  - cá hồi hoang
-  - cẩm ly
-  - chopin
-  - đức phúc
-  - đông nhi
-  - hà anh tuấn
-  - hồ ngọc hà
-  - hoàng thùy linh
-  - hương ly
-  - khánh ly
-  - mây trắng
-  - min
-  - mỹ tâm
-  - sơn tùng
-  - soobin hoàng sơn
-  - tóc tiên
-  - trịnh công sơn
-  - tùng dương
-  - ưng hoàng phúc
-  - văn mai hương
-
-songs:
-  - bông hồng thủy tinh
-  - bùa yêu
-  - có chắc yêu là đây
-  - để mị nói cho mà nghe
-  - đi để trở về
-  - em của ngày hôm qua
-  - gửi người yêu cũ
-  - hát với dòng sông
-  - lạc trôi
-  - một cõi đi về
-  - mùa thu ngày khai trường
-  - nắng ấm xa dần
-  - người hãy quên em đi
-  - nối vòng tay lớn
-  - phía sau một cô gái
-  - tháng tư là lời nói dối của em
-  - tìm lại
-  - tình yêu màu nắng
 
 reminder_texts:
   - gọi mẹ
@@ -151,19 +151,6 @@ reminder_texts:
   - tưới cây
   - thanh toán hóa đơn
   - gọi lại cho khách hàng
-  - bài kiểm tra sinh học
-  - buổi dã ngoại
-  - cuộc hẹn
-  - cuộc họp
-  - đi làm
-  - kỳ nghỉ
-  - mang theo áo mưa
-  - mang theo ô
-  - nghỉ hưu
-  - sinh nhật
-  - trả tiền internet
-  - việc nộp đơn xin thị thực
-  - xem phim ngoài trời
 
 datetimes:
   - mai lúc 7 giờ sáng

@@ -1,14 +1,8 @@
-log_level: INFO
-confidence_threshold: 0.45
-random_seed: 42
+confidence_threshold: 0.35
 model:
   intent_classifier_path: models/intent_classifier.joblib
   label_map_path: models/intent_label_map.json
 nlu:
   regional_variants_path: configs/regional_variants.yaml
   slot_values_path: configs/slot_values.yaml
-data:
-  min_total_samples: 1200
-  train_ratio: 0.7
-  validation_ratio: 0.15
-  test_ratio: 0.15
+  slot_lexicon_path: models/slot_lexicon.json

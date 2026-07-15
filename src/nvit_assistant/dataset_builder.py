@@ -9,12 +9,18 @@ import re
 import unicodedata
 from collections import Counter, defaultdict
 from dataclasses import dataclass
+from itertools import combinations
 from pathlib import Path
 from typing import Any
 
 import yaml
 
-from nvit_assistant.data_validation import are_near_similar, masked_sample_text
+from nvit_assistant.data_validation import (
+    are_near_similar,
+    masked_sample_text,
+    normalized_masked_sample_text,
+)
+from nvit_assistant.nlu.normalizer import VietnameseNormalizer
 from nvit_assistant.schemas import (
     AnnotationQuality,
     DataSource,
@@ -49,6 +55,10 @@ REGIONAL_GROUP_TARGETS = {
 DATETIME_LABELS = {"date", "time", "timeofday", "general_frequency"}
 ANNOTATED_SLOT_PATTERN = re.compile(r"\[([a-z_]+)\s*:\s*([^\]]+)\]")
 REMINDER_MARKERS = re.compile(r"\b(nhắc|nhở|lời nhắc)\b", flags=re.IGNORECASE)
+TEMPORAL_JOINER_PATTERN = re.compile(
+    r"^\s*(?:(?:lúc|vào|khoảng|tầm|đến|tới)\s*)?$", flags=re.IGNORECASE
+)
+TEMPLATE_SLOT_PATTERN = re.compile(r"\{([a-z_]+)\}")
 
 
 @dataclass(frozen=True)
@@ -106,14 +116,29 @@ def parse_annotated_utterance(annotated_text: str) -> tuple[str, list[AnnotatedS
     return plain_text, spans
 
 
-def combine_spans(text: str, spans: list[AnnotatedSpan], labels: set[str]) -> str | None:
-    """Ghép các span liên quan bằng cách lấy đoạn văn bản nhỏ nhất bao quanh chúng."""
-    selected = [span for span in spans if span.label in labels]
+def combine_temporal_spans(
+    text: str, spans: list[AnnotatedSpan], labels: set[str]
+) -> str | list[str] | None:
+    """Chỉ ghép span thời gian liền nhau; không nuốt event nằm giữa hai span."""
+    selected = sorted(
+        (span for span in spans if span.label in labels), key=lambda span: span.start
+    )
     if not selected:
         return None
-    start = min(span.start for span in selected)
-    end = max(span.end for span in selected)
-    return normalize_text(text[start:end])
+
+    components: list[str] = []
+    component_start = selected[0].start
+    component_end = selected[0].end
+    for span in selected[1:]:
+        separator = text[component_end : span.start]
+        if TEMPORAL_JOINER_PATTERN.fullmatch(separator):
+            component_end = span.end
+        else:
+            components.append(normalize_text(text[component_start:component_end]))
+            component_start = span.start
+            component_end = span.end
+    components.append(normalize_text(text[component_start:component_end]))
+    return components[0] if len(components) == 1 else components
 
 
 def first_span_value(spans: list[AnnotatedSpan], label: str) -> str | None:
@@ -133,9 +158,11 @@ def massive_row_has_good_judgments(row: dict[str, Any]) -> bool:
     language_votes = sum(item.get("language_identification") == "target" for item in judgments)
     grammar_scores = [float(item.get("grammar_score", 0)) for item in judgments]
     spelling_scores = [float(item.get("spelling_score", 0)) for item in judgments]
+    slot_votes = sum(item.get("slots_score") in {1, 2} for item in judgments)
     return (
         intent_votes >= 2
         and language_votes >= 2
+        and slot_votes >= 2
         and sum(grammar_scores) / len(grammar_scores) >= 3.5
         and sum(spelling_scores) / len(spelling_scores) >= 1.5
     )
@@ -154,8 +181,12 @@ def map_massive_row(row: dict[str, Any]) -> tuple[str, DatasetSample] | None:
     if len(text.split()) < 3:
         return None
 
-    slots: dict[str, str] = {}
-    datetime_value = combine_spans(marked_text, spans, DATETIME_LABELS)
+    slots: dict[str, str | list[str]] = {}
+    datetime_value = combine_temporal_spans(marked_text, spans, DATETIME_LABELS)
+    # Năm intent hiện dùng một datetime duy nhất. Nhiều cụm thời gian tách rời
+    # thường là quan hệ mơ hồ; loại thay vì tạo nhãn ghép mà extractor không thể học.
+    if isinstance(datetime_value, list):
+        return None
 
     if intent is Intent.SET_ALARM:
         if not datetime_value:
@@ -287,9 +318,11 @@ def sample_values(rng: random.Random, slot_values: dict[str, Any]) -> dict[str, 
     }
 
 
-def slots_for_template(intent: Intent, template: str, values: dict[str, str]) -> dict[str, str]:
+def slots_for_template(
+    intent: Intent, template: str, values: dict[str, str]
+) -> dict[str, str | list[str]]:
     """Tạo nhãn slot từ placeholder thực sự xuất hiện trong template."""
-    slots: dict[str, str] = {}
+    slots: dict[str, str | list[str]] = {}
     if "{datetime}" in template:
         slots["datetime"] = values["datetime"]
     if intent is Intent.SET_REMINDER:
@@ -327,22 +360,79 @@ def split_group_ids(group_ids: list[str], seed: int) -> dict[str, str]:
     return result
 
 
-def split_template_indexes(template_count: int, seed: int, scope: str) -> dict[int, str]:
-    """Gán nguyên template family vào một split và bảo đảm cả ba split đều có template."""
-    if template_count < 3:
-        raise ValueError(f"Cần ít nhất 3 template cho {scope}, hiện có {template_count}")
-    indexes = list(range(template_count))
-    indexes.sort(key=lambda index: stable_order_key(seed, f"{scope}:{index}"))
-    train_count = max(1, template_count - 2)
-    result: dict[int, str] = {}
-    for position, index in enumerate(indexes):
-        if position < train_count:
-            result[index] = "train"
-        elif position == train_count:
-            result[index] = "validation"
-        else:
-            result[index] = "test"
-    return result
+def template_slot_names(template: str) -> frozenset[str]:
+    """Quy placeholder template về tên slot thật được ghi vào dataset."""
+    placeholder_to_slot = {
+        "weather_time": "datetime",
+        "datetime": "datetime",
+        "reminder_text": "reminder_text",
+        "location": "location",
+        "song": "song",
+        "artist": "artist",
+        "contact_name": "contact_name",
+        "phone_number": "phone_number",
+    }
+    return frozenset(
+        placeholder_to_slot[name]
+        for name in TEMPLATE_SLOT_PATTERN.findall(template)
+        if name in placeholder_to_slot
+    )
+
+
+def _covering_subsets(
+    indexes: list[int], signatures: dict[int, frozenset[str]], required: frozenset[str]
+) -> list[tuple[int, ...]]:
+    """Liệt kê các tập family có đủ mọi slot, ưu tiên tập nhỏ để giữ nhiều family train."""
+    candidates: list[tuple[int, ...]] = []
+    for size in range(1, len(indexes) + 1):
+        for subset in combinations(indexes, size):
+            covered = frozenset().union(*(signatures[index] for index in subset))
+            if required.issubset(covered):
+                candidates.append(subset)
+    return candidates
+
+
+def split_template_indexes(templates: list[str], seed: int, scope: str) -> dict[int, str]:
+    """Chia family theo slot coverage để validation/test không bị thiếu loại slot."""
+    if len(templates) < 3:
+        raise ValueError(f"Cần ít nhất 3 template cho {scope}, hiện có {len(templates)}")
+    indexes = list(range(len(templates)))
+    signatures = {index: template_slot_names(template) for index, template in enumerate(templates)}
+    required = frozenset().union(*signatures.values())
+    covers = _covering_subsets(indexes, signatures, required)
+    covers.sort(
+        key=lambda subset: (
+            len(subset),
+            stable_order_key(seed, f"{scope}:{','.join(map(str, subset))}"),
+        )
+    )
+
+    choices: list[tuple[tuple[int, ...], tuple[int, ...]]] = []
+    all_indexes = set(indexes)
+    for validation_indexes in covers:
+        validation_set = set(validation_indexes)
+        for test_indexes in covers:
+            test_set = set(test_indexes)
+            if validation_set & test_set:
+                continue
+            train_indexes = all_indexes - validation_set - test_set
+            if train_indexes:
+                choices.append((validation_indexes, test_indexes))
+    if not choices:
+        raise ValueError(
+            f"Template {scope} chưa đủ family để phủ mọi slot độc lập ở train/validation/test"
+        )
+    choices.sort(
+        key=lambda pair: (
+            len(pair[0]) + len(pair[1]),
+            stable_order_key(seed, f"{scope}:validation:{pair[0]}:test:{pair[1]}"),
+        )
+    )
+    validation_indexes, test_indexes = choices[0]
+    assignment = {index: "train" for index in indexes}
+    assignment.update({index: "validation" for index in validation_indexes})
+    assignment.update({index: "test" for index in test_indexes})
+    return assignment
 
 
 def generate_regional_samples(
@@ -367,7 +457,7 @@ def generate_regional_samples(
         ):
             intent_templates = templates[region.value][intent.value]
             # Template cùng vị trí ở ba vùng là một family song song; chúng phải ở cùng split.
-            template_splits = split_template_indexes(len(intent_templates), seed, intent.value)
+            template_splits = split_template_indexes(intent_templates, seed, intent.value)
             group_target = REGIONAL_GROUP_TARGETS[intent]
             split_targets = {
                 "train": round(group_target * 0.70),
@@ -397,7 +487,9 @@ def generate_regional_samples(
                     if fingerprint in global_fingerprints:
                         continue
                     global_fingerprints.add(fingerprint)
-                    slots = slots_for_template(intent, template, values)
+                    slots: dict[str, str | list[str]] = slots_for_template(
+                        intent, template, values
+                    )
                     group_id = f"regional_{region.value}_{intent.value}_{group_index:03d}"
                     group_index += 1
                     generated += 1
@@ -457,9 +549,11 @@ def merge_partitions(*sources: dict[str, list[DatasetSample]]) -> dict[str, list
 
 
 def remove_cross_split_near_samples(
-    partitions: dict[str, list[DatasetSample]], seed: int
+    partitions: dict[str, list[DatasetSample]],
+    seed: int,
+    normalizer: VietnameseNormalizer,
 ) -> dict[str, list[DatasetSample]]:
-    """Loại nguyên group gần template ở split ưu tiên hơn: test, validation rồi train."""
+    """Loại group gần trùng trên đúng biểu diễn sau normalize mà model nhìn thấy."""
     result: dict[str, list[DatasetSample]] = defaultdict(list)
     protected_templates: list[str] = []
     for partition in ("test", "validation", "train"):
@@ -469,13 +563,67 @@ def remove_cross_split_near_samples(
         current_templates: list[str] = []
         for group_id in sorted(groups, key=lambda value: stable_order_key(seed, value)):
             group_samples = groups[group_id]
-            representative = masked_sample_text(group_samples[0])
+            representative = normalized_masked_sample_text(group_samples[0], normalizer)
             if any(are_near_similar(representative, template) for template in protected_templates):
                 continue
             result[partition].extend(group_samples)
             if representative not in current_templates:
                 current_templates.append(representative)
         protected_templates.extend(current_templates)
+    return result
+
+
+def remove_same_split_normalized_duplicates(
+    partitions: dict[str, list[DatasetSample]],
+    seed: int,
+    normalizer: VietnameseNormalizer,
+) -> dict[str, list[DatasetSample]]:
+    """Giữ một sample cho mỗi câu sau normalize trong cùng split để metric không bị lặp."""
+    quality_priority = {
+        AnnotationQuality.REVIEWED: 0,
+        AnnotationQuality.AUTO_MAPPED: 1,
+        AnnotationQuality.TEMPLATE_GENERATED: 2,
+    }
+    result: dict[str, list[DatasetSample]] = defaultdict(list)
+    for partition in ("train", "validation", "test"):
+        groups: dict[str, list[DatasetSample]] = defaultdict(list)
+        for sample in partitions.get(partition, []):
+            normalized_text = normalizer.normalize(sample.text, sample.region).normalized_text
+            groups[normalized_text].append(sample)
+
+        # Các câu chỉ xuất hiện một lần được cố định trước. Với nhóm trùng, ưu tiên
+        # annotation tốt rồi chọn ô region/intent đang ít mẫu để không làm méo test.
+        retained_counts = Counter(
+            (samples[0].region, samples[0].intent)
+            for samples in groups.values()
+            if len(samples) == 1
+        )
+        result[partition].extend(
+            samples[0] for samples in groups.values() if len(samples) == 1
+        )
+        for normalized_text in sorted(
+            (text for text, samples in groups.items() if len(samples) > 1),
+            key=lambda value: stable_order_key(seed, value),
+        ):
+            candidates = groups[normalized_text]
+            best_quality = min(
+                quality_priority[sample.annotation_quality] for sample in candidates
+            )
+            candidates = [
+                sample
+                for sample in candidates
+                if quality_priority[sample.annotation_quality] == best_quality
+            ]
+            selected = min(
+                candidates,
+                key=lambda sample: (
+                    retained_counts[(sample.region, sample.intent)],
+                    stable_order_key(seed, sample.id),
+                    sample.id,
+                ),
+            )
+            result[partition].append(selected)
+            retained_counts[(selected.region, selected.intent)] += 1
     return result
 
 
@@ -498,8 +646,9 @@ def sha256_file(path: Path) -> str:
 def write_dataset(
     partitions: dict[str, list[DatasetSample]],
     output_dir: Path,
-    massive_path: Path,
+    input_paths: dict[str, Path],
     seed: int,
+    filtering_report: dict[str, Any],
 ) -> dict[str, Any]:
     """Ghi JSONL và manifest thống kê theo cách deterministic."""
     output_dir.mkdir(parents=True, exist_ok=True)
@@ -524,10 +673,24 @@ def write_dataset(
                 payload = sample.model_dump(mode="json")
                 file.write(json.dumps(payload, ensure_ascii=False, sort_keys=True) + "\n")
 
+    output_hashes = {
+        filename: sha256_file(output_dir / filename) for filename in known_outputs
+    }
+    test_digest = hashlib.sha256()
+    for filename in sorted(name for name in known_outputs if name.startswith("test_")):
+        test_digest.update(filename.encode("utf-8"))
+        test_digest.update((output_dir / filename).read_bytes())
+
     all_samples = [sample for samples in buckets.values() for sample in samples]
     manifest = {
         "seed": seed,
-        "massive_input_sha256": sha256_file(massive_path),
+        "split_policy": "slot_coverage_normalized_near_similarity_v3",
+        "filtering": filtering_report,
+        "inputs_sha256": {
+            name: sha256_file(path) for name, path in sorted(input_paths.items())
+        },
+        "files_sha256": output_hashes,
+        "test_set_sha256": test_digest.hexdigest(),
         "total": len(all_samples),
         "files": {name: len(buckets.get(name, [])) for name in known_outputs},
         "intents": dict(sorted(Counter(sample.intent.value for sample in all_samples).items())),
@@ -540,6 +703,7 @@ def write_dataset(
     (output_dir / "manifest.json").write_text(
         json.dumps(manifest, ensure_ascii=False, indent=2, sort_keys=True) + "\n",
         encoding="utf-8",
+        newline="\n",
     )
     return manifest
 
@@ -550,13 +714,59 @@ def build_dataset(
     templates_path: Path,
     slot_values_path: Path,
     old_project_seed_path: Path,
+    hard_cases_path: Path,
+    regional_variants_path: Path,
     seed: int = 42,
 ) -> dict[str, Any]:
-    """Điều phối toàn bộ quá trình build dataset từ ba nguồn đã duyệt."""
+    """Điều phối build từ mọi nguồn; hard-case là input chính thức, không augment tay."""
     massive = load_massive_samples(massive_path, seed)
     regional = generate_regional_samples(templates_path, slot_values_path, seed)
     old_project = load_reviewed_seed(old_project_seed_path, seed)
-    merged = remove_cross_split_near_samples(
-        merge_partitions(massive, regional, old_project), seed
+    hard_cases = load_reviewed_seed(hard_cases_path, seed)
+    normalizer = VietnameseNormalizer(regional_variants_path)
+    unfiltered = merge_partitions(massive, regional, old_project, hard_cases)
+    cross_split_filtered = remove_cross_split_near_samples(unfiltered, seed, normalizer)
+    merged = remove_same_split_normalized_duplicates(cross_split_filtered, seed, normalizer)
+    before_samples = [sample for values in unfiltered.values() for sample in values]
+    cross_split_samples = [
+        sample for values in cross_split_filtered.values() for sample in values
+    ]
+    after_samples = [sample for values in merged.values() for sample in values]
+    before_by_source = Counter(sample.source.value for sample in before_samples)
+    after_by_source = Counter(sample.source.value for sample in after_samples)
+    filtering_report = {
+        "reason": "normalized_cross_split_near_and_same_split_exact_duplicates",
+        "before": len(before_samples),
+        "after": len(after_samples),
+        "dropped": len(before_samples) - len(after_samples),
+        "steps": {
+            "cross_split_near_similarity": {
+                "before": len(before_samples),
+                "after": len(cross_split_samples),
+                "dropped": len(before_samples) - len(cross_split_samples),
+            },
+            "same_split_exact_after_normalization": {
+                "before": len(cross_split_samples),
+                "after": len(after_samples),
+                "dropped": len(cross_split_samples) - len(after_samples),
+            },
+        },
+        "dropped_by_source": {
+            source: before_by_source[source] - after_by_source[source]
+            for source in sorted(before_by_source)
+        },
+    }
+    return write_dataset(
+        merged,
+        output_dir,
+        {
+            "massive_vi_v1": massive_path,
+            "regional_templates": templates_path,
+            "slot_values": slot_values_path,
+            "old_project_seed": old_project_seed_path,
+            "intent_hard_cases": hard_cases_path,
+            "regional_variants": regional_variants_path,
+        },
+        seed,
+        filtering_report,
     )
-    return write_dataset(merged, output_dir, massive_path, seed)

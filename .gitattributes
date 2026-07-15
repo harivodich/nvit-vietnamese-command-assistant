@@ -1,0 +1,13 @@
+* text=auto
+configs/app.yaml text eol=lf
+configs/data_templates.yaml text eol=lf
+configs/intent_training.yaml text eol=lf
+configs/regional_variants.yaml text eol=lf
+configs/semantic_intent_training.yaml text eol=lf
+configs/slot_values.yaml text eol=lf
+data/**/*.jsonl text eol=lf
+data/samples/manifest.json text eol=lf
+models/*.json text eol=lf
+reports/*.json text eol=lf
+*.joblib binary
+*.png binary

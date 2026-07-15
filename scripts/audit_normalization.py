@@ -13,7 +13,11 @@ SRC = ROOT / "src"
 if str(SRC) not in sys.path:
     sys.path.insert(0, str(SRC))
 
-from nvit_assistant.data_validation import read_samples, split_name  # noqa: E402
+from nvit_assistant.data_validation import (  # noqa: E402
+    find_cross_split_near_duplicates,
+    read_samples,
+    split_name,
+)
 from nvit_assistant.nlu.normalizer import VietnameseNormalizer  # noqa: E402
 
 
@@ -23,13 +27,16 @@ def audit_normalization(data_dir: Path, normalizer: VietnameseNormalizer) -> dic
     total = 0
     region_counts: Counter[str] = Counter()
     locations_by_text: dict[str, set[tuple[str, str]]] = defaultdict(set)
+    records = []
     for path in sorted(data_dir.glob("*.jsonl")):
         for sample in read_samples(path):
             total += 1
             result = normalizer.normalize(sample.text, sample.region)
             changed += result.normalized_text != sample.text.casefold()
             region_counts[result.region.value] += 1
-            locations_by_text[result.normalized_text].add((split_name(path.name), sample.group_id))
+            logical_split = split_name(path.name)
+            records.append((logical_split, sample))
+            locations_by_text[result.normalized_text].add((logical_split, sample.id))
 
     collisions = {
         text: sorted(f"{split}:{group_id}" for split, group_id in locations)
@@ -44,6 +51,7 @@ def audit_normalization(data_dir: Path, normalizer: VietnameseNormalizer) -> dic
     same_split_collisions = {
         text: locations for text, locations in collisions.items() if text not in cross_split_collisions
     }
+    near_duplicates = find_cross_split_near_duplicates(records, normalizer=normalizer)
     return {
         "total": total,
         "changed": changed,
@@ -52,6 +60,16 @@ def audit_normalization(data_dir: Path, normalizer: VietnameseNormalizer) -> dic
         "normalized_collisions": len(collisions),
         "same_split_collisions": same_split_collisions,
         "cross_split_collisions": cross_split_collisions,
+        "near_similar_cross_split": [
+            {
+                "left_split": left_split,
+                "left_id": left_id,
+                "right_split": right_split,
+                "right_id": right_id,
+                "score": score,
+            }
+            for left_split, left_id, right_split, right_id, score in near_duplicates
+        ],
     }
 
 
@@ -72,9 +90,14 @@ def main() -> None:
     args.output.write_text(
         json.dumps(report, ensure_ascii=False, indent=2, sort_keys=True) + "\n",
         encoding="utf-8",
+        newline="\n",
     )
     print(json.dumps(report, ensure_ascii=False, indent=2, sort_keys=True))
-    if report["cross_split_collisions"]:
+    if (
+        report["same_split_collisions"]
+        or report["cross_split_collisions"]
+        or report["near_similar_cross_split"]
+    ):
         raise SystemExit(1)
 
 

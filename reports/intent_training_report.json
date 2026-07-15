@@ -1,46 +1,38 @@
 {
+  "artifact_metadata": "models/intent_classifier.metadata.json",
+  "artifacts_sha256": {
+    "intent_training_config": "51db31bcdc7fe7a8327f3c3e78bb08f618e8b4da3363df81bdbde219d598261e",
+    "label_map": "2a8ee41e730c10ca9b9e77d5121b78900aa4af7b6b5d2822ab84487f0be55979",
+    "metadata": "572d8c911ac5b93c2f63cd875eef3393186ef58afab97ff6e360302399596b27",
+    "model": "8be364c8181b672aafbd21ef1cf2f5563dbffc4b4951e2861b704d4168eeff47",
+    "preprocessed_train": "e26ab914320819b5d67c6990bc46b05eca25313db488de206e0225f411dfb145",
+    "preprocessed_validation": "8f601ea3fda9811557c6903bcaa3a2f0fa68dd5e328e636038981380d3823a1d",
+    "regional_variants": "7186267fd5da18cac4045582a4ca09352f79690f9deb3e57a43947add1c90184",
+    "train": "43b15762c3ba3ed423bebd2bbaf98ea8fd649b79ac6e97a6feb5c3925c1723d8",
+    "validation": "d9199b55fe92c0692069a1b366d644fcaa68f6fcbe55f6d6dc3bc0efcc50dee1"
+  },
   "preprocessing": {
     "files": {
-      "test_central.jsonl": {
-        "dropped": 0,
-        "input": 72,
-        "output": 72
-      },
-      "test_north.jsonl": {
-        "dropped": 0,
-        "input": 72,
-        "output": 72
-      },
-      "test_south.jsonl": {
-        "dropped": 0,
-        "input": 72,
-        "output": 72
-      },
-      "test_standard.jsonl": {
-        "dropped": 0,
-        "input": 175,
-        "output": 175
-      },
       "train.jsonl": {
-        "dropped": 31,
-        "input": 1645,
-        "output": 1614
+        "dropped": 0,
+        "input": 1363,
+        "output": 1363
       },
       "validation.jsonl": {
         "dropped": 0,
-        "input": 352,
-        "output": 352
+        "input": 347,
+        "output": 347
       }
     },
     "totals": {
-      "dropped": 31,
-      "input": 2388,
-      "output": 2357
+      "dropped": 0,
+      "input": 1710,
+      "output": 1710
     }
   },
   "python_version": "3.12.9",
   "rule_baseline_validation": {
-    "accuracy": 0.5710227272727273,
+    "accuracy": 0.40057636887608067,
     "failures": [
       {
         "expected": "set_alarm",
@@ -104,9 +96,9 @@
       },
       {
         "expected": "play_music",
-        "id": "massive_vi_play_music_2103",
+        "id": "massive_vi_play_music_2675",
         "predicted": "unknown",
-        "text": "mở danh sách phát đã phát lần trước của tôi"
+        "text": "mở danh sách phát"
       },
       {
         "expected": "play_music",
@@ -173,12 +165,6 @@
         "id": "massive_vi_play_music_3768",
         "predicted": "unknown",
         "text": "tôi muốn nghe một vài bài jazz"
-      },
-      {
-        "expected": "play_music",
-        "id": "massive_vi_play_music_392",
-        "predicted": "unknown",
-        "text": "mở một bài hát từ yêu thích của tôi"
       },
       {
         "expected": "play_music",
@@ -260,6 +246,12 @@
       },
       {
         "expected": "play_music",
+        "id": "massive_vi_play_music_6107",
+        "predicted": "unknown",
+        "text": "phát cả một trời thương nhớ hồ ngọc hà"
+      },
+      {
+        "expected": "play_music",
         "id": "massive_vi_play_music_6131",
         "predicted": "unknown",
         "text": "phát bất kỳ bài hát nào trong danh sách phát gần đây của tôi"
@@ -269,6 +261,12 @@
         "id": "massive_vi_play_music_6132",
         "predicted": "unknown",
         "text": "mở bất cứ thứ gì trong danh sách phát gần đây nhất của tôi"
+      },
+      {
+        "expected": "play_music",
+        "id": "massive_vi_play_music_626",
+        "predicted": "unknown",
+        "text": "cho tôi nghe bông hồng thủy tinh"
       },
       {
         "expected": "play_music",
@@ -296,15 +294,15 @@
       },
       {
         "expected": "play_music",
-        "id": "massive_vi_play_music_9371",
-        "predicted": "unknown",
-        "text": "phát một bài hát sẽ khiến tôi mỉm cười"
-      },
-      {
-        "expected": "play_music",
         "id": "massive_vi_play_music_9459",
         "predicted": "unknown",
         "text": "vui lòng phát nhạc đồng quê hàng đầu"
+      },
+      {
+        "expected": "play_music",
+        "id": "massive_vi_play_music_9492",
+        "predicted": "unknown",
+        "text": "mở danh sách phát hiện tại"
       },
       {
         "expected": "ask_weather",
@@ -463,494 +461,830 @@
         "text": "hôm nay tôi có nên mặc áo nhiều lớp không"
       },
       {
+        "expected": "ask_weather",
+        "id": "regional_central_ask_weather_021_no_diacritics",
+        "predicted": "unknown",
+        "text": "nhiet do tuyen quang hôm nay rang roi hi"
+      },
+      {
+        "expected": "ask_weather",
+        "id": "regional_central_ask_weather_022_no_diacritics",
+        "predicted": "unknown",
+        "text": "nhiet do kien giang ngày mai rang roi hi"
+      },
+      {
+        "expected": "ask_weather",
+        "id": "regional_central_ask_weather_023_no_diacritics",
+        "predicted": "unknown",
+        "text": "nhiet do cao bang toi nay rang roi hi"
+      },
+      {
+        "expected": "ask_weather",
+        "id": "regional_central_ask_weather_024_no_diacritics",
+        "predicted": "unknown",
+        "text": "nhiet do soc trang hôm nay rang roi hi"
+      },
+      {
         "expected": "call_contact",
         "id": "regional_central_call_contact_052_no_diacritics",
         "predicted": "unknown",
-        "text": "bam so 090 000 0000 cho tôi hi"
+        "text": "goi dien cho chi mai di hi"
       },
       {
         "expected": "call_contact",
         "id": "regional_central_call_contact_053_no_diacritics",
         "predicted": "unknown",
-        "text": "bam so 085 555 5555 cho tôi hi"
+        "text": "goi dien cho bac si minh di hi"
       },
       {
         "expected": "call_contact",
         "id": "regional_central_call_contact_054_no_diacritics",
         "predicted": "unknown",
-        "text": "bam so 038 888 8888 cho tôi hi"
+        "text": "goi dien cho em an di hi"
       },
       {
         "expected": "call_contact",
         "id": "regional_central_call_contact_055_no_diacritics",
         "predicted": "unknown",
-        "text": "bam so 082 222 2222 cho tôi hi"
+        "text": "goi dien cho ma di hi"
       },
       {
         "expected": "call_contact",
         "id": "regional_central_call_contact_056_no_diacritics",
         "predicted": "unknown",
-        "text": "bam so 077 777 7777 cho tôi hi"
+        "text": "goi dien cho tia di hi"
       },
       {
         "expected": "call_contact",
         "id": "regional_central_call_contact_057_no_diacritics",
         "predicted": "unknown",
-        "text": "bam so 076 666 6666 cho tôi hi"
+        "text": "lien he so 038 888 8888 gium tôi"
       },
       {
         "expected": "call_contact",
         "id": "regional_central_call_contact_058_no_diacritics",
         "predicted": "unknown",
-        "text": "bam so 084 444 4444 cho tôi hi"
+        "text": "goi dien cho ban khanh di hi"
       },
       {
         "expected": "call_contact",
         "id": "regional_central_call_contact_059_no_diacritics",
         "predicted": "unknown",
-        "text": "bam so 079 999 9999 cho tôi hi"
+        "text": "goi dien cho chi linh di hi"
       },
       {
         "expected": "call_contact",
         "id": "regional_central_call_contact_060_no_diacritics",
         "predicted": "unknown",
-        "text": "bam so 070 000 0000 cho tôi hi"
+        "text": "goi dien cho ong noi di hi"
       },
       {
         "expected": "call_contact",
         "id": "regional_central_call_contact_061_no_diacritics",
         "predicted": "unknown",
-        "text": "bam so 083 333 3333 cho tôi hi"
+        "text": "lien he so 079 999 9999 gium tôi"
       },
       {
         "expected": "call_contact",
         "id": "regional_central_call_contact_062_no_diacritics",
         "predicted": "unknown",
-        "text": "bam so 081 111 1111 cho tôi hi"
+        "text": "lien he so 081 111 1111 gium tôi"
+      },
+      {
+        "expected": "play_music",
+        "id": "regional_central_play_music_021_no_diacritics",
+        "predicted": "unknown",
+        "text": "bat bai em cua ngay hom qua cua son tung cho tôi voi"
+      },
+      {
+        "expected": "play_music",
+        "id": "regional_central_play_music_021_regional",
+        "predicted": "unknown",
+        "text": "bật bài em của ngày hôm qua của sơn tùng cho tôi với"
+      },
+      {
+        "expected": "play_music",
+        "id": "regional_central_play_music_022_no_diacritics",
+        "predicted": "unknown",
+        "text": "bat bai phia sau mot co gai cua soobin hoang son cho tôi voi"
+      },
+      {
+        "expected": "play_music",
+        "id": "regional_central_play_music_022_regional",
+        "predicted": "unknown",
+        "text": "bật bài phía sau một cô gái của soobin hoàng sơn cho tôi với"
+      },
+      {
+        "expected": "play_music",
+        "id": "regional_central_play_music_023_no_diacritics",
+        "predicted": "unknown",
+        "text": "bat bai di de tro ve cua soobin hoang son cho tôi voi"
+      },
+      {
+        "expected": "play_music",
+        "id": "regional_central_play_music_023_regional",
+        "predicted": "unknown",
+        "text": "bật bài đi để trở về của soobin hoàng sơn cho tôi với"
+      },
+      {
+        "expected": "play_music",
+        "id": "regional_central_play_music_024_no_diacritics",
+        "predicted": "unknown",
+        "text": "bat bai noi vong tay lon cua trinh cong son cho tôi voi"
+      },
+      {
+        "expected": "play_music",
+        "id": "regional_central_play_music_024_regional",
+        "predicted": "unknown",
+        "text": "bật bài nối vòng tay lớn của trịnh công sơn cho tôi với"
       },
       {
         "expected": "set_alarm",
         "id": "regional_central_set_alarm_036_no_diacritics",
         "predicted": "unknown",
-        "text": "toi nay luc 9 gio keu tôi day voi hi"
+        "text": "chu dat chuong 2 tieng nua gium tôi"
+      },
+      {
+        "expected": "set_alarm",
+        "id": "regional_central_set_alarm_036_regional",
+        "predicted": "unknown",
+        "text": "bây giờ đặt chuông 2 tiếng nữa giùm tôi"
       },
       {
         "expected": "set_alarm",
         "id": "regional_central_set_alarm_037_no_diacritics",
         "predicted": "unknown",
-        "text": "2 tieng nua keu tôi day voi hi"
+        "text": "chu dat chuong mai luc 7 gio sang gium tôi"
+      },
+      {
+        "expected": "set_alarm",
+        "id": "regional_central_set_alarm_037_regional",
+        "predicted": "unknown",
+        "text": "bây giờ đặt chuông mai lúc 7 giờ sáng giùm tôi"
       },
       {
         "expected": "set_alarm",
         "id": "regional_central_set_alarm_038_no_diacritics",
         "predicted": "unknown",
-        "text": "45 phut nua keu tôi day voi hi"
+        "text": "chu dat chuong ngay 4 thang 5 luc 10 gio gium tôi"
+      },
+      {
+        "expected": "set_alarm",
+        "id": "regional_central_set_alarm_038_regional",
+        "predicted": "unknown",
+        "text": "bây giờ đặt chuông ngày 4 tháng 5 lúc 10 giờ giùm tôi"
       },
       {
         "expected": "set_alarm",
         "id": "regional_central_set_alarm_039_no_diacritics",
         "predicted": "unknown",
-        "text": "6 gio sang mai keu tôi day voi hi"
+        "text": "chu dat chuong toi nay luc 9 gio gium tôi"
+      },
+      {
+        "expected": "set_alarm",
+        "id": "regional_central_set_alarm_039_regional",
+        "predicted": "unknown",
+        "text": "bây giờ đặt chuông tối nay lúc 9 giờ giùm tôi"
       },
       {
         "expected": "set_alarm",
         "id": "regional_central_set_alarm_040_no_diacritics",
         "predicted": "unknown",
-        "text": "cuoi ngay hôm nay keu tôi day voi hi"
+        "text": "chu dat chuong 45 phut nua gium tôi"
+      },
+      {
+        "expected": "set_alarm",
+        "id": "regional_central_set_alarm_040_regional",
+        "predicted": "unknown",
+        "text": "bây giờ đặt chuông 45 phút nữa giùm tôi"
       },
       {
         "expected": "set_alarm",
         "id": "regional_central_set_alarm_041_no_diacritics",
         "predicted": "unknown",
-        "text": "thu hai tuan sau luc 8 gio sang keu tôi day voi hi"
+        "text": "chu dat chuong 6 gio sang mai gium tôi"
+      },
+      {
+        "expected": "set_alarm",
+        "id": "regional_central_set_alarm_041_regional",
+        "predicted": "unknown",
+        "text": "bây giờ đặt chuông 6 giờ sáng mai giùm tôi"
       },
       {
         "expected": "set_alarm",
         "id": "regional_central_set_alarm_042_no_diacritics",
         "predicted": "unknown",
-        "text": "ngày mai luc 8 gio keu tôi day voi hi"
+        "text": "chu dat chuong cuoi ngay hôm nay gium tôi"
+      },
+      {
+        "expected": "set_alarm",
+        "id": "regional_central_set_alarm_042_regional",
+        "predicted": "unknown",
+        "text": "bây giờ đặt chuông cuối ngày hôm nay giùm tôi"
       },
       {
         "expected": "set_alarm",
         "id": "regional_central_set_alarm_043_no_diacritics",
         "predicted": "unknown",
-        "text": "ngay 4 thang 5 luc 10 gio keu tôi day voi hi"
+        "text": "chu dat chuong thu hai tuan sau luc 8 gio sang gium tôi"
+      },
+      {
+        "expected": "set_alarm",
+        "id": "regional_central_set_alarm_043_regional",
+        "predicted": "unknown",
+        "text": "bây giờ đặt chuông thứ hai tuần sau lúc 8 giờ sáng giùm tôi"
       },
       {
         "expected": "set_reminder",
         "id": "regional_central_set_reminder_035_no_diacritics",
         "predicted": "unknown",
-        "text": "chieu thu sau nho viec kiem tra email gium tôi"
+        "text": "15 phut nua uong thuoc voi hi"
+      },
+      {
+        "expected": "set_reminder",
+        "id": "regional_central_set_reminder_035_regional",
+        "predicted": "unknown",
+        "text": "15 phút nữa uống thuốc với hỉ"
       },
       {
         "expected": "set_reminder",
         "id": "regional_central_set_reminder_036_no_diacritics",
         "predicted": "unknown",
-        "text": "7 gio toi mai nho viec nop bao cao gium tôi"
+        "text": "trua mai goi lai cho khach hang voi hi"
+      },
+      {
+        "expected": "set_reminder",
+        "id": "regional_central_set_reminder_036_regional",
+        "predicted": "unknown",
+        "text": "trưa mai gọi lại cho khách hàng với nhé"
       },
       {
         "expected": "set_reminder",
         "id": "regional_central_set_reminder_037_no_diacritics",
         "predicted": "unknown",
-        "text": "chieu thu sau nho viec tap the duc gium tôi"
+        "text": "hôm nay luc 6 gio chieu mua sua voi hi"
+      },
+      {
+        "expected": "set_reminder",
+        "id": "regional_central_set_reminder_037_regional",
+        "predicted": "unknown",
+        "text": "hôm nay lúc 6 giờ chiều mua sữa với hỉ"
       },
       {
         "expected": "set_reminder",
         "id": "regional_central_set_reminder_038_no_diacritics",
         "predicted": "unknown",
-        "text": "toi nay luc 9 gio nho viec nop bao cao gium tôi"
+        "text": "15 phut nua mua sua voi hi"
+      },
+      {
+        "expected": "set_reminder",
+        "id": "regional_central_set_reminder_038_regional",
+        "predicted": "unknown",
+        "text": "15 phút nữa mua sữa với hỉ"
       },
       {
         "expected": "set_reminder",
         "id": "regional_central_set_reminder_039_no_diacritics",
         "predicted": "unknown",
-        "text": "thu hai tuan sau luc 8 gio sang nho viec goi me gium tôi"
+        "text": "chieu thu sau gui tai lieu voi hi"
+      },
+      {
+        "expected": "set_reminder",
+        "id": "regional_central_set_reminder_039_regional",
+        "predicted": "unknown",
+        "text": "chiều thứ sáu gửi tài liệu với hỉ"
       },
       {
         "expected": "set_reminder",
         "id": "regional_central_set_reminder_040_no_diacritics",
         "predicted": "unknown",
-        "text": "dau gio chieu nho viec goi me gium tôi"
+        "text": "hôm nay luc 6 gio chieu hop voi nhom voi hi"
+      },
+      {
+        "expected": "set_reminder",
+        "id": "regional_central_set_reminder_040_regional",
+        "predicted": "unknown",
+        "text": "hôm nay lúc 6 giờ chiều họp với nhóm với hỉ"
       },
       {
         "expected": "set_reminder",
         "id": "regional_central_set_reminder_041_no_diacritics",
         "predicted": "unknown",
-        "text": "hôm nay luc 6 gio chieu nho viec nop bao cao gium tôi"
+        "text": "45 phut nua don con voi hi"
+      },
+      {
+        "expected": "set_reminder",
+        "id": "regional_central_set_reminder_041_regional",
+        "predicted": "unknown",
+        "text": "45 phút nữa đón con với hỉ"
       },
       {
         "expected": "set_reminder",
         "id": "regional_central_set_reminder_042_no_diacritics",
         "predicted": "unknown",
-        "text": "thu hai tuan sau luc 8 gio sang nho viec kiem tra email gium tôi"
+        "text": "dau gio chieu hop voi nhom voi hi"
+      },
+      {
+        "expected": "set_reminder",
+        "id": "regional_central_set_reminder_042_regional",
+        "predicted": "unknown",
+        "text": "đầu giờ chiều họp với nhóm với hỉ"
       },
       {
         "expected": "call_contact",
         "id": "regional_north_call_contact_052_no_diacritics",
         "predicted": "unknown",
-        "text": "bam so 085 555 5555 giup to"
+        "text": "lien he so 091 111 1111 ho toi"
       },
       {
         "expected": "call_contact",
         "id": "regional_north_call_contact_053_no_diacritics",
         "predicted": "unknown",
-        "text": "bam so 082 222 2222 giup to"
+        "text": "goi dien cho em an nha"
       },
       {
         "expected": "call_contact",
         "id": "regional_north_call_contact_054_no_diacritics",
         "predicted": "unknown",
-        "text": "bam so 084 444 4444 giup to"
+        "text": "lien he so 079 999 9999 ho toi"
       },
       {
         "expected": "call_contact",
         "id": "regional_north_call_contact_055_no_diacritics",
         "predicted": "unknown",
-        "text": "bam so 090 000 0000 giup to"
+        "text": "goi dien cho sep hai nha"
       },
       {
         "expected": "call_contact",
         "id": "regional_north_call_contact_056_no_diacritics",
         "predicted": "unknown",
-        "text": "bam so 081 111 1111 giup to"
+        "text": "goi dien cho tia nha"
       },
       {
         "expected": "call_contact",
         "id": "regional_north_call_contact_057_no_diacritics",
         "predicted": "unknown",
-        "text": "bam so 076 666 6666 giup to"
+        "text": "goi dien cho ba ngoai nha"
       },
       {
         "expected": "call_contact",
         "id": "regional_north_call_contact_058_no_diacritics",
         "predicted": "unknown",
-        "text": "bam so 070 000 0000 giup to"
+        "text": "goi dien cho bo nha"
       },
       {
         "expected": "call_contact",
         "id": "regional_north_call_contact_059_no_diacritics",
         "predicted": "unknown",
-        "text": "bam so 083 333 3333 giup to"
+        "text": "goi dien cho bac si minh nha"
       },
       {
         "expected": "call_contact",
         "id": "regional_north_call_contact_060_no_diacritics",
         "predicted": "unknown",
-        "text": "bam so 032 222 2222 giup to"
+        "text": "goi dien cho chu hung nha"
       },
       {
         "expected": "call_contact",
         "id": "regional_north_call_contact_061_no_diacritics",
         "predicted": "unknown",
-        "text": "bam so 091 111 1111 giup to"
+        "text": "lien he so 081 111 1111 ho toi"
       },
       {
         "expected": "call_contact",
         "id": "regional_north_call_contact_062_no_diacritics",
         "predicted": "unknown",
-        "text": "bam so 038 888 8888 giup to"
+        "text": "lien he so 076 666 6666 ho toi"
+      },
+      {
+        "expected": "play_music",
+        "id": "regional_north_play_music_021_no_diacritics",
+        "predicted": "unknown",
+        "text": "phat bai co chac yeu la day cua son tung cho to"
+      },
+      {
+        "expected": "play_music",
+        "id": "regional_north_play_music_022_no_diacritics",
+        "predicted": "unknown",
+        "text": "phat bai mot coi di ve cua khanh ly cho to"
+      },
+      {
+        "expected": "play_music",
+        "id": "regional_north_play_music_023_no_diacritics",
+        "predicted": "unknown",
+        "text": "phat bai lac troi cua son tung cho to"
+      },
+      {
+        "expected": "play_music",
+        "id": "regional_north_play_music_024_no_diacritics",
+        "predicted": "unknown",
+        "text": "phat bai em cua ngay hom qua cua son tung cho to"
       },
       {
         "expected": "set_alarm",
         "id": "regional_north_set_alarm_036_no_diacritics",
         "predicted": "unknown",
-        "text": "2 tieng nua goi to day nhe"
+        "text": "dat chuong ngay 4 thang 5 luc 10 gio ho toi"
+      },
+      {
+        "expected": "set_alarm",
+        "id": "regional_north_set_alarm_036_regional",
+        "predicted": "unknown",
+        "text": "đặt chuông ngày 4 tháng 5 lúc 10 giờ giúp tôi"
       },
       {
         "expected": "set_alarm",
         "id": "regional_north_set_alarm_037_no_diacritics",
         "predicted": "unknown",
-        "text": "45 phut nua goi to day nhe"
+        "text": "dat chuong mai luc 7 gio sang ho toi"
+      },
+      {
+        "expected": "set_alarm",
+        "id": "regional_north_set_alarm_037_regional",
+        "predicted": "unknown",
+        "text": "đặt chuông mai lúc 7 giờ sáng giúp tôi"
       },
       {
         "expected": "set_alarm",
         "id": "regional_north_set_alarm_038_no_diacritics",
         "predicted": "unknown",
-        "text": "15 phut nua goi to day nhe"
+        "text": "dat chuong hôm nay luc 6 gio chieu ho toi"
+      },
+      {
+        "expected": "set_alarm",
+        "id": "regional_north_set_alarm_038_regional",
+        "predicted": "unknown",
+        "text": "đặt chuông hôm nay lúc 6 giờ chiều giúp tôi"
       },
       {
         "expected": "set_alarm",
         "id": "regional_north_set_alarm_039_no_diacritics",
         "predicted": "unknown",
-        "text": "chieu thu sau goi to day nhe"
+        "text": "dat chuong 15 phut nua ho toi"
+      },
+      {
+        "expected": "set_alarm",
+        "id": "regional_north_set_alarm_039_regional",
+        "predicted": "unknown",
+        "text": "đặt chuông 15 phút nữa giúp tôi"
       },
       {
         "expected": "set_alarm",
         "id": "regional_north_set_alarm_040_no_diacritics",
         "predicted": "unknown",
-        "text": "toi nay luc 9 gio goi to day nhe"
+        "text": "dat chuong 30 phut nua ho toi"
+      },
+      {
+        "expected": "set_alarm",
+        "id": "regional_north_set_alarm_040_regional",
+        "predicted": "unknown",
+        "text": "đặt chuông 30 phút nữa giúp tôi"
       },
       {
         "expected": "set_alarm",
         "id": "regional_north_set_alarm_041_no_diacritics",
         "predicted": "unknown",
-        "text": "dau gio chieu goi to day nhe"
+        "text": "dat chuong trua mai ho toi"
+      },
+      {
+        "expected": "set_alarm",
+        "id": "regional_north_set_alarm_041_regional",
+        "predicted": "unknown",
+        "text": "đặt chuông trưa mai giúp tôi"
       },
       {
         "expected": "set_alarm",
         "id": "regional_north_set_alarm_042_no_diacritics",
         "predicted": "unknown",
-        "text": "trua mai goi to day nhe"
+        "text": "dat chuong toi nay luc 9 gio ho toi"
+      },
+      {
+        "expected": "set_alarm",
+        "id": "regional_north_set_alarm_042_regional",
+        "predicted": "unknown",
+        "text": "đặt chuông tối nay lúc 9 giờ giúp tôi"
       },
       {
         "expected": "set_alarm",
         "id": "regional_north_set_alarm_043_no_diacritics",
         "predicted": "unknown",
-        "text": "3 tieng nua goi to day nhe"
+        "text": "dat chuong 3 tieng nua ho toi"
+      },
+      {
+        "expected": "set_alarm",
+        "id": "regional_north_set_alarm_043_regional",
+        "predicted": "unknown",
+        "text": "đặt chuông 3 tiếng nữa giúp tôi"
       },
       {
         "expected": "set_reminder",
         "id": "regional_north_set_reminder_035_no_diacritics",
         "predicted": "unknown",
-        "text": "thu hai tuan sau luc 8 gio sang nho viec thanh toan hoa don ho toi"
+        "text": "2 tieng nua kiem tra email nhe"
+      },
+      {
+        "expected": "set_reminder",
+        "id": "regional_north_set_reminder_035_regional",
+        "predicted": "unknown",
+        "text": "2 tiếng nữa kiểm tra email nhé"
       },
       {
         "expected": "set_reminder",
         "id": "regional_north_set_reminder_036_no_diacritics",
         "predicted": "unknown",
-        "text": "hôm nay luc 6 gio chieu nho viec tuoi cay ho toi"
+        "text": "trua mai goi me nhe"
+      },
+      {
+        "expected": "set_reminder",
+        "id": "regional_north_set_reminder_036_regional",
+        "predicted": "unknown",
+        "text": "trưa mai gọi mẹ nhé"
       },
       {
         "expected": "set_reminder",
         "id": "regional_north_set_reminder_037_no_diacritics",
         "predicted": "unknown",
-        "text": "ngay 4 thang 5 luc 10 gio nho viec hop voi nhom ho toi"
+        "text": "ngày mai luc 8 gio kiem tra email nhe"
+      },
+      {
+        "expected": "set_reminder",
+        "id": "regional_north_set_reminder_037_regional",
+        "predicted": "unknown",
+        "text": "ngày mai lúc 8 giờ kiểm tra email nhé"
       },
       {
         "expected": "set_reminder",
         "id": "regional_north_set_reminder_038_no_diacritics",
         "predicted": "unknown",
-        "text": "3 tieng nua nho viec goi me ho toi"
+        "text": "thu hai tuan sau luc 8 gio sang thanh toan hoa don nhe"
+      },
+      {
+        "expected": "set_reminder",
+        "id": "regional_north_set_reminder_038_regional",
+        "predicted": "unknown",
+        "text": "thứ hai tuần sau lúc 8 giờ sáng thanh toán hóa đơn nhé"
       },
       {
         "expected": "set_reminder",
         "id": "regional_north_set_reminder_039_no_diacritics",
         "predicted": "unknown",
-        "text": "15 phut nua nho viec nop bao cao ho toi"
+        "text": "hôm nay luc 6 gio chieu tuoi cay nhe"
+      },
+      {
+        "expected": "set_reminder",
+        "id": "regional_north_set_reminder_039_regional",
+        "predicted": "unknown",
+        "text": "hôm nay lúc 6 giờ chiều tưới cây nhé"
       },
       {
         "expected": "set_reminder",
         "id": "regional_north_set_reminder_040_no_diacritics",
         "predicted": "unknown",
-        "text": "dau gio chieu nho viec gui tai lieu ho toi"
+        "text": "ngay 4 thang 5 luc 10 gio hop voi nhom nhe"
+      },
+      {
+        "expected": "set_reminder",
+        "id": "regional_north_set_reminder_040_regional",
+        "predicted": "unknown",
+        "text": "ngày 4 tháng 5 lúc 10 giờ họp với nhóm nhé"
       },
       {
         "expected": "set_reminder",
         "id": "regional_north_set_reminder_041_no_diacritics",
         "predicted": "unknown",
-        "text": "ngay 4 thang 5 luc 10 gio nho viec kiem tra email ho toi"
+        "text": "3 tieng nua goi me nhe"
+      },
+      {
+        "expected": "set_reminder",
+        "id": "regional_north_set_reminder_041_regional",
+        "predicted": "unknown",
+        "text": "3 tiếng nữa gọi mẹ nhé"
       },
       {
         "expected": "set_reminder",
         "id": "regional_north_set_reminder_042_no_diacritics",
         "predicted": "unknown",
-        "text": "2 tieng nua nho viec tuoi cay ho toi"
+        "text": "15 phut nua nop bao cao nhe"
+      },
+      {
+        "expected": "set_reminder",
+        "id": "regional_north_set_reminder_042_regional",
+        "predicted": "unknown",
+        "text": "15 phút nữa nộp báo cáo nhé"
+      },
+      {
+        "expected": "ask_weather",
+        "id": "regional_south_ask_weather_021_no_diacritics",
+        "predicted": "unknown",
+        "text": "o thai nguyen cuoi tuan nay co mua hong"
+      },
+      {
+        "expected": "ask_weather",
+        "id": "regional_south_ask_weather_022_no_diacritics",
+        "predicted": "unknown",
+        "text": "o dien bien ngày mai co mua hong"
+      },
+      {
+        "expected": "ask_weather",
+        "id": "regional_south_ask_weather_023_no_diacritics",
+        "predicted": "unknown",
+        "text": "o vinh long bây giờ co mua hong"
+      },
+      {
+        "expected": "ask_weather",
+        "id": "regional_south_ask_weather_024_no_diacritics",
+        "predicted": "unknown",
+        "text": "o tien giang cuoi tuan nay co mua hong"
       },
       {
         "expected": "call_contact",
         "id": "regional_south_call_contact_052_no_diacritics",
         "predicted": "unknown",
-        "text": "bam so 076 666 6666 gium tôi nghen"
+        "text": "lien he so 077 777 7777 gium tôi"
       },
       {
         "expected": "call_contact",
         "id": "regional_south_call_contact_053_no_diacritics",
         "predicted": "unknown",
-        "text": "bam so 084 444 4444 gium tôi nghen"
+        "text": "goi dien cho em an nghen"
       },
       {
         "expected": "call_contact",
         "id": "regional_south_call_contact_054_no_diacritics",
         "predicted": "unknown",
-        "text": "bam so 070 000 0000 gium tôi nghen"
+        "text": "lien he so 085 555 5555 gium tôi"
       },
       {
         "expected": "call_contact",
         "id": "regional_south_call_contact_055_no_diacritics",
         "predicted": "unknown",
-        "text": "bam so 077 777 7777 gium tôi nghen"
+        "text": "goi dien cho ma nghen"
       },
       {
         "expected": "call_contact",
         "id": "regional_south_call_contact_056_no_diacritics",
         "predicted": "unknown",
-        "text": "bam so 083 333 3333 gium tôi nghen"
+        "text": "goi dien cho me nghen"
       },
       {
         "expected": "call_contact",
         "id": "regional_south_call_contact_057_no_diacritics",
         "predicted": "unknown",
-        "text": "bam so 038 888 8888 gium tôi nghen"
+        "text": "lien he so 091 111 1111 gium tôi"
       },
       {
         "expected": "call_contact",
         "id": "regional_south_call_contact_058_no_diacritics",
         "predicted": "unknown",
-        "text": "bam so 091 111 1111 gium tôi nghen"
+        "text": "lien he so 084 444 4444 gium tôi"
       },
       {
         "expected": "call_contact",
         "id": "regional_south_call_contact_059_no_diacritics",
         "predicted": "unknown",
-        "text": "bam so 079 999 9999 gium tôi nghen"
+        "text": "goi dien cho co lan nghen"
       },
       {
         "expected": "call_contact",
         "id": "regional_south_call_contact_060_no_diacritics",
         "predicted": "unknown",
-        "text": "bam so 090 000 0000 gium tôi nghen"
+        "text": "goi dien cho sep hai nghen"
       },
       {
         "expected": "call_contact",
         "id": "regional_south_call_contact_061_no_diacritics",
         "predicted": "unknown",
-        "text": "bam so 082 222 2222 gium tôi nghen"
+        "text": "lien he so 083 333 3333 gium tôi"
       },
       {
         "expected": "call_contact",
         "id": "regional_south_call_contact_062_no_diacritics",
         "predicted": "unknown",
-        "text": "bam so 032 222 2222 gium tôi nghen"
+        "text": "goi dien cho ban phuong nghen"
       },
       {
-        "expected": "set_alarm",
-        "id": "regional_south_set_alarm_036_no_diacritics",
+        "expected": "play_music",
+        "id": "regional_south_play_music_021_no_diacritics",
         "predicted": "unknown",
-        "text": "ngày mai luc 8 gio keu tôi day dum nghen"
+        "text": "phat bai mot coi di ve cua khanh ly dum tôi"
       },
       {
-        "expected": "set_alarm",
-        "id": "regional_south_set_alarm_037_no_diacritics",
+        "expected": "play_music",
+        "id": "regional_south_play_music_022_no_diacritics",
         "predicted": "unknown",
-        "text": "cuoi ngay hôm nay keu tôi day dum nghen"
+        "text": "phat bai em cua ngay hom qua cua son tung dum tôi"
       },
       {
-        "expected": "set_alarm",
-        "id": "regional_south_set_alarm_038_no_diacritics",
+        "expected": "play_music",
+        "id": "regional_south_play_music_023_no_diacritics",
         "predicted": "unknown",
-        "text": "toi nay luc 9 gio keu tôi day dum nghen"
+        "text": "phat bai thang tu la loi noi doi cua em cua ha anh tuan dum tôi"
       },
       {
-        "expected": "set_alarm",
-        "id": "regional_south_set_alarm_039_no_diacritics",
+        "expected": "play_music",
+        "id": "regional_south_play_music_024_no_diacritics",
         "predicted": "unknown",
-        "text": "6 gio sang mai keu tôi day dum nghen"
-      },
-      {
-        "expected": "set_alarm",
-        "id": "regional_south_set_alarm_040_no_diacritics",
-        "predicted": "unknown",
-        "text": "toi thu bay keu tôi day dum nghen"
-      },
-      {
-        "expected": "set_alarm",
-        "id": "regional_south_set_alarm_041_no_diacritics",
-        "predicted": "unknown",
-        "text": "45 phut nua keu tôi day dum nghen"
-      },
-      {
-        "expected": "set_alarm",
-        "id": "regional_south_set_alarm_042_no_diacritics",
-        "predicted": "unknown",
-        "text": "thu hai tuan sau luc 8 gio sang keu tôi day dum nghen"
-      },
-      {
-        "expected": "set_alarm",
-        "id": "regional_south_set_alarm_043_no_diacritics",
-        "predicted": "unknown",
-        "text": "hôm nay luc 6 gio chieu keu tôi day dum nghen"
+        "text": "phat bai di de tro ve cua soobin hoang son dum tôi"
       },
       {
         "expected": "set_reminder",
         "id": "regional_south_set_reminder_035_no_diacritics",
         "predicted": "unknown",
-        "text": "trua mai nho viec kiem tra email gium tôi hen"
+        "text": "hôm nay luc 6 gio chieu gui tai lieu nghen"
+      },
+      {
+        "expected": "set_reminder",
+        "id": "regional_south_set_reminder_035_regional",
+        "predicted": "unknown",
+        "text": "hôm nay lúc 6 giờ chiều gửi tài liệu nghen"
       },
       {
         "expected": "set_reminder",
         "id": "regional_south_set_reminder_036_no_diacritics",
         "predicted": "unknown",
-        "text": "sang mai nho viec mua sua gium tôi hen"
+        "text": "ngày mai luc 8 gio hop voi nhom nghen"
+      },
+      {
+        "expected": "set_reminder",
+        "id": "regional_south_set_reminder_036_regional",
+        "predicted": "unknown",
+        "text": "ngày mai lúc 8 giờ họp với nhóm nghen"
       },
       {
         "expected": "set_reminder",
         "id": "regional_south_set_reminder_037_no_diacritics",
         "predicted": "unknown",
-        "text": "mai luc 7 gio sang nho viec hop voi nhom gium tôi hen"
+        "text": "ngày mai luc 8 gio kiem tra email nghen"
+      },
+      {
+        "expected": "set_reminder",
+        "id": "regional_south_set_reminder_037_regional",
+        "predicted": "unknown",
+        "text": "ngày mai lúc 8 giờ kiểm tra email nghen"
       },
       {
         "expected": "set_reminder",
         "id": "regional_south_set_reminder_038_no_diacritics",
         "predicted": "unknown",
-        "text": "mai luc 7 gio sang nho viec tap the duc gium tôi hen"
+        "text": "30 phut nua mua sua nghen"
+      },
+      {
+        "expected": "set_reminder",
+        "id": "regional_south_set_reminder_038_regional",
+        "predicted": "unknown",
+        "text": "30 phút nữa mua sữa nghen"
       },
       {
         "expected": "set_reminder",
         "id": "regional_south_set_reminder_039_no_diacritics",
         "predicted": "unknown",
-        "text": "45 phut nua nho viec gui tai lieu gium tôi hen"
+        "text": "3 tieng nua kiem tra email nghen"
+      },
+      {
+        "expected": "set_reminder",
+        "id": "regional_south_set_reminder_039_regional",
+        "predicted": "unknown",
+        "text": "3 tiếng nữa kiểm tra email nghen"
       },
       {
         "expected": "set_reminder",
         "id": "regional_south_set_reminder_040_no_diacritics",
         "predicted": "unknown",
-        "text": "ngay 4 thang 5 luc 10 gio nho viec tap the duc gium tôi hen"
+        "text": "chieu thu sau don con nghen"
+      },
+      {
+        "expected": "set_reminder",
+        "id": "regional_south_set_reminder_040_regional",
+        "predicted": "unknown",
+        "text": "chiều thứ sáu đón con nghen"
       },
       {
         "expected": "set_reminder",
         "id": "regional_south_set_reminder_041_no_diacritics",
         "predicted": "unknown",
-        "text": "chieu thu sau nho viec thanh toan hoa don gium tôi hen"
+        "text": "15 phut nua gui tai lieu nghen"
+      },
+      {
+        "expected": "set_reminder",
+        "id": "regional_south_set_reminder_041_regional",
+        "predicted": "unknown",
+        "text": "15 phút nữa gửi tài liệu nghen"
       },
       {
         "expected": "set_reminder",
         "id": "regional_south_set_reminder_042_no_diacritics",
         "predicted": "unknown",
-        "text": "hôm nay luc 6 gio chieu nho viec don con gium tôi hen"
+        "text": "2 tieng nua hop voi nhom nghen"
+      },
+      {
+        "expected": "set_reminder",
+        "id": "regional_south_set_reminder_042_regional",
+        "predicted": "unknown",
+        "text": "2 tiếng nữa họp với nhóm nghen"
       }
     ],
-    "total": 352,
-    "unknown": 150
+    "total": 347,
+    "unknown": 207
   },
   "sklearn_version": "1.9.0",
   "test_used": false,
@@ -973,21 +1307,21 @@
           ]
         },
         "validation": {
-          "accuracy": 0.9630681818181818,
+          "accuracy": 0.9337175792507204,
           "confusion_matrix": [
             [
-              63,
+              62,
               1,
-              3,
+              2,
               0,
               0
             ],
             [
-              0,
-              48,
+              8,
+              47,
               2,
               0,
-              7
+              0
             ],
             [
               0,
@@ -1004,24 +1338,24 @@
               0
             ],
             [
+              2,
               0,
               0,
-              0,
-              0,
-              66
+              8,
+              53
             ]
           ],
           "failures": [
             {
-              "confidence": 0.44025798275163586,
-              "expected": "set_reminder",
-              "id": "massive_vi_calendar_set_6823",
-              "predicted": "ask_weather",
+              "confidence": 0.43346347795733714,
+              "expected": "set_alarm",
+              "id": "massive_vi_alarm_set_8253",
+              "predicted": "set_reminder",
               "region": "standard",
-              "text": "nhắc tôi đi xem phim ngoài trời cuối tuần này"
+              "text": "đặt một lời nhắc rằng tôi cần thức dậy lúc năm giờ mỗi buổi sáng"
             },
             {
-              "confidence": 0.7011883981856393,
+              "confidence": 0.7375884498299272,
               "expected": "set_reminder",
               "id": "massive_vi_calendar_set_8847",
               "predicted": "ask_weather",
@@ -1029,7 +1363,7 @@
               "text": "nhắc tôi mang theo áo mưa vì trời có thể mưa"
             },
             {
-              "confidence": 0.6231679927630958,
+              "confidence": 0.6459042598925457,
               "expected": "set_reminder",
               "id": "massive_vi_calendar_set_8848",
               "predicted": "ask_weather",
@@ -1037,84 +1371,164 @@
               "text": "vui lòng nhắc tôi mang theo ô vì trời sẽ rất nóng hôm nay"
             },
             {
-              "confidence": 0.24573233378533788,
+              "confidence": 0.294204502960896,
+              "expected": "call_contact",
+              "id": "regional_central_call_contact_052_no_diacritics",
+              "predicted": "play_music",
+              "region": "central",
+              "text": "goi dien cho chi mai di hi"
+            },
+            {
+              "confidence": 0.34025572519946495,
+              "expected": "call_contact",
+              "id": "regional_central_call_contact_053_no_diacritics",
+              "predicted": "play_music",
+              "region": "central",
+              "text": "goi dien cho bac si minh di hi"
+            },
+            {
+              "confidence": 0.4449562752870329,
+              "expected": "call_contact",
+              "id": "regional_central_call_contact_054_no_diacritics",
+              "predicted": "play_music",
+              "region": "central",
+              "text": "goi dien cho em an di hi"
+            },
+            {
+              "confidence": 0.44739682490017896,
+              "expected": "call_contact",
+              "id": "regional_central_call_contact_055_no_diacritics",
+              "predicted": "play_music",
+              "region": "central",
+              "text": "goi dien cho ma di hi"
+            },
+            {
+              "confidence": 0.40845247435469945,
+              "expected": "call_contact",
+              "id": "regional_central_call_contact_056_no_diacritics",
+              "predicted": "play_music",
+              "region": "central",
+              "text": "goi dien cho tia di hi"
+            },
+            {
+              "confidence": 0.40261531964662184,
+              "expected": "call_contact",
+              "id": "regional_central_call_contact_058_no_diacritics",
+              "predicted": "play_music",
+              "region": "central",
+              "text": "goi dien cho ban khanh di hi"
+            },
+            {
+              "confidence": 0.3679618189169173,
+              "expected": "call_contact",
+              "id": "regional_central_call_contact_059_no_diacritics",
+              "predicted": "play_music",
+              "region": "central",
+              "text": "goi dien cho chi linh di hi"
+            },
+            {
+              "confidence": 0.4212405894427646,
+              "expected": "call_contact",
+              "id": "regional_central_call_contact_060_no_diacritics",
+              "predicted": "play_music",
+              "region": "central",
+              "text": "goi dien cho ong noi di hi"
+            },
+            {
+              "confidence": 0.3250128947512435,
+              "expected": "set_alarm",
+              "id": "regional_central_set_alarm_036_no_diacritics",
+              "predicted": "set_reminder",
+              "region": "central",
+              "text": "chu dat chuong 2 tieng nua gium tôi"
+            },
+            {
+              "confidence": 0.42441791459538764,
               "expected": "set_alarm",
               "id": "regional_central_set_alarm_037_no_diacritics",
-              "predicted": "call_contact",
+              "predicted": "set_reminder",
               "region": "central",
-              "text": "2 tieng nua keu tôi day voi hi"
+              "text": "chu dat chuong mai luc 7 gio sang gium tôi"
             },
             {
-              "confidence": 0.3264263164988207,
+              "confidence": 0.343650263020777,
+              "expected": "set_alarm",
+              "id": "regional_central_set_alarm_038_no_diacritics",
+              "predicted": "set_reminder",
+              "region": "central",
+              "text": "chu dat chuong ngay 4 thang 5 luc 10 gio gium tôi"
+            },
+            {
+              "confidence": 0.3482252988108751,
               "expected": "set_alarm",
               "id": "regional_central_set_alarm_040_no_diacritics",
+              "predicted": "set_reminder",
+              "region": "central",
+              "text": "chu dat chuong 45 phut nua gium tôi"
+            },
+            {
+              "confidence": 0.3304321551515243,
+              "expected": "set_alarm",
+              "id": "regional_central_set_alarm_041_no_diacritics",
+              "predicted": "set_reminder",
+              "region": "central",
+              "text": "chu dat chuong 6 gio sang mai gium tôi"
+            },
+            {
+              "confidence": 0.3583083929266555,
+              "expected": "set_alarm",
+              "id": "regional_central_set_alarm_042_no_diacritics",
               "predicted": "ask_weather",
               "region": "central",
-              "text": "cuoi ngay hôm nay keu tôi day voi hi"
+              "text": "chu dat chuong cuoi ngay hôm nay gium tôi"
             },
             {
-              "confidence": 0.3692941722341703,
+              "confidence": 0.3489986293281496,
               "expected": "set_alarm",
-              "id": "regional_central_set_alarm_040_regional",
+              "id": "regional_central_set_alarm_042_regional",
               "predicted": "ask_weather",
               "region": "central",
-              "text": "cuối ngày hôm nay kêu tôi dậy với hỉ"
+              "text": "bây giờ đặt chuông cuối ngày hôm nay giùm tôi"
             },
             {
-              "confidence": 0.3269413408589229,
+              "confidence": 0.42487610901919687,
               "expected": "set_alarm",
-              "id": "regional_north_set_alarm_036_no_diacritics",
-              "predicted": "call_contact",
-              "region": "north",
-              "text": "2 tieng nua goi to day nhe"
+              "id": "regional_central_set_alarm_043_no_diacritics",
+              "predicted": "set_reminder",
+              "region": "central",
+              "text": "chu dat chuong thu hai tuan sau luc 8 gio sang gium tôi"
             },
             {
-              "confidence": 0.26443897053008136,
+              "confidence": 0.3511444365465852,
+              "expected": "call_contact",
+              "id": "regional_north_call_contact_058_no_diacritics",
+              "predicted": "set_reminder",
+              "region": "north",
+              "text": "goi dien cho bo nha"
+            },
+            {
+              "confidence": 0.3498189967357232,
               "expected": "set_alarm",
-              "id": "regional_north_set_alarm_037_no_diacritics",
-              "predicted": "call_contact",
+              "id": "regional_north_set_alarm_040_regional",
+              "predicted": "set_reminder",
               "region": "north",
-              "text": "45 phut nua goi to day nhe"
+              "text": "đặt chuông 30 phút nữa giúp tôi"
             },
             {
-              "confidence": 0.2596618970575132,
-              "expected": "set_alarm",
-              "id": "regional_north_set_alarm_038_no_diacritics",
-              "predicted": "call_contact",
-              "region": "north",
-              "text": "15 phut nua goi to day nhe"
-            },
-            {
-              "confidence": 0.2681391678685736,
-              "expected": "set_alarm",
-              "id": "regional_north_set_alarm_039_no_diacritics",
-              "predicted": "call_contact",
-              "region": "north",
-              "text": "chieu thu sau goi to day nhe"
-            },
-            {
-              "confidence": 0.3265359753967404,
-              "expected": "set_alarm",
-              "id": "regional_north_set_alarm_042_no_diacritics",
-              "predicted": "call_contact",
-              "region": "north",
-              "text": "trua mai goi to day nhe"
-            },
-            {
-              "confidence": 0.3269413408589229,
-              "expected": "set_alarm",
-              "id": "regional_north_set_alarm_043_no_diacritics",
-              "predicted": "call_contact",
-              "region": "north",
-              "text": "3 tieng nua goi to day nhe"
-            },
-            {
-              "confidence": 0.41569533681332604,
+              "confidence": 0.36856176175445987,
               "expected": "set_reminder",
-              "id": "regional_south_set_reminder_042_no_diacritics",
+              "id": "regional_north_set_reminder_039_regional",
               "predicted": "set_alarm",
+              "region": "north",
+              "text": "hôm nay lúc 6 giờ chiều tưới cây nhé"
+            },
+            {
+              "confidence": 0.3449449217889441,
+              "expected": "call_contact",
+              "id": "regional_south_call_contact_056_no_diacritics",
+              "predicted": "set_reminder",
               "region": "south",
-              "text": "hôm nay luc 6 gio chieu nho viec don con gium tôi hen"
+              "text": "goi dien cho me nghen"
             }
           ],
           "labels": [
@@ -1124,82 +1538,82 @@
             "play_music",
             "call_contact"
           ],
-          "macro_f1": 0.9586951067475852,
+          "macro_f1": 0.928737228456584,
           "per_intent": {
-            "accuracy": 0.9630681818181818,
+            "accuracy": 0.9337175792507204,
             "ask_weather": {
-              "f1-score": 0.968944099378882,
-              "precision": 0.9397590361445783,
+              "f1-score": 0.975,
+              "precision": 0.9512195121951219,
               "recall": 1.0,
               "support": 78.0
             },
             "call_contact": {
-              "f1-score": 0.9496402877697842,
-              "precision": 0.9041095890410958,
-              "recall": 1.0,
-              "support": 66.0
+              "f1-score": 0.9137931034482759,
+              "precision": 1.0,
+              "recall": 0.8412698412698413,
+              "support": 63.0
             },
             "macro avg": {
-              "f1-score": 0.9586951067475852,
-              "precision": 0.9646920923840735,
-              "recall": 0.9564807541241163,
-              "support": 352.0
+              "f1-score": 0.9287372284565842,
+              "precision": 0.940908153646754,
+              "recall": 0.9239354797249535,
+              "support": 347.0
             },
             "play_music": {
-              "f1-score": 1.0,
-              "precision": 1.0,
+              "f1-score": 0.9545454545454546,
+              "precision": 0.9130434782608695,
               "recall": 1.0,
               "support": 84.0
             },
             "set_alarm": {
-              "f1-score": 0.9056603773584906,
-              "precision": 0.9795918367346939,
-              "recall": 0.8421052631578947,
+              "f1-score": 0.8952380952380953,
+              "precision": 0.9791666666666666,
+              "recall": 0.8245614035087719,
               "support": 57.0
             },
             "set_reminder": {
-              "f1-score": 0.9692307692307692,
-              "precision": 1.0,
-              "recall": 0.9402985074626866,
-              "support": 67.0
+              "f1-score": 0.9051094890510949,
+              "precision": 0.8611111111111112,
+              "recall": 0.9538461538461539,
+              "support": 65.0
             },
             "weighted avg": {
-              "f1-score": 0.9625426187279945,
-              "precision": 0.9653669670166676,
-              "recall": 0.9630681818181818,
-              "support": 352.0
+              "f1-score": 0.9327419939940985,
+              "precision": 0.9385460989837312,
+              "recall": 0.9337175792507204,
+              "support": 347.0
             }
           },
           "probability_metrics": {
-            "expected_calibration_error_10_bins": 0.21178521022537963,
-            "log_loss": 0.34662134339087625,
-            "multiclass_brier": 0.1423213178235988,
+            "expected_calibration_error_10_bins": 0.2302918497746897,
+            "log_loss": 0.44175065374705513,
+            "multiclass_brier": 0.19887170131408216,
             "per_intent": {
               "ask_weather": {
-                "average_precision": 0.9991884170681637,
-                "roc_auc": 0.999766049036122
+                "average_precision": 0.9970908052996355,
+                "roc_auc": 0.9991897817176627
               },
               "call_contact": {
-                "average_precision": 1.0,
-                "roc_auc": 1.0
+                "average_precision": 0.9995115995115993,
+                "roc_auc": 0.9998882181980774
               },
               "play_music": {
-                "average_precision": 0.9999999999999998,
+                "average_precision": 0.9999999999999999,
                 "roc_auc": 1.0
               },
               "set_alarm": {
-                "average_precision": 0.9496797625743001,
-                "roc_auc": 0.9884032114183765
+                "average_precision": 0.9880120959510219,
+                "roc_auc": 0.9975196612220206
               },
               "set_reminder": {
-                "average_precision": 0.9933968757196372,
-                "roc_auc": 0.9979052107881645
+                "average_precision": 0.9815031614745843,
+                "roc_auc": 0.9936170212765958
               }
             },
-            "pr_auc_macro": 0.9884530110724201,
-            "roc_auc_ovr_macro": 0.9972148942485326
+            "pr_auc_macro": 0.9932235324473682,
+            "roc_auc_ovr_macro": 0.9980429364828713
           },
-          "total": 352
+          "total": 347
         }
       },
       {
@@ -1219,21 +1633,21 @@
           ]
         },
         "validation": {
-          "accuracy": 0.96875,
+          "accuracy": 0.9827089337175793,
           "confusion_matrix": [
             [
-              64,
-              0,
+              60,
+              2,
               3,
               0,
               0
             ],
             [
               0,
-              49,
-              2,
+              57,
               0,
-              6
+              0,
+              0
             ],
             [
               0,
@@ -1250,16 +1664,16 @@
               0
             ],
             [
+              1,
               0,
               0,
               0,
-              0,
-              66
+              62
             ]
           ],
           "failures": [
             {
-              "confidence": 0.5250222775762623,
+              "confidence": 0.4839068341337054,
               "expected": "set_reminder",
               "id": "massive_vi_calendar_set_6823",
               "predicted": "ask_weather",
@@ -1267,7 +1681,7 @@
               "text": "nhắc tôi đi xem phim ngoài trời cuối tuần này"
             },
             {
-              "confidence": 0.6948602478167423,
+              "confidence": 0.7464519212411775,
               "expected": "set_reminder",
               "id": "massive_vi_calendar_set_8847",
               "predicted": "ask_weather",
@@ -1275,7 +1689,7 @@
               "text": "nhắc tôi mang theo áo mưa vì trời có thể mưa"
             },
             {
-              "confidence": 0.6666181699912399,
+              "confidence": 0.696195005963998,
               "expected": "set_reminder",
               "id": "massive_vi_calendar_set_8848",
               "predicted": "ask_weather",
@@ -1283,68 +1697,28 @@
               "text": "vui lòng nhắc tôi mang theo ô vì trời sẽ rất nóng hôm nay"
             },
             {
-              "confidence": 0.3448056009962783,
-              "expected": "set_alarm",
-              "id": "regional_central_set_alarm_040_no_diacritics",
-              "predicted": "ask_weather",
-              "region": "central",
-              "text": "cuoi ngay hôm nay keu tôi day voi hi"
-            },
-            {
-              "confidence": 0.449840966863682,
-              "expected": "set_alarm",
-              "id": "regional_central_set_alarm_040_regional",
-              "predicted": "ask_weather",
-              "region": "central",
-              "text": "cuối ngày hôm nay kêu tôi dậy với hỉ"
-            },
-            {
-              "confidence": 0.34079388221127976,
-              "expected": "set_alarm",
-              "id": "regional_north_set_alarm_036_no_diacritics",
-              "predicted": "call_contact",
+              "confidence": 0.4862508393468756,
+              "expected": "set_reminder",
+              "id": "regional_north_set_reminder_039_regional",
+              "predicted": "set_alarm",
               "region": "north",
-              "text": "2 tieng nua goi to day nhe"
+              "text": "hôm nay lúc 6 giờ chiều tưới cây nhé"
             },
             {
-              "confidence": 0.300232495975282,
-              "expected": "set_alarm",
-              "id": "regional_north_set_alarm_037_no_diacritics",
-              "predicted": "call_contact",
+              "confidence": 0.38628435877868533,
+              "expected": "set_reminder",
+              "id": "regional_north_set_reminder_042_regional",
+              "predicted": "set_alarm",
               "region": "north",
-              "text": "45 phut nua goi to day nhe"
+              "text": "15 phút nữa nộp báo cáo nhé"
             },
             {
-              "confidence": 0.2942083072732607,
-              "expected": "set_alarm",
-              "id": "regional_north_set_alarm_038_no_diacritics",
-              "predicted": "call_contact",
-              "region": "north",
-              "text": "15 phut nua goi to day nhe"
-            },
-            {
-              "confidence": 0.3086259120991021,
-              "expected": "set_alarm",
-              "id": "regional_north_set_alarm_039_no_diacritics",
-              "predicted": "call_contact",
-              "region": "north",
-              "text": "chieu thu sau goi to day nhe"
-            },
-            {
-              "confidence": 0.3415198894181067,
-              "expected": "set_alarm",
-              "id": "regional_north_set_alarm_042_no_diacritics",
-              "predicted": "call_contact",
-              "region": "north",
-              "text": "trua mai goi to day nhe"
-            },
-            {
-              "confidence": 0.3415195735065669,
-              "expected": "set_alarm",
-              "id": "regional_north_set_alarm_043_no_diacritics",
-              "predicted": "call_contact",
-              "region": "north",
-              "text": "3 tieng nua goi to day nhe"
+              "confidence": 0.3441289304107586,
+              "expected": "call_contact",
+              "id": "regional_south_call_contact_056_no_diacritics",
+              "predicted": "set_reminder",
+              "region": "south",
+              "text": "goi dien cho me nghen"
             }
           ],
           "labels": [
@@ -1354,26 +1728,26 @@
             "play_music",
             "call_contact"
           ],
-          "macro_f1": 0.9654186754074662,
+          "macro_f1": 0.981654329708461,
           "per_intent": {
-            "accuracy": 0.96875,
+            "accuracy": 0.9827089337175793,
             "ask_weather": {
-              "f1-score": 0.968944099378882,
-              "precision": 0.9397590361445783,
+              "f1-score": 0.9811320754716981,
+              "precision": 0.9629629629629629,
               "recall": 1.0,
               "support": 78.0
             },
             "call_contact": {
-              "f1-score": 0.9565217391304348,
-              "precision": 0.9166666666666666,
-              "recall": 1.0,
-              "support": 66.0
+              "f1-score": 0.992,
+              "precision": 1.0,
+              "recall": 0.9841269841269841,
+              "support": 63.0
             },
             "macro avg": {
-              "f1-score": 0.9654186754074662,
-              "precision": 0.9712851405622491,
-              "recall": 0.9629746006808066,
-              "support": 352.0
+              "f1-score": 0.981654329708461,
+              "precision": 0.9825342430510531,
+              "recall": 0.9814407814407815,
+              "support": 347.0
             },
             "play_music": {
               "f1-score": 1.0,
@@ -1382,32 +1756,32 @@
               "support": 84.0
             },
             "set_alarm": {
-              "f1-score": 0.9245283018867925,
-              "precision": 1.0,
-              "recall": 0.8596491228070176,
+              "f1-score": 0.9827586206896551,
+              "precision": 0.9661016949152542,
+              "recall": 1.0,
               "support": 57.0
             },
             "set_reminder": {
-              "f1-score": 0.9770992366412213,
-              "precision": 1.0,
-              "recall": 0.9552238805970149,
-              "support": 67.0
+              "f1-score": 0.9523809523809523,
+              "precision": 0.9836065573770492,
+              "recall": 0.9230769230769231,
+              "support": 65.0
             },
             "weighted avg": {
-              "f1-score": 0.9683858994223592,
-              "precision": 0.9710261500547646,
-              "recall": 0.96875,
-              "support": 352.0
+              "f1-score": 0.9825541935759788,
+              "precision": 0.9830355445267688,
+              "recall": 0.9827089337175793,
+              "support": 347.0
             }
           },
           "probability_metrics": {
-            "expected_calibration_error_10_bins": 0.15136417765247476,
-            "log_loss": 0.25630357097984946,
-            "multiclass_brier": 0.10079887209227172,
+            "expected_calibration_error_10_bins": 0.19905086501916794,
+            "log_loss": 0.29035251547436647,
+            "multiclass_brier": 0.12069617722183447,
             "per_intent": {
               "ask_weather": {
-                "average_precision": 0.9993549172346641,
-                "roc_auc": 0.9998128392288976
+                "average_precision": 0.9980069302508277,
+                "roc_auc": 0.9994280812124677
               },
               "call_contact": {
                 "average_precision": 1.0,
@@ -1418,18 +1792,18 @@
                 "roc_auc": 1.0
               },
               "set_alarm": {
-                "average_precision": 0.9660628916022221,
-                "roc_auc": 0.992149866190901
+                "average_precision": 0.9984652434074943,
+                "roc_auc": 0.999697519661222
               },
               "set_reminder": {
-                "average_precision": 0.9965235442505781,
-                "roc_auc": 0.999057344854674
+                "average_precision": 0.9932125894139732,
+                "roc_auc": 0.9981451172940534
               }
             },
-            "pr_auc_macro": 0.9923882706174929,
-            "roc_auc_ovr_macro": 0.9982040100548945
+            "pr_auc_macro": 0.9979369526144591,
+            "roc_auc_ovr_macro": 0.9994541436335487
           },
-          "total": 352
+          "total": 347
         }
       },
       {
@@ -1449,21 +1823,21 @@
           ]
         },
         "validation": {
-          "accuracy": 0.9659090909090909,
+          "accuracy": 0.9827089337175793,
           "confusion_matrix": [
             [
-              63,
-              1,
+              60,
+              2,
               3,
               0,
               0
             ],
             [
               0,
-              49,
-              2,
+              57,
               0,
-              6
+              0,
+              0
             ],
             [
               0,
@@ -1480,16 +1854,16 @@
               0
             ],
             [
+              1,
               0,
               0,
               0,
-              0,
-              66
+              62
             ]
           ],
           "failures": [
             {
-              "confidence": 0.5203302052926457,
+              "confidence": 0.46247529320283365,
               "expected": "set_reminder",
               "id": "massive_vi_calendar_set_6823",
               "predicted": "ask_weather",
@@ -1497,7 +1871,7 @@
               "text": "nhắc tôi đi xem phim ngoài trời cuối tuần này"
             },
             {
-              "confidence": 0.6742860259783632,
+              "confidence": 0.7314728645492896,
               "expected": "set_reminder",
               "id": "massive_vi_calendar_set_8847",
               "predicted": "ask_weather",
@@ -1505,7 +1879,7 @@
               "text": "nhắc tôi mang theo áo mưa vì trời có thể mưa"
             },
             {
-              "confidence": 0.6565071118115104,
+              "confidence": 0.6806896632540856,
               "expected": "set_reminder",
               "id": "massive_vi_calendar_set_8848",
               "predicted": "ask_weather",
@@ -1513,76 +1887,28 @@
               "text": "vui lòng nhắc tôi mang theo ô vì trời sẽ rất nóng hôm nay"
             },
             {
-              "confidence": 0.3932681549666875,
-              "expected": "set_alarm",
-              "id": "regional_central_set_alarm_040_no_diacritics",
-              "predicted": "ask_weather",
-              "region": "central",
-              "text": "cuoi ngay hôm nay keu tôi day voi hi"
-            },
-            {
-              "confidence": 0.4933476104304213,
-              "expected": "set_alarm",
-              "id": "regional_central_set_alarm_040_regional",
-              "predicted": "ask_weather",
-              "region": "central",
-              "text": "cuối ngày hôm nay kêu tôi dậy với hỉ"
-            },
-            {
-              "confidence": 0.3560446676253041,
-              "expected": "set_alarm",
-              "id": "regional_north_set_alarm_036_no_diacritics",
-              "predicted": "call_contact",
-              "region": "north",
-              "text": "2 tieng nua goi to day nhe"
-            },
-            {
-              "confidence": 0.26577611914706334,
-              "expected": "set_alarm",
-              "id": "regional_north_set_alarm_037_no_diacritics",
-              "predicted": "call_contact",
-              "region": "north",
-              "text": "45 phut nua goi to day nhe"
-            },
-            {
-              "confidence": 0.25766257961202,
-              "expected": "set_alarm",
-              "id": "regional_north_set_alarm_038_no_diacritics",
-              "predicted": "call_contact",
-              "region": "north",
-              "text": "15 phut nua goi to day nhe"
-            },
-            {
-              "confidence": 0.29190805796657254,
-              "expected": "set_alarm",
-              "id": "regional_north_set_alarm_039_no_diacritics",
-              "predicted": "call_contact",
-              "region": "north",
-              "text": "chieu thu sau goi to day nhe"
-            },
-            {
-              "confidence": 0.31632423920041025,
-              "expected": "set_alarm",
-              "id": "regional_north_set_alarm_042_no_diacritics",
-              "predicted": "call_contact",
-              "region": "north",
-              "text": "trua mai goi to day nhe"
-            },
-            {
-              "confidence": 0.3433103361895809,
-              "expected": "set_alarm",
-              "id": "regional_north_set_alarm_043_no_diacritics",
-              "predicted": "call_contact",
-              "region": "north",
-              "text": "3 tieng nua goi to day nhe"
-            },
-            {
-              "confidence": 0.44846802720762224,
+              "confidence": 0.5052880376926349,
               "expected": "set_reminder",
-              "id": "regional_south_set_reminder_042_no_diacritics",
+              "id": "regional_north_set_reminder_039_regional",
               "predicted": "set_alarm",
+              "region": "north",
+              "text": "hôm nay lúc 6 giờ chiều tưới cây nhé"
+            },
+            {
+              "confidence": 0.41791988524230006,
+              "expected": "set_reminder",
+              "id": "regional_north_set_reminder_042_regional",
+              "predicted": "set_alarm",
+              "region": "north",
+              "text": "15 phút nữa nộp báo cáo nhé"
+            },
+            {
+              "confidence": 0.34136143158884796,
+              "expected": "call_contact",
+              "id": "regional_south_call_contact_056_no_diacritics",
+              "predicted": "set_reminder",
               "region": "south",
-              "text": "hôm nay luc 6 gio chieu nho viec don con gium tôi hen"
+              "text": "goi dien cho me nghen"
             }
           ],
           "labels": [
@@ -1592,26 +1918,26 @@
             "play_music",
             "call_contact"
           ],
-          "macro_f1": 0.9621168916414751,
+          "macro_f1": 0.981654329708461,
           "per_intent": {
-            "accuracy": 0.9659090909090909,
+            "accuracy": 0.9827089337175793,
             "ask_weather": {
-              "f1-score": 0.968944099378882,
-              "precision": 0.9397590361445783,
+              "f1-score": 0.9811320754716981,
+              "precision": 0.9629629629629629,
               "recall": 1.0,
               "support": 78.0
             },
             "call_contact": {
-              "f1-score": 0.9565217391304348,
-              "precision": 0.9166666666666666,
-              "recall": 1.0,
-              "support": 66.0
+              "f1-score": 0.992,
+              "precision": 1.0,
+              "recall": 0.9841269841269841,
+              "support": 63.0
             },
             "macro avg": {
-              "f1-score": 0.9621168916414751,
-              "precision": 0.967285140562249,
-              "recall": 0.9599895260539408,
-              "support": 352.0
+              "f1-score": 0.981654329708461,
+              "precision": 0.9825342430510531,
+              "recall": 0.9814407814407815,
+              "support": 347.0
             },
             "play_music": {
               "f1-score": 1.0,
@@ -1620,58 +1946,58 @@
               "support": 84.0
             },
             "set_alarm": {
-              "f1-score": 0.9158878504672897,
-              "precision": 0.98,
-              "recall": 0.8596491228070176,
+              "f1-score": 0.9827586206896551,
+              "precision": 0.9661016949152542,
+              "recall": 1.0,
               "support": 57.0
             },
             "set_reminder": {
-              "f1-score": 0.9692307692307692,
-              "precision": 1.0,
-              "recall": 0.9402985074626866,
-              "support": 67.0
+              "f1-score": 0.9523809523809523,
+              "precision": 0.9836065573770492,
+              "recall": 0.9230769230769231,
+              "support": 65.0
             },
             "weighted avg": {
-              "f1-score": 0.9654890441740299,
-              "precision": 0.9677875136911283,
-              "recall": 0.9659090909090909,
-              "support": 352.0
+              "f1-score": 0.9825541935759788,
+              "precision": 0.9830355445267688,
+              "recall": 0.9827089337175793,
+              "support": 347.0
             }
           },
           "probability_metrics": {
-            "expected_calibration_error_10_bins": 0.1296504062414046,
-            "log_loss": 0.22730564333058234,
-            "multiclass_brier": 0.08931808517150698,
+            "expected_calibration_error_10_bins": 0.17927393127564353,
+            "log_loss": 0.26035905441168206,
+            "multiclass_brier": 0.10626067324986452,
             "per_intent": {
               "ask_weather": {
-                "average_precision": 0.9996794871794872,
-                "roc_auc": 0.9999064196144488
+                "average_precision": 0.9986865550075972,
+                "roc_auc": 0.9996187208083118
               },
               "call_contact": {
-                "average_precision": 1.0,
+                "average_precision": 0.9999999999999998,
                 "roc_auc": 1.0
               },
               "play_music": {
-                "average_precision": 1.0,
+                "average_precision": 0.9999999999999999,
                 "roc_auc": 1.0
               },
               "set_alarm": {
-                "average_precision": 0.9690635756843375,
-                "roc_auc": 0.9931608682723758
+                "average_precision": 0.9984652434074943,
+                "roc_auc": 0.999697519661222
               },
               "set_reminder": {
-                "average_precision": 0.9979203785378392,
-                "roc_auc": 0.9994763026970411
+                "average_precision": 0.9954056818590478,
+                "roc_auc": 0.9988543371522094
               }
             },
-            "pr_auc_macro": 0.9933326882803328,
-            "roc_auc_ovr_macro": 0.9985087181167731
+            "pr_auc_macro": 0.9985114960548278,
+            "roc_auc_ovr_macro": 0.9996341155243487
           },
-          "total": 352
+          "total": 347
         }
       }
     ],
-    "final_fit_samples": 1966,
+    "final_fit_samples": 1710,
     "selected_config": {
       "c": 2.0,
       "char_min_df": 2,
@@ -1688,21 +2014,21 @@
       ]
     },
     "selected_validation": {
-      "accuracy": 0.96875,
+      "accuracy": 0.9827089337175793,
       "confusion_matrix": [
         [
-          64,
-          0,
+          60,
+          2,
           3,
           0,
           0
         ],
         [
           0,
-          49,
-          2,
+          57,
           0,
-          6
+          0,
+          0
         ],
         [
           0,
@@ -1719,16 +2045,16 @@
           0
         ],
         [
+          1,
           0,
           0,
           0,
-          0,
-          66
+          62
         ]
       ],
       "failures": [
         {
-          "confidence": 0.5250222775762623,
+          "confidence": 0.4839068341337054,
           "expected": "set_reminder",
           "id": "massive_vi_calendar_set_6823",
           "predicted": "ask_weather",
@@ -1736,7 +2062,7 @@
           "text": "nhắc tôi đi xem phim ngoài trời cuối tuần này"
         },
         {
-          "confidence": 0.6948602478167423,
+          "confidence": 0.7464519212411775,
           "expected": "set_reminder",
           "id": "massive_vi_calendar_set_8847",
           "predicted": "ask_weather",
@@ -1744,7 +2070,7 @@
           "text": "nhắc tôi mang theo áo mưa vì trời có thể mưa"
         },
         {
-          "confidence": 0.6666181699912399,
+          "confidence": 0.696195005963998,
           "expected": "set_reminder",
           "id": "massive_vi_calendar_set_8848",
           "predicted": "ask_weather",
@@ -1752,75 +2078,35 @@
           "text": "vui lòng nhắc tôi mang theo ô vì trời sẽ rất nóng hôm nay"
         },
         {
-          "confidence": 0.3448056009962783,
-          "expected": "set_alarm",
-          "id": "regional_central_set_alarm_040_no_diacritics",
-          "predicted": "ask_weather",
-          "region": "central",
-          "text": "cuoi ngay hôm nay keu tôi day voi hi"
-        },
-        {
-          "confidence": 0.449840966863682,
-          "expected": "set_alarm",
-          "id": "regional_central_set_alarm_040_regional",
-          "predicted": "ask_weather",
-          "region": "central",
-          "text": "cuối ngày hôm nay kêu tôi dậy với hỉ"
-        },
-        {
-          "confidence": 0.34079388221127976,
-          "expected": "set_alarm",
-          "id": "regional_north_set_alarm_036_no_diacritics",
-          "predicted": "call_contact",
+          "confidence": 0.4862508393468756,
+          "expected": "set_reminder",
+          "id": "regional_north_set_reminder_039_regional",
+          "predicted": "set_alarm",
           "region": "north",
-          "text": "2 tieng nua goi to day nhe"
+          "text": "hôm nay lúc 6 giờ chiều tưới cây nhé"
         },
         {
-          "confidence": 0.300232495975282,
-          "expected": "set_alarm",
-          "id": "regional_north_set_alarm_037_no_diacritics",
-          "predicted": "call_contact",
+          "confidence": 0.38628435877868533,
+          "expected": "set_reminder",
+          "id": "regional_north_set_reminder_042_regional",
+          "predicted": "set_alarm",
           "region": "north",
-          "text": "45 phut nua goi to day nhe"
+          "text": "15 phút nữa nộp báo cáo nhé"
         },
         {
-          "confidence": 0.2942083072732607,
-          "expected": "set_alarm",
-          "id": "regional_north_set_alarm_038_no_diacritics",
-          "predicted": "call_contact",
-          "region": "north",
-          "text": "15 phut nua goi to day nhe"
-        },
-        {
-          "confidence": 0.3086259120991021,
-          "expected": "set_alarm",
-          "id": "regional_north_set_alarm_039_no_diacritics",
-          "predicted": "call_contact",
-          "region": "north",
-          "text": "chieu thu sau goi to day nhe"
-        },
-        {
-          "confidence": 0.3415198894181067,
-          "expected": "set_alarm",
-          "id": "regional_north_set_alarm_042_no_diacritics",
-          "predicted": "call_contact",
-          "region": "north",
-          "text": "trua mai goi to day nhe"
-        },
-        {
-          "confidence": 0.3415195735065669,
-          "expected": "set_alarm",
-          "id": "regional_north_set_alarm_043_no_diacritics",
-          "predicted": "call_contact",
-          "region": "north",
-          "text": "3 tieng nua goi to day nhe"
+          "confidence": 0.3441289304107586,
+          "expected": "call_contact",
+          "id": "regional_south_call_contact_056_no_diacritics",
+          "predicted": "set_reminder",
+          "region": "south",
+          "text": "goi dien cho me nghen"
         }
       ],
       "figures": [
-        "E:\\PRJ\\nvit-vietnamese-command-assistant\\reports\\figures\\intent_confusion_matrix.png",
-        "E:\\PRJ\\nvit-vietnamese-command-assistant\\reports\\figures\\intent_roc_curve.png",
-        "E:\\PRJ\\nvit-vietnamese-command-assistant\\reports\\figures\\intent_pr_curve.png",
-        "E:\\PRJ\\nvit-vietnamese-command-assistant\\reports\\figures\\intent_reliability_curve.png"
+        "reports/figures/intent_confusion_matrix.png",
+        "reports/figures/intent_roc_curve.png",
+        "reports/figures/intent_pr_curve.png",
+        "reports/figures/intent_reliability_curve.png"
       ],
       "labels": [
         "set_reminder",
@@ -1829,26 +2115,26 @@
         "play_music",
         "call_contact"
       ],
-      "macro_f1": 0.9654186754074662,
+      "macro_f1": 0.981654329708461,
       "per_intent": {
-        "accuracy": 0.96875,
+        "accuracy": 0.9827089337175793,
         "ask_weather": {
-          "f1-score": 0.968944099378882,
-          "precision": 0.9397590361445783,
+          "f1-score": 0.9811320754716981,
+          "precision": 0.9629629629629629,
           "recall": 1.0,
           "support": 78.0
         },
         "call_contact": {
-          "f1-score": 0.9565217391304348,
-          "precision": 0.9166666666666666,
-          "recall": 1.0,
-          "support": 66.0
+          "f1-score": 0.992,
+          "precision": 1.0,
+          "recall": 0.9841269841269841,
+          "support": 63.0
         },
         "macro avg": {
-          "f1-score": 0.9654186754074662,
-          "precision": 0.9712851405622491,
-          "recall": 0.9629746006808066,
-          "support": 352.0
+          "f1-score": 0.981654329708461,
+          "precision": 0.9825342430510531,
+          "recall": 0.9814407814407815,
+          "support": 347.0
         },
         "play_music": {
           "f1-score": 1.0,
@@ -1857,32 +2143,32 @@
           "support": 84.0
         },
         "set_alarm": {
-          "f1-score": 0.9245283018867925,
-          "precision": 1.0,
-          "recall": 0.8596491228070176,
+          "f1-score": 0.9827586206896551,
+          "precision": 0.9661016949152542,
+          "recall": 1.0,
           "support": 57.0
         },
         "set_reminder": {
-          "f1-score": 0.9770992366412213,
-          "precision": 1.0,
-          "recall": 0.9552238805970149,
-          "support": 67.0
+          "f1-score": 0.9523809523809523,
+          "precision": 0.9836065573770492,
+          "recall": 0.9230769230769231,
+          "support": 65.0
         },
         "weighted avg": {
-          "f1-score": 0.9683858994223592,
-          "precision": 0.9710261500547646,
-          "recall": 0.96875,
-          "support": 352.0
+          "f1-score": 0.9825541935759788,
+          "precision": 0.9830355445267688,
+          "recall": 0.9827089337175793,
+          "support": 347.0
         }
       },
       "probability_metrics": {
-        "expected_calibration_error_10_bins": 0.15136417765247476,
-        "log_loss": 0.25630357097984946,
-        "multiclass_brier": 0.10079887209227172,
+        "expected_calibration_error_10_bins": 0.19905086501916794,
+        "log_loss": 0.29035251547436647,
+        "multiclass_brier": 0.12069617722183447,
         "per_intent": {
           "ask_weather": {
-            "average_precision": 0.9993549172346641,
-            "roc_auc": 0.9998128392288976
+            "average_precision": 0.9980069302508277,
+            "roc_auc": 0.9994280812124677
           },
           "call_contact": {
             "average_precision": 1.0,
@@ -1893,18 +2179,24 @@
             "roc_auc": 1.0
           },
           "set_alarm": {
-            "average_precision": 0.9660628916022221,
-            "roc_auc": 0.992149866190901
+            "average_precision": 0.9984652434074943,
+            "roc_auc": 0.999697519661222
           },
           "set_reminder": {
-            "average_precision": 0.9965235442505781,
-            "roc_auc": 0.999057344854674
+            "average_precision": 0.9932125894139732,
+            "roc_auc": 0.9981451172940534
           }
         },
-        "pr_auc_macro": 0.9923882706174929,
-        "roc_auc_ovr_macro": 0.9982040100548945
+        "pr_auc_macro": 0.9979369526144591,
+        "roc_auc_ovr_macro": 0.9994541436335487
       },
-      "total": 352
+      "total": 347
+    },
+    "selection_policy": {
+      "final_tie_breaker": "candidate_order_in_config",
+      "primary": "macro_f1",
+      "secondary": "accuracy",
+      "selected_candidate_index": 1
     }
   }
 }

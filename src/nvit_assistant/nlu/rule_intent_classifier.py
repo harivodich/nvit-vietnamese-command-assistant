@@ -9,8 +9,8 @@ from typing import Any
 
 import yaml
 
-from nvit_assistant.nlu.intent_classifier import IntentPrediction
-from nvit_assistant.schemas import Intent, PreprocessedSample
+from nvit_assistant.nlu.runtime_intent_classifier import IntentPrediction
+from nvit_assistant.schemas import DatasetSample, Intent, PreprocessedSample
 
 
 @dataclass(frozen=True)
@@ -57,6 +57,33 @@ def load_rule_classifier(path: Path) -> RuleIntentClassifier:
         raw_patterns = raw_rule["patterns"]
         if not raw_patterns or not all(isinstance(pattern, str) for pattern in raw_patterns):
             raise ValueError(f"patterns không hợp lệ cho intent {intent.value}")
+        raw_required_groups = raw_rule.get("required_slot_groups")
+        configured_groups: tuple[frozenset[str], ...]
+        if raw_required_groups is None:
+            raw_required = raw_rule.get("required_slots")
+            if not isinstance(raw_required, list) or not all(
+                isinstance(slot, str) for slot in raw_required
+            ):
+                raise ValueError(f"required_slots không hợp lệ cho intent {intent.value}")
+            configured_groups = (frozenset(raw_required),)
+        else:
+            if not isinstance(raw_required_groups, list) or not all(
+                isinstance(group, list)
+                and all(isinstance(slot, str) for slot in group)
+                for group in raw_required_groups
+            ):
+                raise ValueError(f"required_slot_groups không hợp lệ cho intent {intent.value}")
+            configured_groups = tuple(frozenset(group) for group in raw_required_groups)
+        if configured_groups != DatasetSample.required_slot_groups[intent]:
+            raise ValueError(f"required slot contract bị lệch cho intent {intent.value}")
+        raw_optional = raw_rule.get("optional_slots")
+        if not isinstance(raw_optional, list) or not all(
+            isinstance(slot, str) for slot in raw_optional
+        ):
+            raise ValueError(f"optional_slots không hợp lệ cho intent {intent.value}")
+        configured_slots = set(raw_optional).union(*configured_groups)
+        if configured_slots != set(DatasetSample.allowed_slots_by_intent[intent]):
+            raise ValueError(f"allowed slot contract bị lệch cho intent {intent.value}")
         rules.append(
             IntentRule(intent=intent, patterns=tuple(re.compile(pattern) for pattern in raw_patterns))
         )

@@ -1,0 +1,16 @@
+{
+  "files_sha256": {
+    "intent_training_config": "51db31bcdc7fe7a8327f3c3e78bb08f618e8b4da3363df81bdbde219d598261e",
+    "label_map": "2a8ee41e730c10ca9b9e77d5121b78900aa4af7b6b5d2822ab84487f0be55979",
+    "model": "8be364c8181b672aafbd21ef1cf2f5563dbffc4b4951e2861b704d4168eeff47",
+    "preprocessed_train": "e26ab914320819b5d67c6990bc46b05eca25313db488de206e0225f411dfb145",
+    "preprocessed_validation": "8f601ea3fda9811557c6903bcaa3a2f0fa68dd5e328e636038981380d3823a1d",
+    "regional_variants": "7186267fd5da18cac4045582a4ca09352f79690f9deb3e57a43947add1c90184",
+    "train": "43b15762c3ba3ed423bebd2bbaf98ea8fd649b79ac6e97a6feb5c3925c1723d8",
+    "validation": "d9199b55fe92c0692069a1b366d644fcaa68f6fcbe55f6d6dc3bc0efcc50dee1"
+  },
+  "fit_split": "train_plus_validation",
+  "schema_version": 1,
+  "selected_candidate": "word_1_2_char_3_5",
+  "sklearn_version": "1.9.0"
+}

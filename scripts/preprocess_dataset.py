@@ -34,6 +34,7 @@ def main() -> None:
     args.report.write_text(
         json.dumps(report, ensure_ascii=False, indent=2, sort_keys=True) + "\n",
         encoding="utf-8",
+        newline="\n",
     )
     print(json.dumps(report, ensure_ascii=False, indent=2, sort_keys=True))
 

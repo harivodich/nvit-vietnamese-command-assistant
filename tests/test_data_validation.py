@@ -2,6 +2,7 @@ import json
 from pathlib import Path
 
 from nvit_assistant.data_validation import validate_dataset_dir
+from nvit_assistant.nlu.normalizer import VietnameseNormalizer
 from nvit_assistant.schemas import (
     AnnotationQuality,
     DataSource,
@@ -87,7 +88,28 @@ def test_validator_detects_near_similar_template_across_splits(tmp_path: Path) -
 
 
 def test_committed_dataset_passes_validation() -> None:
-    report = validate_dataset_dir(Path("data/samples"))
+    normalizer = VietnameseNormalizer(Path("configs/regional_variants.yaml"))
+    report = validate_dataset_dir(Path("data/samples"), normalizer=normalizer)
 
     assert report["errors"] == []
+    assert report["manifest_verified"] is True
     assert report["total"] >= 1200
+
+
+def test_validator_detects_stale_manifest_checksum(tmp_path: Path) -> None:
+    write_sample(tmp_path / "train.jsonl", make_call_sample("a", "group-a", "gọi mẹ"))
+    (tmp_path / "manifest.json").write_text(
+        json.dumps(
+            {
+                "files_sha256": {"train.jsonl": "not-a-real-hash"},
+                "files": {"train.jsonl": 1},
+                "total": 1,
+                "test_set_sha256": "not-a-real-hash",
+            }
+        ),
+        encoding="utf-8",
+    )
+
+    report = validate_dataset_dir(tmp_path, enforce_minimums=False)
+
+    assert any("manifest checksum lệch: train.jsonl" in error for error in report["errors"])

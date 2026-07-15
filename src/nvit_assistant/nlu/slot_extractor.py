@@ -11,14 +11,26 @@ from typing import Any
 import yaml
 
 from nvit_assistant.nlu.normalizer import normalize_surface
+from nvit_assistant.nlu.slot_lexicon import load_slot_lexicon
 from nvit_assistant.schemas import Intent, SlotName
 
 
-PHONE_PATTERN = re.compile(r"(?<!\d)(?:\+?84|0)(?:[ .-]?\d){8,10}(?!\d)")
-NUMERIC_TIME_PATTERN = re.compile(
-    r"(?<!\w)(?:[01]?\d|2[0-3])\s*(?:h|giờ)"
+PHONE_PATTERN = re.compile(
+    r"(?<!\d)(?:\+?84|0)(?:[ .-]?\d){8,10}(?![ .-]?\d)"
+)
+OVERLONG_PHONE_PATTERN = re.compile(
+    r"(?<!\d)(?:\+?84|0)(?:[ .-]?\d){11,}(?![ .-]?\d)"
+)
+NUMERIC_CLOCK = (
+    r"(?:[01]?\d|2[0-3])\s*(?:h|giờ)"
     r"(?:\s*rưỡi|\s+kém\s+(?:[0-5]?\d)(?:\s*phút)?|"
-    r"\s*(?:[0-5]?\d)\s*(?:phút)?)?(?!\w)"
+    r"\s*(?:[0-5]?\d)\s*(?:phút)?)?"
+)
+NUMERIC_TIME_PATTERN = re.compile(rf"(?<!\w){NUMERIC_CLOCK}(?!\w)")
+INVALID_NUMERIC_TIME_PATTERN = re.compile(
+    r"(?<!\w)[+-]\s*\d+\s*(?:h|giờ)(?!\w)|"
+    r"(?<!\w)(?:[01]?\d|2[0-3])\s*(?:h|giờ)\s+"
+    r"(?:kém\s+)?(?:[+-]\s*\d+|[6-9]\d|\d{3,})(?:\s*phút)?(?!\w)"
 )
 DURATION_PATTERN = re.compile(
     r"(?<!\w)(?:\d+|một|hai|ba|bốn|năm|sáu|bảy|tám|chín|mười)\s+"
@@ -46,6 +58,14 @@ DAY_CLOCK_PATTERN = re.compile(
     rf"\s+(?:lúc\s+)?{NUMBER_WORDS}(?:\s+giờ|\s+rưỡi)"
     r"(?:\s+(?:sáng|trưa|chiều|tối|đêm))?(?!\w)"
 )
+DAY_NUMERIC_CLOCK_PATTERN = re.compile(
+    rf"(?<!\w)(?:buổi\s+)?(?:sáng|trưa|chiều|tối|đêm)?\s*{DAY_WORDS}"
+    rf"\s+(?:lúc\s+)?{NUMERIC_CLOCK}(?!\w)"
+)
+NUMERIC_CLOCK_DAY_PATTERN = re.compile(
+    rf"(?<!\w){NUMERIC_CLOCK}\s+"
+    rf"(?:buổi\s+)?(?:sáng|trưa|chiều|tối|đêm)?\s*{DAY_WORDS}(?!\w)"
+)
 AFTER_CLOCK_PATTERN = re.compile(
     rf"(?<!\w)sau\s+{NUMBER_WORDS}(?:\s+giờ|\s+rưỡi)"
     r"(?:\s+(?:sáng|trưa|chiều|tối|đêm))?(?!\w)"
@@ -55,8 +75,10 @@ CALENDAR_DATE_PATTERN = re.compile(
     rf"(?:\s+(?:năm\s+)?{NUMBER_WORDS})?(?!\w)"
 )
 PERIOD_PATTERN = re.compile(
-    rf"(?<!\w)(?:trong\s+|sau\s+)?(?:{NUMBER_WORDS}|\d+)\s+"
-    r"(?:phút|tiếng|giờ|ngày|tuần|tháng)(?:\s+(?:nữa|tới|sau|kể từ bây giờ))?(?!\w)"
+    rf"(?<!\w)(?:(?:trong|sau)\s+(?:{NUMBER_WORDS}|\d+)\s+"
+    r"(?:phút|tiếng|giờ|ngày|tuần|tháng)"
+    rf"|(?:{NUMBER_WORDS}|\d+)\s+(?:phút|tiếng|giờ|ngày|tuần|tháng)\s+"
+    r"(?:nữa|tới|sau|kể từ bây giờ))(?!\w)"
 )
 WEEK_PATTERN = re.compile(
     r"(?<!\w)(?:buổi\s+)?(?:sáng|trưa|chiều|tối|đêm)?\s*"
@@ -71,17 +93,68 @@ MONTHLY_DATE_PATTERN = re.compile(
     rf"(?<!\w)ngày\s+{NUMBER_WORDS}\s+hàng\s+tháng(?!\w)"
 )
 REMINDER_TRIGGER_PATTERN = re.compile(
-    r"^(?:hãy\s+)?(?:nhắc|nhớ báo|đừng quên nhắc|tạo lời nhắc)"
-    r"(?:\s+(?:cho))?(?:\s+(?:tôi|tớ|tui|mình))?\s+"
+    r"^(?:hãy\s+)?(?:nhắc|nhớ báo|đừng quên(?:\s+nhắc)?|tạo lời nhắc)"
+    r"(?:\s+cho)?(?:\s+(?:tôi|tớ|tui|mình))?(?:\s+|$)"
 )
-POLITE_END_PATTERN = re.compile(r"\s+(?:nhé|nhá|nha|nghen|hen|hỉ|với|giúp tôi|dùm|giùm)\s*$")
+POLITE_END_PATTERN = re.compile(
+    r"(?:^|\s)(?:nhé|nhá|nha|nghen|hen|hỉ|với|giúp tôi|dùm|giùm|được không|đi|ngay)\s*$"
+)
 ENTITY_END_PATTERN = re.compile(
     r"\s+(?:bây giờ|ngay bây giờ|một lần nữa|cho (?:tôi|tớ|tui|mình)|"
-    r"để (?:tôi|tớ|tui|mình)|nhé|nha|với|được không|không)\s*$"
+    r"để (?:tôi|tớ|tui|mình)|nhé|nha|với|đi|ngay|được không|không)\s*$"
+)
+REMINDER_POLITE_PREFIX_PATTERN = re.compile(
+    r"^(?:giúp|dùm|giùm)(?:\s+(?:tôi|tớ|tui|mình))?(?:\s+|$)"
+)
+REMINDER_EMPTY_CONTENT = frozenset(
+    {
+        "nhắc",
+        "lời nhắc",
+        "tạo lời nhắc",
+        "đặt lời nhắc",
+        "tôi",
+        "tớ",
+        "tui",
+        "mình",
+        "giúp",
+        "giúp tôi",
+        "dùm",
+        "giùm",
+    }
+)
+REMINDER_INCOMPLETE_ACTION = re.compile(
+    r"^(?:gọi(?:\s+lại)?|mua|uống|gửi|nộp|tưới|đón|trả|thanh toán|kiểm tra)$"
+)
+CONTACT_EMPTY_CONTENT = frozenset(
+    {
+        "cho",
+        "đến",
+        "tới",
+        "tôi",
+        "tớ",
+        "tui",
+        "mình",
+        "giúp",
+        "giúp tôi",
+        "dùm",
+        "giùm",
+        "đi",
+        "ngay",
+        "bây giờ",
+        "ngay bây giờ",
+        "điện",
+        "số",
+        "ai",
+        "người nào",
+        "nguoi nao",
+    }
 )
 INVALID_MUSIC_ENTITY = re.compile(
     r"(?:^|\s)(?:tôi|mình|danh sách phát|yêu thích|tất cả|bất kỳ|bất cứ|"
     r"hàng đầu|thính phòng|đồng quê)(?:\s|$)"
+)
+MUSIC_ENTITY_STOP_ONLY = re.compile(
+    r"^(?:đi|ngay|lên|thôi|nào|giúp tôi|chưa|không|à|hả|ư|vậy|thế|sao|phải|ai)$"
 )
 INVALID_LOCATION = re.compile(
     r"(?:^|\s)(?:tôi|mình|bao nhiêu|mưa|gió|độ|là|nên|khu vực của)(?:\s|$)"
@@ -116,17 +189,23 @@ def _normalized_strings(values: Any, field_name: str) -> tuple[str, ...]:
     """Kiểm tra list chuỗi từ YAML và chuẩn hóa để lookup ổn định."""
     if not isinstance(values, list) or not all(isinstance(value, str) for value in values):
         raise ValueError(f"{field_name} phải là list chuỗi")
-    return tuple(sorted({normalize_surface(value) for value in values}, key=lambda value: (-len(value), value)))
+    unique = dict.fromkeys(normalize_surface(value) for value in values)
+    return tuple(sorted(unique, key=lambda value: -len(value)))
 
 
 def _find_longest(text: str, values: tuple[str, ...]) -> str | None:
-    """Tìm cụm dài nhất, chấp nhận text không dấu nhưng trả về giá trị chuẩn có dấu."""
+    """Tìm cụm dài nhất; chỉ ưu tiên khớp có dấu khi hai ứng viên dài bằng nhau."""
     folded_text = _strip_diacritics(text)
-    for value in values:
+    matches: list[tuple[int, bool, int, str]] = []
+    for index, value in enumerate(values):
+        exact = bool(re.search(rf"(?<!\w){re.escape(value)}(?!\w)", text))
         folded_value = _strip_diacritics(value)
-        if re.search(rf"(?<!\w){re.escape(folded_value)}(?!\w)", folded_text):
-            return value
-    return None
+        folded = bool(
+            re.search(rf"(?<!\w){re.escape(folded_value)}(?!\w)", folded_text)
+        )
+        if exact or folded:
+            matches.append((len(folded_value), exact, -index, value))
+    return max(matches)[3] if matches else None
 
 
 def _strip_diacritics(text: str) -> str:
@@ -146,26 +225,51 @@ def _clean_entity(value: str) -> str | None:
 class RegexSlotExtractor:
     """Extractor theo intent; không tự suy diễn slot không xuất hiện trong câu."""
 
-    def __init__(self, config_path: Path) -> None:
-        """Nạp từ điển một lần cho toàn bộ request runtime."""
+    def __init__(self, config_path: Path, lexicon_path: Path | None = None) -> None:
+        """Nạp config thủ công và lexicon học từ train một lần cho runtime."""
         raw: Any = yaml.safe_load(config_path.read_text(encoding="utf-8")) or {}
         if not isinstance(raw, dict):
             raise ValueError("slot_values YAML phải là mapping")
-        self.contacts = _normalized_strings(raw.get("contacts"), "contacts")
-        self.locations = _normalized_strings(raw.get("locations"), "locations")
+        learned = load_slot_lexicon(lexicon_path) if lexicon_path is not None else {}
+        self.contacts = _normalized_strings(
+            [
+                *_normalized_strings(raw.get("contacts"), "contacts"),
+                *learned.get("contact_name", ()),
+            ],
+            "contacts",
+        )
+        self.locations = _normalized_strings(
+            [
+                *_normalized_strings(raw.get("locations"), "locations"),
+                *learned.get("location", ()),
+            ],
+            "locations",
+        )
         self.datetimes = _normalized_strings(raw.get("datetimes"), "datetimes")
         self.weather_times = _normalized_strings(raw.get("weather_times"), "weather_times")
-        self.reminder_texts = _normalized_strings(raw.get("reminder_texts"), "reminder_texts")
+        self.reminder_texts = _normalized_strings(
+            [
+                *_normalized_strings(raw.get("reminder_texts"), "reminder_texts"),
+                *learned.get("reminder_text", ()),
+            ],
+            "reminder_texts",
+        )
         catalog = raw.get("music_catalog")
         if not isinstance(catalog, list) or not all(isinstance(item, dict) for item in catalog):
             raise ValueError("music_catalog phải là list mapping")
         extra_songs = _normalized_strings(raw.get("songs", []), "songs")
         extra_artists = _normalized_strings(raw.get("artists", []), "artists")
         self.songs = _normalized_strings(
-            [item["song"] for item in catalog] + list(extra_songs), "music songs"
+            [item["song"] for item in catalog]
+            + list(extra_songs)
+            + list(learned.get("song", ())),
+            "music songs",
         )
         self.artists = _normalized_strings(
-            [item["artist"] for item in catalog] + list(extra_artists), "music artists"
+            [item["artist"] for item in catalog]
+            + list(extra_artists)
+            + list(learned.get("artist", ())),
+            "music artists",
         )
 
     def extract(self, text: str, intent: Intent) -> SlotExtractionResult:
@@ -201,7 +305,11 @@ class RegexSlotExtractor:
                 matched.append(f"artist:{artist}")
 
         elif intent is Intent.CALL_CONTACT:
-            phone_match = PHONE_PATTERN.search(normalized_text)
+            phone_match = (
+                None
+                if OVERLONG_PHONE_PATTERN.search(normalized_text)
+                else PHONE_PATTERN.search(normalized_text)
+            )
             contact = _find_longest(normalized_text, self.contacts)
             if phone_match:
                 phone = re.sub(r"\s+", " ", phone_match.group()).strip()
@@ -221,10 +329,14 @@ class RegexSlotExtractor:
 
     def _extract_datetime(self, text: str) -> str | None:
         """Sinh nhiều ứng viên rồi lấy cụm dài nhất để không cắt `ngày mai lúc sáu giờ`."""
+        if INVALID_NUMERIC_TIME_PATTERN.search(text):
+            return None
         configured = _find_longest(text, self.datetimes + self.weather_times)
         candidates = [configured] if configured else []
         patterns = (
             DAY_CLOCK_PATTERN,
+            DAY_NUMERIC_CLOCK_PATTERN,
+            NUMERIC_CLOCK_DAY_PATTERN,
             AFTER_CLOCK_PATTERN,
             CALENDAR_DATE_PATTERN,
             MONTHLY_DATE_PATTERN,
@@ -251,18 +363,26 @@ class RegexSlotExtractor:
         reminder = REMINDER_TRIGGER_PATTERN.sub("", reminder, count=1)
         reminder = re.sub(
             r"^(?:cài đặt một nhắc nhở|đặt lời nhắc|đặt lịch|tôi cần phải được nhắc rằng)"
-            r"(?:\s+(?:cho|tôi))?\s+",
+            r"(?:\s+(?:cho|tôi))?(?:\s+|$)",
             "",
             reminder,
         )
+        reminder = REMINDER_POLITE_PREFIX_PATTERN.sub("", reminder, count=1)
         if datetime:
             reminder = re.sub(rf"(?<!\w){re.escape(datetime)}(?!\w)", " ", reminder, count=1)
-        reminder = re.sub(r"^(?:vào|lúc|đến|cho|về|rằng|sau|trước)\s+", "", reminder.strip())
+        reminder = re.sub(
+            r"^(?:vào|lúc|đến|cho|về|rằng|sau|trước)(?:\s+|$)",
+            "",
+            reminder.strip(),
+        )
         reminder = re.sub(r"\s+(?:vào|lúc|đến|cho|sau|trước)\s*$", "", reminder.strip())
         reminder = re.split(r"\s+(?:vì|tại|ở)\s+", reminder, maxsplit=1)[0]
         reminder = re.sub(r"\s+(?:của (?:tôi|mình)|tiếp theo)\s*$", "", reminder)
         reminder = POLITE_END_PATTERN.sub("", reminder).strip(" ,.!?")
-        return re.sub(r"\s+", " ", reminder) or None
+        reminder = re.sub(r"\s+", " ", reminder)
+        if reminder in REMINDER_EMPTY_CONTENT or REMINDER_INCOMPLETE_ACTION.fullmatch(reminder):
+            return None
+        return reminder or None
 
     def _extract_location(self, text: str) -> str | None:
         """Ưu tiên địa danh chuẩn; nếu ngoài từ điển thì lấy theo ngữ cảnh câu thời tiết."""
@@ -307,6 +427,7 @@ class RegexSlotExtractor:
                     matches
                     and (value := _clean_entity(matches[-1].group("value")))
                     and not INVALID_MUSIC_ENTITY.search(value)
+                    and not MUSIC_ENTITY_STOP_ONLY.fullmatch(value)
                 ):
                     artist = value
                     break
@@ -322,7 +443,11 @@ class RegexSlotExtractor:
             for pattern in song_patterns:
                 match = pattern.search(text)
                 if match and (value := _clean_entity(match.group("value"))):
-                    if not INVALID_MUSIC_ENTITY.search(value) and not value.startswith("từ "):
+                    if (
+                        not INVALID_MUSIC_ENTITY.search(value)
+                        and not MUSIC_ENTITY_STOP_ONLY.fullmatch(value)
+                        and not value.startswith("từ ")
+                    ):
                         song = value
                         break
         return song, artist
@@ -341,7 +466,25 @@ class RegexSlotExtractor:
 
     def _extract_unknown_contact(self, text: str) -> str | None:
         """Lấy tên ngoài danh bạ sau cue gọi; không buộc mọi tên riêng vào YAML."""
-        match = re.search(r"^(?:hãy\s+)?gọi(?:\s+(?:cho|đến|tới|giúp tôi))?\s+(?P<value>.+)$", text)
-        if not match:
+        candidate = re.sub(
+            r"^(?:hãy\s+)?gọi(?:\s+(?:điện|lại)){0,2}(?=\s|$)",
+            "",
+            text,
+            count=1,
+        ).strip()
+        candidate = re.sub(r"^(?:cho|đến|tới)(?=\s|$)", "", candidate, count=1).strip()
+        value = _clean_entity(candidate)
+        if value is None or value in CONTACT_EMPTY_CONTENT:
             return None
-        return _clean_entity(match.group("value"))
+        if re.match(r"^(?:giúp|dùm|giùm|đi|ngay|bây giờ|điện|số)(?:\s|$)", value):
+            return None
+        if re.fullmatch(
+            r"(?:ai|người nào|nguoi nao)(?:\s+(?:vậy|thế|nào|đó|vay|the|nao|do))?",
+            value,
+        ):
+            return None
+        if re.search(r"(?<!\w)dậy\s*$", value):
+            return None
+        if re.search(r"\d", value) or value.startswith("+"):
+            return None
+        return value

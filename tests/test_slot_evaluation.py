@@ -50,3 +50,5 @@ def test_slot_evaluation_counts_exact_and_missing_values() -> None:
     assert report["micro"]["precision"] == 1.0
     assert report["micro"]["recall"] == 0.5
     assert report["failure_count"] == 1
+    assert report["breakdown"]["source"]["manual"]["total_samples"] == 2
+    assert report["breakdown"]["intent"]["call_contact"]["slot_exact_match"] == 1.0

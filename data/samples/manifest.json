@@ -1,42 +1,77 @@
 {
   "annotation_quality": {
-    "auto_mapped": 994,
-    "reviewed": 22,
-    "template_generated": 1372
-  },
-  "augmentations": {
-    "intent_hard_cases": {
-      "samples": 22,
-      "source": "data\\raw_sources\\intent_hard_cases.jsonl"
-    }
+    "auto_mapped": 969,
+    "reviewed": 19,
+    "template_generated": 1106
   },
   "files": {
-    "test_central.jsonl": 72,
-    "test_north.jsonl": 72,
-    "test_south.jsonl": 72,
-    "test_standard.jsonl": 175,
-    "train.jsonl": 1645,
-    "validation.jsonl": 352
+    "test_central.jsonl": 70,
+    "test_north.jsonl": 70,
+    "test_south.jsonl": 70,
+    "test_standard.jsonl": 174,
+    "train.jsonl": 1363,
+    "validation.jsonl": 347
+  },
+  "files_sha256": {
+    "test_central.jsonl": "d30803f16fc0b809b9ab1e0f2572f7df007ff44975b24a719fac757c2307203a",
+    "test_north.jsonl": "7fd8faba023754e46f074cf40436174296e9a8ebf79f863e167ea6bfa94a023e",
+    "test_south.jsonl": "8f6fa315f9896f77fbfb15d06e201cd69d9d3f0c39445933cee6b5c735c615df",
+    "test_standard.jsonl": "351ae7a019a1de2becbd95fa2848d3dfe14a0c7f28c73513e6f93e1e2250c541",
+    "train.jsonl": "43b15762c3ba3ed423bebd2bbaf98ea8fd649b79ac6e97a6feb5c3925c1723d8",
+    "validation.jsonl": "d9199b55fe92c0692069a1b366d644fcaa68f6fcbe55f6d6dc3bc0efcc50dee1"
+  },
+  "filtering": {
+    "after": 2094,
+    "before": 2421,
+    "dropped": 327,
+    "dropped_by_source": {
+      "manual": 3,
+      "massive": 1,
+      "old_project": 10,
+      "synthetic": 313
+    },
+    "reason": "normalized_cross_split_near_and_same_split_exact_duplicates",
+    "steps": {
+      "cross_split_near_similarity": {
+        "after": 2119,
+        "before": 2421,
+        "dropped": 302
+      },
+      "same_split_exact_after_normalization": {
+        "after": 2094,
+        "before": 2119,
+        "dropped": 25
+      }
+    }
+  },
+  "inputs_sha256": {
+    "intent_hard_cases": "0a0a87224e70d6463ce7231f81ae2be673227b5be493059c42388cbb969650e9",
+    "massive_vi_v1": "9dfff36bac20067085d836c30f1a617de968c16fd81bf4c5b802ddd637ab131a",
+    "old_project_seed": "151116af84d8908bc7d040bc707e8b27383d7e18f5ad94e67684e51ed1bbfd20",
+    "regional_templates": "629ef79adabb4fd2f655162b21a0fd14c0094279e9d534cfe1e040ff55ee9d4e",
+    "regional_variants": "7186267fd5da18cac4045582a4ca09352f79690f9deb3e57a43947add1c90184",
+    "slot_values": "f08f91785c8f73b61f0dd617d012541a1f99c9a1f44888f7945c03a69c85ba05"
   },
   "intents": {
-    "ask_weather": 550,
-    "call_contact": 430,
-    "play_music": 580,
-    "set_alarm": 410,
-    "set_reminder": 418
+    "ask_weather": 482,
+    "call_contact": 286,
+    "play_music": 571,
+    "set_alarm": 366,
+    "set_reminder": 389
   },
-  "massive_input_sha256": "9dfff36bac20067085d836c30f1a617de968c16fd81bf4c5b802ddd637ab131a",
   "regions": {
-    "central": 473,
-    "north": 447,
-    "south": 457,
-    "standard": 1011
+    "central": 438,
+    "north": 289,
+    "south": 378,
+    "standard": 989
   },
   "seed": 42,
   "sources": {
-    "manual": 22,
-    "massive": 994,
-    "synthetic": 1372
+    "manual": 19,
+    "massive": 969,
+    "synthetic": 1106
   },
-  "total": 2388
+  "split_policy": "slot_coverage_normalized_near_similarity_v3",
+  "test_set_sha256": "47cb9cf87cc53c5a210298453b4ae6ca75d045250c883bd5cca59709ddec9f2a",
+  "total": 2094
 }

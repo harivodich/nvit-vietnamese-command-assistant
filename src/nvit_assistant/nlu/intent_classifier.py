@@ -9,15 +9,15 @@ from dataclasses import dataclass
 from pathlib import Path
 from typing import Any
 
-import joblib  # type: ignore[import-untyped]
+import joblib
 os.environ.setdefault("MPLCONFIGDIR", str(Path(tempfile.gettempdir()) / "nvit_matplotlib"))
 
 import matplotlib
 import numpy as np
 import yaml
-from sklearn.feature_extraction.text import TfidfVectorizer  # type: ignore[import-untyped]
-from sklearn.linear_model import LogisticRegression  # type: ignore[import-untyped]
-from sklearn.metrics import (  # type: ignore[import-untyped]
+from sklearn.feature_extraction.text import TfidfVectorizer
+from sklearn.linear_model import LogisticRegression
+from sklearn.metrics import (
     ConfusionMatrixDisplay,
     accuracy_score,
     average_precision_score,
@@ -29,12 +29,17 @@ from sklearn.metrics import (  # type: ignore[import-untyped]
     roc_auc_score,
     roc_curve,
 )
-from sklearn.pipeline import FeatureUnion, Pipeline  # type: ignore[import-untyped]
+from sklearn.pipeline import FeatureUnion, Pipeline
 
+from nvit_assistant.nlu.runtime_intent_classifier import IntentClassifier
+from nvit_assistant.nlu.runtime_intent_classifier import (
+    IntentPrediction as IntentPrediction,
+)
+from nvit_assistant.nlu.runtime_intent_classifier import load_classifier as load_classifier
 from nvit_assistant.schemas import Intent, PreprocessedSample
 
 matplotlib.use("Agg")
-import matplotlib.pyplot as plt  # noqa: E402
+import matplotlib.pyplot as plt
 
 
 @dataclass(frozen=True)
@@ -48,34 +53,6 @@ class CandidateConfig:
     char_ngram_range: tuple[int, int] = (3, 5)
     char_min_df: int = 2
     c: float = 1.0
-
-
-@dataclass(frozen=True)
-class IntentPrediction:
-    """Kết quả một lần dự đoán intent, chưa thực hiện slot extraction."""
-
-    intent: Intent
-    confidence: float
-    probabilities: dict[str, float]
-
-
-class IntentClassifier:
-    """Wrapper cho sklearn pipeline để runtime không phụ thuộc chi tiết feature."""
-
-    def __init__(self, pipeline: Any) -> None:
-        self.pipeline = pipeline
-
-    def predict(self, text: str) -> IntentPrediction:
-        """Dự đoán intent và confidence từ text đã qua normalizer."""
-        probabilities = self.pipeline.predict_proba([text])[0]
-        labels = [str(label) for label in self.pipeline.classes_]
-        probability_map = {label: float(score) for label, score in zip(labels, probabilities)}
-        best_label = max(probability_map, key=probability_map.__getitem__)
-        return IntentPrediction(
-            intent=Intent(best_label),
-            confidence=probability_map[best_label],
-            probabilities=probability_map,
-        )
 
 
 def load_preprocessed_samples(path: Path) -> list[PreprocessedSample]:
@@ -100,6 +77,8 @@ def load_training_config(path: Path) -> tuple[int, list[CandidateConfig]]:
         raw_config: Any = yaml.safe_load(file) or {}
     if not isinstance(raw_config, dict) or not isinstance(raw_config.get("seed"), int):
         raise ValueError(f"config train không hợp lệ: {path}")
+    if raw_config.get("selection_metric") != "macro_f1":
+        raise ValueError("selection_metric hiện chỉ hỗ trợ macro_f1")
     raw_candidates = raw_config.get("candidates")
     if not isinstance(raw_candidates, list) or not raw_candidates:
         raise ValueError(f"config train cần candidates: {path}")
@@ -257,7 +236,7 @@ def write_validation_figures(
 
     figure, axis = plt.subplots(figsize=(8, 6))
     for index, label in enumerate(labels):
-        recall, precision, _ = precision_recall_curve(one_hot[:, index], probabilities[:, index])
+        precision, recall, _ = precision_recall_curve(one_hot[:, index], probabilities[:, index])
         axis.plot(recall, precision, label=label)
     axis.set(
         xlabel="Recall",
@@ -294,7 +273,14 @@ def write_validation_figures(
     figure.savefig(calibration_path, dpi=160)
     plt.close(figure)
     paths.append(calibration_path)
-    return [str(path) for path in paths]
+    portable_paths: list[str] = []
+    for path in paths:
+        try:
+            reports_index = path.parts.index("reports")
+            portable_paths.append(Path(*path.parts[reports_index:]).as_posix())
+        except ValueError:
+            portable_paths.append(path.name)
+    return portable_paths
 
 
 def evaluate_pipeline(
@@ -376,6 +362,12 @@ def train_with_validation(
     final_pipeline = build_pipeline(best_config, seed)
     final_pipeline.fit(all_texts, all_labels)
     report = {
+        "selection_policy": {
+            "primary": "macro_f1",
+            "secondary": "accuracy",
+            "final_tie_breaker": "candidate_order_in_config",
+            "selected_candidate_index": candidates.index(best_config),
+        },
         "selected_config": best_config.__dict__,
         "selected_validation": selected_report,
         "candidates": candidate_reports,
@@ -389,14 +381,13 @@ def save_classifier(
     model_path: Path,
     label_map_path: Path,
 ) -> None:
-    """Lưu pipeline và label map riêng để CLI/API sau này load có kiểm tra rõ ràng."""
+    """Lưu pipeline và label map riêng để CLI/API load có kiểm tra rõ ràng."""
     model_path.parent.mkdir(parents=True, exist_ok=True)
     joblib.dump(classifier.pipeline, model_path)
     labels = sorted(str(label) for label in classifier.pipeline.classes_)
     label_map_path.parent.mkdir(parents=True, exist_ok=True)
-    label_map_path.write_text(json.dumps(labels, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
-
-
-def load_classifier(model_path: Path) -> IntentClassifier:
-    """Load artifact đã train cho pipeline runtime ở phase kế tiếp."""
-    return IntentClassifier(joblib.load(model_path))
+    label_map_path.write_text(
+        json.dumps(labels, ensure_ascii=False, indent=2) + "\n",
+        encoding="utf-8",
+        newline="\n",
+    )
