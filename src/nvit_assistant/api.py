@@ -33,7 +33,10 @@ def create_app(pipeline: NLUPipeline | None = None) -> FastAPI:
     def health(request: Request) -> dict[str, str]:
         """Báo ready chỉ sau khi lifespan đã nạp pipeline thành công."""
         status = "ready" if hasattr(request.app.state, "pipeline") else "starting"
-        return {"status": status, "mode": "mock-actions"}
+        runtime_pipeline: NLUPipeline | None = getattr(request.app.state, "pipeline", None)
+        router = runtime_pipeline.action_router if runtime_pipeline is not None else None
+        mode = getattr(router, "mode", "starting")
+        return {"status": status, "mode": mode}
 
     @application.post("/parse", response_model=ParseResult)
     def parse(payload: ParseRequest, request: Request) -> ParseResult:

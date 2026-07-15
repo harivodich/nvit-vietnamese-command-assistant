@@ -91,6 +91,19 @@ def test_trainer_selects_candidate_and_predicts_known_intent(tmp_path: Path) -> 
 
     model_path = tmp_path / "intent.joblib"
     label_map_path = tmp_path / "labels.json"
+    word_vectorizer = classifier.pipeline.named_steps["features"].transformer_list[0][1]
+    assert "_stop_words_id" in word_vectorizer.__dict__
     save_classifier(classifier, model_path, label_map_path)
 
-    assert load_classifier(model_path).predict("gọi cho mẹ").intent is Intent.CALL_CONTACT
+    assert "_stop_words_id" not in word_vectorizer.__dict__
+    loaded = load_classifier(model_path)
+    loaded_word_vectorizer = loaded.pipeline.named_steps["features"].transformer_list[0][1]
+    assert "_stop_words_id" not in loaded_word_vectorizer.__dict__
+    assert loaded.predict("gọi cho mẹ").intent is Intent.CALL_CONTACT
+
+    second_model_path = tmp_path / "intent-second.joblib"
+    second_label_map_path = tmp_path / "labels-second.json"
+    word_vectorizer.__dict__["_stop_words_id"] = 123456
+    save_classifier(classifier, second_model_path, second_label_map_path)
+
+    assert model_path.read_bytes() == second_model_path.read_bytes()

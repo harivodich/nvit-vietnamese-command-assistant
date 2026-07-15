@@ -27,6 +27,10 @@ def test_runtime_settings_resolve_paths_inside_project() -> None:
     assert settings.regional_variants_path == (ROOT / "configs" / "regional_variants.yaml")
     assert settings.slot_values_path == (ROOT / "configs" / "slot_values.yaml")
     assert settings.slot_lexicon_path == (ROOT / "models" / "slot_lexicon.json")
+    assert settings.action_mode == "mock"
+    assert settings.contacts_path == (ROOT / "data" / "fake_contacts.json")
+    assert settings.music_catalog_path == (ROOT / "data" / "music_catalog.json")
+    assert settings.weather_timeout_seconds == 5.0
 
 
 def test_runtime_settings_reject_invalid_threshold(tmp_path: Path) -> None:
@@ -54,6 +58,13 @@ def test_build_pipeline_has_action_router_and_confidence_gate() -> None:
     assert pipeline.confidence_threshold == 0.35
 
 
+def test_build_pipeline_can_enable_live_weather_without_calling_network() -> None:
+    pipeline = build_pipeline(ROOT, action_mode="live-weather")
+
+    assert pipeline.action_router is not None
+    assert pipeline.action_router.mode == "live-weather"
+
+
 def test_resolve_project_root_uses_environment_outside_repo(
     tmp_path: Path, monkeypatch: pytest.MonkeyPatch
 ) -> None:
@@ -61,6 +72,11 @@ def test_resolve_project_root_uses_environment_outside_repo(
     monkeypatch.setenv("NVIT_PROJECT_ROOT", str(ROOT))
 
     assert resolve_project_root() == ROOT.resolve()
+
+
+def test_resolve_project_root_rejects_invalid_explicit_path(tmp_path: Path) -> None:
+    with pytest.raises(FileNotFoundError, match="project root được chỉ định"):
+        resolve_project_root(tmp_path)
 
 
 def test_classifier_label_map_mismatch_fails_fast(tmp_path: Path) -> None:

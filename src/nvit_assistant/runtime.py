@@ -11,7 +11,12 @@ from typing import Any
 
 import yaml
 
-from nvit_assistant.actions import MockActionRouter
+from nvit_assistant.actions import (
+    ActionRouter,
+    IntegratedActionRouter,
+    MockActionRouter,
+    OpenMeteoWeatherClient,
+)
 from nvit_assistant.nlu.action_gate import CommandActionGate
 from nvit_assistant.nlu.normalizer import VietnameseNormalizer
 from nvit_assistant.nlu.pipeline import NLUPipeline
@@ -31,6 +36,10 @@ class RuntimeSettings:
     regional_variants_path: Path
     slot_values_path: Path
     slot_lexicon_path: Path
+    action_mode: str
+    contacts_path: Path
+    music_catalog_path: Path
+    weather_timeout_seconds: float
 
 
 def _mapping(value: Any, field_name: str) -> dict[str, Any]:
@@ -48,11 +57,24 @@ def _relative_path(root: Path, value: Any, field_name: str) -> Path:
     return path if path.is_absolute() else (root / path).resolve()
 
 
+def _action_mode(value: Any, field_name: str) -> str:
+    """Chỉ cho phép hai chế độ được mô tả rõ, tránh vô tình bật action thật khác."""
+    if not isinstance(value, str) or value not in {"mock", "live-weather"}:
+        raise ValueError(f"{field_name} phải là mock hoặc live-weather")
+    return value
+
+
 def resolve_project_root(explicit_root: Path | None = None) -> Path:
     """Tìm repo root từ tham số, biến môi trường, cwd rồi mới tới source tree."""
+    if explicit_root is not None:
+        resolved = explicit_root.resolve()
+        if (resolved / "configs" / "app.yaml").is_file():
+            return resolved
+        raise FileNotFoundError(
+            f"project root được chỉ định không có configs/app.yaml: {resolved}"
+        )
     environment_root = os.environ.get("NVIT_PROJECT_ROOT")
     candidates = [
-        explicit_root,
         Path(environment_root) if environment_root else None,
         Path.cwd(),
         Path(__file__).resolve().parents[2],
@@ -127,6 +149,14 @@ def load_runtime_settings(config_path: Path, project_root: Path) -> RuntimeSetti
         raise ValueError("confidence_threshold phải nằm trong [0, 1]")
     model = _mapping(config.get("model"), "model")
     nlu = _mapping(config.get("nlu"), "nlu")
+    actions = _mapping(config.get("actions", {}), "actions")
+    weather_timeout = actions.get("weather_timeout_seconds", 5.0)
+    if (
+        not isinstance(weather_timeout, (int, float))
+        or isinstance(weather_timeout, bool)
+        or not 0.0 < float(weather_timeout) <= 30.0
+    ):
+        raise ValueError("actions.weather_timeout_seconds phải nằm trong (0, 30]")
     return RuntimeSettings(
         confidence_threshold=float(threshold),
         intent_classifier_path=_relative_path(
@@ -140,10 +170,24 @@ def load_runtime_settings(config_path: Path, project_root: Path) -> RuntimeSetti
         slot_lexicon_path=_relative_path(
             root, nlu.get("slot_lexicon_path"), "nlu.slot_lexicon_path"
         ),
+        action_mode=_action_mode(actions.get("mode", "mock"), "actions.mode"),
+        contacts_path=_relative_path(
+            root,
+            actions.get("contacts_path", "data/fake_contacts.json"),
+            "actions.contacts_path",
+        ),
+        music_catalog_path=_relative_path(
+            root,
+            actions.get("music_catalog_path", "data/music_catalog.json"),
+            "actions.music_catalog_path",
+        ),
+        weather_timeout_seconds=float(weather_timeout),
     )
 
 
-def build_pipeline(project_root: Path | None = None) -> NLUPipeline:
+def build_pipeline(
+    project_root: Path | None = None, action_mode: str | None = None
+) -> NLUPipeline:
     """Lắp pipeline hoàn chỉnh một lần; CLI/API không tự tạo dependency khác nhau."""
     root = resolve_project_root(project_root)
     settings = load_runtime_settings(root / "configs" / "app.yaml", root)
@@ -176,6 +220,19 @@ def build_pipeline(project_root: Path | None = None) -> NLUPipeline:
     validate_slot_lexicon_provenance(
         slot_lexicon_path, train_path, settings.regional_variants_path
     )
+    selected_action_mode = _action_mode(
+        action_mode or os.environ.get("NVIT_ACTION_MODE") or settings.action_mode,
+        "action mode runtime",
+    )
+    action_router: ActionRouter
+    if selected_action_mode == "live-weather":
+        action_router = IntegratedActionRouter(
+            _require_file(settings.contacts_path, "fake contacts data"),
+            _require_file(settings.music_catalog_path, "music catalog data"),
+            OpenMeteoWeatherClient(settings.weather_timeout_seconds),
+        )
+    else:
+        action_router = MockActionRouter()
     return NLUPipeline(
         normalizer=VietnameseNormalizer(
             _require_file(settings.regional_variants_path, "regional variants config")
@@ -185,7 +242,7 @@ def build_pipeline(project_root: Path | None = None) -> NLUPipeline:
             _require_file(settings.slot_values_path, "slot values config"),
             slot_lexicon_path,
         ),
-        action_router=MockActionRouter(),
+        action_router=action_router,
         action_gate=CommandActionGate(),
         confidence_threshold=settings.confidence_threshold,
     )

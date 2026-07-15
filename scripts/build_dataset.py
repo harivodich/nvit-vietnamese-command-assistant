@@ -1,4 +1,4 @@
-"""Build dataset từ MASSIVE, seed cũ và template vùng miền."""
+"""Build dataset từ MASSIVE, template vùng miền và hard-case đã rà soát."""
 
 from __future__ import annotations
 
@@ -30,7 +30,6 @@ def main() -> None:
         output_dir=args.output_dir.resolve(),
         templates_path=ROOT / "configs" / "data_templates.yaml",
         slot_values_path=ROOT / "configs" / "slot_values.yaml",
-        old_project_seed_path=ROOT / "data" / "raw_sources" / "old_project_seed.jsonl",
         hard_cases_path=ROOT / "data" / "raw_sources" / "intent_hard_cases.jsonl",
         regional_variants_path=ROOT / "configs" / "regional_variants.yaml",
         seed=args.seed,

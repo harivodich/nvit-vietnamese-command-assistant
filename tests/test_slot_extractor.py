@@ -177,3 +177,19 @@ def test_overlong_separated_phone_is_not_truncated(
     text = "gọi số 0 9 0 1 2 3 4 5 6 7 8 9"
 
     assert extractor.extract(text, Intent.CALL_CONTACT).slots == {}
+
+
+@pytest.mark.parametrize(
+    "text",
+    [
+        "thời tiết ở đâu",
+        "thời tiết ở đây",
+        "thời tiết ở chỗ nào",
+        "thời tiết ở nơi nào",
+        "thoi tiet o dau",
+    ],
+)
+def test_weather_placeholder_is_not_a_location(
+    extractor: RegexSlotExtractor, text: str
+) -> None:
+    assert "location" not in extractor.extract(text, Intent.ASK_WEATHER).slots

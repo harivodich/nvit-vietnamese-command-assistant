@@ -6,3 +6,8 @@ nlu:
   regional_variants_path: configs/regional_variants.yaml
   slot_values_path: configs/slot_values.yaml
   slot_lexicon_path: models/slot_lexicon.json
+actions:
+  mode: mock
+  contacts_path: data/fake_contacts.json
+  music_catalog_path: data/music_catalog.json
+  weather_timeout_seconds: 5.0

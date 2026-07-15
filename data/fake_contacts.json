@@ -1,0 +1,86 @@
+{
+  "schema_version": 1,
+  "notice": "Dữ liệu hoàn toàn giả lập cho demo; không được dùng để thực hiện cuộc gọi thật.",
+  "contacts": [
+    {
+      "name": "mẹ",
+      "aliases": ["má", "mạ"],
+      "phone_number": "000 000 0001"
+    },
+    {
+      "name": "bố",
+      "aliases": ["cha", "ba", "tía"],
+      "phone_number": "000 000 0002"
+    },
+    {
+      "name": "anh nam",
+      "aliases": [],
+      "phone_number": "000 000 0003"
+    },
+    {
+      "name": "chị linh",
+      "aliases": [],
+      "phone_number": "000 000 0004"
+    },
+    {
+      "name": "em an",
+      "aliases": [],
+      "phone_number": "000 000 0005"
+    },
+    {
+      "name": "cô lan",
+      "aliases": [],
+      "phone_number": "000 000 0006"
+    },
+    {
+      "name": "chú hùng",
+      "aliases": [],
+      "phone_number": "000 000 0007"
+    },
+    {
+      "name": "bác sĩ minh",
+      "aliases": [],
+      "phone_number": "000 000 0008"
+    },
+    {
+      "name": "sếp hải",
+      "aliases": [],
+      "phone_number": "000 000 0009"
+    },
+    {
+      "name": "bạn phương",
+      "aliases": [],
+      "phone_number": "000 000 0010"
+    },
+    {
+      "name": "đồng nghiệp",
+      "aliases": [],
+      "phone_number": "000 000 0011"
+    },
+    {
+      "name": "ông nội",
+      "aliases": [],
+      "phone_number": "000 000 0012"
+    },
+    {
+      "name": "bà ngoại",
+      "aliases": [],
+      "phone_number": "000 000 0013"
+    },
+    {
+      "name": "anh tuấn",
+      "aliases": [],
+      "phone_number": "000 000 0014"
+    },
+    {
+      "name": "chị mai",
+      "aliases": [],
+      "phone_number": "000 000 0015"
+    },
+    {
+      "name": "bạn khánh",
+      "aliases": [],
+      "phone_number": "000 000 0016"
+    }
+  ]
+}

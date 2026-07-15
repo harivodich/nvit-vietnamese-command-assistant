@@ -24,14 +24,21 @@ def missing_required_slot_options(intent: Intent, slots: Mapping[str, object]) -
 MISSING_SLOT_PROMPTS = {
     Intent.SET_REMINDER: "Bạn muốn mình nhắc việc gì?",
     Intent.SET_ALARM: "Bạn muốn đặt báo thức lúc nào?",
+    Intent.ASK_WEATHER: "Bạn muốn xem thời tiết ở tỉnh hoặc thành phố nào?",
     Intent.CALL_CONTACT: "Bạn muốn gọi cho ai hoặc gọi tới số điện thoại nào?",
 }
 WAKE_UP_BOUNDARY_PATTERN = re.compile(
     r"(?<!\w)(?:(?:gọi|kêu)(?:\s+\w+){0,3}\s+dậy|"
     r"đánh thức(?:\s+(?:tôi|tớ|tui|mình|em|con|cháu|tao))?)(?!\w)"
 )
-IMMEDIATE_CALL_BOUNDARY_PATTERN = re.compile(
-    r"^(?:hãy\s+)?gọi(?:\s+(?:điện|lại)){0,2}(?=\s|$)"
+CALL_COMMAND_PATTERN = re.compile(
+    r"(?<!\w)(?:gọi|goi|liên lạc|lien lac|liên hệ|lien he|"
+    r"quay (?:số|so)|bấm (?:số|so)|bam (?:so|may)|bấm máy|"
+    r"nối máy|noi may|thực hiện cuộc gọi|thuc hien cuoc goi)(?!\w)"
+)
+IMMEDIATE_DATETIMES = frozenset({"bây giờ", "bay gio"})
+WEATHER_LOCATION_PLACEHOLDER_PATTERN = re.compile(
+    r"(?<!\w)(?:đâu|dau|đây|day|chỗ nào|cho nao|nơi nào|noi nao)(?!\w)"
 )
 
 
@@ -45,20 +52,47 @@ def missing_slot_prompt(intent: Intent, missing_options: tuple[str, ...]) -> str
 
 def resolve_intent_boundary(
     text: str, predicted_intent: Intent, slot_extractor: RegexSlotExtractor
-) -> Intent:
-    """Áp dụng hai ranh giới high-precision mà classifier thường nhầm trong câu cực ngắn."""
+) -> tuple[Intent, bool]:
+    """Sửa các ranh giới gọi ngay, gọi theo lịch và đánh thức bằng rule rõ nghĩa."""
     if WAKE_UP_BOUNDARY_PATTERN.search(text):
-        return Intent.SET_ALARM
-    if IMMEDIATE_CALL_BOUNDARY_PATTERN.search(text):
-        reminder_slots = slot_extractor.extract(text, Intent.SET_REMINDER).slots
-        call_slots = slot_extractor.extract(text, Intent.CALL_CONTACT).slots
-        if "datetime" not in reminder_slots and (
-            predicted_intent is Intent.SET_REMINDER
-            or "contact_name" in call_slots
-            or "phone_number" in call_slots
-        ):
-            return Intent.CALL_CONTACT
-    return predicted_intent
+        return Intent.SET_ALARM, True
+
+    reminder_slots = slot_extractor.extract(text, Intent.SET_REMINDER).slots
+    call_slots = slot_extractor.extract(text, Intent.CALL_CONTACT).slots
+    reminder_text = reminder_slots.get("reminder_text")
+    if isinstance(reminder_text, str):
+        call_slots = {
+            **slot_extractor.extract(reminder_text, Intent.CALL_CONTACT).slots,
+            **call_slots,
+        }
+    has_call_target = "contact_name" in call_slots or "phone_number" in call_slots
+    has_call_command = CALL_COMMAND_PATTERN.search(text) is not None
+    scheduled_call_command = (
+        isinstance(reminder_text, str) and CALL_COMMAND_PATTERN.match(reminder_text) is not None
+    )
+    datetime = reminder_slots.get("datetime")
+    contact_name = call_slots.get("contact_name")
+    datetime_belongs_to_contact = (
+        isinstance(datetime, str)
+        and isinstance(contact_name, str)
+        and re.search(rf"(?<!\w){re.escape(datetime)}(?!\w)", contact_name) is not None
+    )
+
+    if (
+        scheduled_call_command
+        and has_call_target
+        and isinstance(datetime, str)
+        and datetime not in IMMEDIATE_DATETIMES
+        and not datetime_belongs_to_contact
+    ):
+        return Intent.SET_REMINDER, True
+    if (
+        has_call_command
+        and has_call_target
+        and (datetime is None or datetime in IMMEDIATE_DATETIMES or datetime_belongs_to_contact)
+    ):
+        return Intent.CALL_CONTACT, True
+    return predicted_intent, False
 
 
 class NLUPipeline:
@@ -86,7 +120,18 @@ class NLUPipeline:
         """Chuẩn hóa một lần, dự đoán intent rồi chỉ trích slot hợp lệ của intent đó."""
         normalized = self.normalizer.normalize(request.text, request.region_hint)
         prediction = self.intent_classifier.predict(normalized.normalized_text)
-        if prediction.confidence < self.confidence_threshold:
+        resolved_intent, boundary_matched = resolve_intent_boundary(
+            normalized.normalized_text, prediction.intent, self.slot_extractor
+        )
+        if resolved_intent is not prediction.intent:
+            boundary_features = [
+                f"intent_boundary:{prediction.intent.value}->{resolved_intent.value}"
+            ]
+        elif boundary_matched:
+            boundary_features = [f"intent_boundary_confirmed:{resolved_intent.value}"]
+        else:
+            boundary_features = []
+        if prediction.confidence < self.confidence_threshold and not boundary_matched:
             return ParseResult(
                 text=request.text,
                 normalized_text=normalized.normalized_text,
@@ -101,14 +146,8 @@ class NLUPipeline:
                     f"confidence_threshold:{self.confidence_threshold:.2f}",
                 ],
             )
-        resolved_intent = resolve_intent_boundary(
-            normalized.normalized_text, prediction.intent, self.slot_extractor
-        )
-        boundary_features = (
-            [f"intent_boundary:{prediction.intent.value}->{resolved_intent.value}"]
-            if resolved_intent is not prediction.intent
-            else []
-        )
+        if prediction.confidence < self.confidence_threshold:
+            boundary_features.append("confidence_override:high_precision_boundary")
         extraction = self.slot_extractor.extract(normalized.normalized_text, resolved_intent)
         if self.action_gate is not None:
             gate = self.action_gate.check(
@@ -133,7 +172,16 @@ class NLUPipeline:
                         f"action_gate:{gate.reason}",
                     ],
                 )
-        missing_options = missing_required_slot_options(resolved_intent, extraction.slots)
+        weather_location_is_placeholder = (
+            resolved_intent is Intent.ASK_WEATHER
+            and "location" not in extraction.slots
+            and WEATHER_LOCATION_PLACEHOLDER_PATTERN.search(normalized.normalized_text) is not None
+        )
+        missing_options = (
+            ("location",)
+            if weather_location_is_placeholder
+            else missing_required_slot_options(resolved_intent, extraction.slots)
+        )
         action = None
         if missing_options:
             response = missing_slot_prompt(resolved_intent, missing_options)
@@ -157,6 +205,14 @@ class NLUPipeline:
                 f"intent_model:{prediction.intent.value}",
                 *boundary_features,
                 *extraction.matched_features,
-                *([f"missing_required_slots:{'|'.join(missing_options)}"] if missing_options else []),
+                *(
+                    ["location_clarification:placeholder"]
+                    if weather_location_is_placeholder
+                    else (
+                        [f"missing_required_slots:{'|'.join(missing_options)}"]
+                        if missing_options
+                        else []
+                    )
+                ),
             ],
         )

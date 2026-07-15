@@ -33,14 +33,17 @@ UNSUPPORTED_OPERATION_FOLDED_PATTERN = re.compile(
 NEGATED_COMMAND_PATTERN = re.compile(
     r"(?<!\w)(?:đừng|chớ|khỏi)\s+(?!quên\s+(?:nhắc|báo|gọi))|"
     r"(?<!\w)(?:không|chưa)\s+(?:cần\s+)?"
-    r"(?:gọi|mở|phát|chơi|nghe|đặt|cài|nhắc|hỏi|xem|báo)|"
+    r"(?:gọi|liên lạc|liên hệ|quay số|bấm|nối máy|hẹn giờ|"
+    r"mở|phát|chơi|nghe|đặt|cài|nhắc|hỏi|xem|báo)|"
     r"(?<!\w)tôi\s+không\s+muốn\b"
 )
 NEGATED_COMMAND_FOLDED_PATTERN = re.compile(
     r"(?<!\w)(?:dung|khoi)\s+(?!quen\s+(?:nhac|bao|goi))"
-    r"(?:goi|mo|phat|choi|nghe|dat|cai|nhac|hoi|xem|bao)\b|"
+    r"(?:goi|lien lac|lien he|quay so|bam|noi may|hen gio|"
+    r"mo|phat|choi|nghe|dat|cai|nhac|hoi|xem|bao)\b|"
     r"(?<!\w)(?:khong|chua)\s+(?:can\s+)?"
-    r"(?:goi|mo|phat|choi|nghe|dat|cai|nhac|hoi|xem|bao)\b|"
+    r"(?:goi|lien lac|lien he|quay so|bam|noi may|hen gio|"
+    r"mo|phat|choi|nghe|dat|cai|nhac|hoi|xem|bao)\b|"
     r"(?<!\w)(?:khong|chua)\s+can\s+"
     r"(?:thoi tiet|du bao|bao thuc|chuong|loi nhac|nhac)\b|"
     r"(?<!\w)(?:toi\s+)?khong\s+muon\s+"
@@ -54,20 +57,23 @@ OUT_OF_SCOPE_PATTERN = re.compile(r"(?<!\w)gọi\s+món\b")
 OUT_OF_SCOPE_FOLDED_PATTERN = re.compile(r"(?<!\w)goi\s+mon\b")
 NON_ACTION_STATEMENT_FOLDED_PATTERN = re.compile(
     r"^(?:toi|minh|me|bo|ba|ma|co ay|anh ay|em ay|ho|ban)\s+"
-    r"(?:dang|da|vua|thich|yeu|ghet)\b|"
+    r"(?:dang|da|vua|se|thich|yeu|ghet)\b|"
     r"^(?:toi|minh|me|bo|ba|ma|co ay|anh ay|em ay|ho|ban)\s+"
-    r"(?:uong|mua|goi|nop|gui|tuoi|hop|kiem tra|thanh toan|tra|don|tap|nghe|mo|phat)\b|"
+    r"(?:uong|mua|goi|bam|lien lac|lien he|quay so|noi may|thuc hien cuoc goi|"
+    r"nop|gui|tuoi|hop|hen gio|kiem tra|thanh toan|tra|don|tap|nghe|mo|phat)\b|"
     r"^(?:hom qua|toi qua|sang qua|chieu qua)\b.*(?<!\w)(?:troi|thoi tiet)\b.*"
     r"(?<!\w)(?:mua|nang|lanh|nong|gio|dep)\s*[.!?]*$|"
-    r"^(?:day|do)\s+la\b|(?:roi|qua)\s*[.!?]*$|(?<!\w)chuong\s+cua\b"
+    r"^(?:day|do)\s+la\b|^(?:roi|qua)\s*[.!?]*$|(?<!\w)chuong\s+cua\b"
     r"|^(?:hom nay\s+)?troi\s+(?:dang\s+)?"
-    r"(?:dep|mua|nang|lanh|nong|nhieu gio|co gio)\s*[.!?]*$"
+    r"(?:dep|mua|nang|lanh|nong|nhieu gio|co gio)"
+    r"(?:\s+(?:roi|qua))?\s*[.!?]*$"
     r"|^(?:toi|minh|me|bo|ba|ma|co ay|anh ay|em ay|ho|ban)\s+"
     r"(?:nghe|mo|phat)\s+(?:nhac|am nhac|bai hat)"
     r"(?:\s+(?:moi ngay|hang ngay|thuong xuyen))?\s*[.!?]*$"
     r"|^(?:nhac|am nhac|bai hat(?: nay)?)\s+(?:dang\s+phat|hay)\s*[.!]*$"
     r"|^nhiet do\s+la\s+(?:\d+|am\s+\d+)\s+do\s*[.!]*$"
-    r"|^.{2,40}\s+dang\s+(?:mua|nang|lanh|nong)\s*[.!]*$"
+    r"|^.{2,40}\s+dang\s+(?:mua|nang|lanh|nong)"
+    r"(?:\s+(?:roi|qua))?\s*[.!]*$"
     r"|^(?:hom nay|ngay mai|mai|toi nay)\s+co\s+cuoc hop\s*[.!]*$"
 )
 SIDE_EFFECT_INTENTS = frozenset(
@@ -79,8 +85,9 @@ SIDE_EFFECT_INTENTS = frozenset(
     }
 )
 ACTION_VERB_FOLDED = (
-    r"(?:goi|lien he|quay so|noi may|mo|bat|phat|choi|nghe|"
-    r"dat|cai|nhac|tao loi nhac|danh thuc)"
+    r"(?:goi|lien lac|lien he|quay so|bam(?: so| may)?|noi may|"
+    r"thuc hien cuoc goi|mo|bat|phat|choi|nghe|"
+    r"dat|cai|hen gio|nhac|tao loi nhac|danh thuc)"
 )
 NON_COMMAND_QUESTION_FOLDED_PATTERN = re.compile(
     rf"^(?:da\s+)?{ACTION_VERB_FOLDED}(?:\s+.+?)?\s+chua\s*[?!.]*$|"
@@ -104,7 +111,7 @@ INTENT_CUES = {
     Intent.SET_ALARM: _compile_folded(
         r"(?<!\w)(?:báo thức|đánh thức|(?:gọi|kêu)"
         r"(?:\s+\w+){0,3}\s+dậy|"
-        r"thức dậy|chuông)\b"
+        r"thức dậy|chuông|hẹn giờ)\b"
     ),
     Intent.ASK_WEATHER: _compile_folded(
         r"(?<!\w)(?:thời tiết|dự báo|nhiệt độ|trời|mưa|nắng|lạnh|nóng|tuyết|gió|"
@@ -115,7 +122,8 @@ INTENT_CUES = {
         r"nghe|phát|rap|jazz)\b"
     ),
     Intent.CALL_CONTACT: _compile_folded(
-        r"(?<!\w)(?:gọi|liên hệ|quay số|nối máy|điện thoại)\b"
+        r"(?<!\w)(?:gọi|liên lạc|liên hệ|quay số|bấm số|bấm máy|nối máy|"
+        r"thực hiện cuộc gọi|điện thoại)\b"
     ),
 }
 
@@ -142,7 +150,13 @@ class CommandActionGate:
     def check(self, text: str, intent: Intent, slots: dict[str, Any]) -> ActionGateDecision:
         """Ưu tiên chặn phủ định/cancel, sau đó yêu cầu cue phù hợp intent."""
         folded_text = _fold_for_matching(text)
-        if NON_ACTION_STATEMENT_FOLDED_PATTERN.search(folded_text):
+        reminder_text = slots.get(SlotName.REMINDER_TEXT.value)
+        folded_reminder = (
+            _fold_for_matching(reminder_text) if isinstance(reminder_text, str) else ""
+        )
+        if NON_ACTION_STATEMENT_FOLDED_PATTERN.search(
+            folded_text
+        ) or NON_ACTION_STATEMENT_FOLDED_PATTERN.search(folded_reminder):
             return ActionGateDecision(False, "non_action_statement")
         if (
             intent in SIDE_EFFECT_INTENTS

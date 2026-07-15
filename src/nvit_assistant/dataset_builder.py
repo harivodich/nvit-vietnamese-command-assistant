@@ -120,9 +120,7 @@ def combine_temporal_spans(
     text: str, spans: list[AnnotatedSpan], labels: set[str]
 ) -> str | list[str] | None:
     """Chỉ ghép span thời gian liền nhau; không nuốt event nằm giữa hai span."""
-    selected = sorted(
-        (span for span in spans if span.label in labels), key=lambda span: span.start
-    )
+    selected = sorted((span for span in spans if span.label in labels), key=lambda span: span.start)
     if not selected:
         return None
 
@@ -177,7 +175,9 @@ def map_massive_row(row: dict[str, Any]) -> tuple[str, DatasetSample] | None:
         return None
 
     marked_text, spans = parse_annotated_utterance(str(row.get("annot_utt", "")))
-    text = normalize_text(re.sub(r"^(olly|alexa)\s*[,，]?\s*", "", marked_text, flags=re.IGNORECASE))
+    text = normalize_text(
+        re.sub(r"^(olly|alexa)\s*[,，]?\s*", "", marked_text, flags=re.IGNORECASE)
+    )
     if len(text.split()) < 3:
         return None
 
@@ -487,15 +487,11 @@ def generate_regional_samples(
                     if fingerprint in global_fingerprints:
                         continue
                     global_fingerprints.add(fingerprint)
-                    slots: dict[str, str | list[str]] = slots_for_template(
-                        intent, template, values
-                    )
+                    slots: dict[str, str | list[str]] = slots_for_template(intent, template, values)
                     group_id = f"regional_{region.value}_{intent.value}_{group_index:03d}"
                     group_index += 1
                     generated += 1
-                    source_ref = (
-                        f"template:{region.value}:{intent.value}:{template_index:02d}"
-                    )
+                    source_ref = f"template:{region.value}:{intent.value}:{template_index:02d}"
                     partitions[partition].append(
                         DatasetSample(
                             id=f"{group_id}_regional",
@@ -598,17 +594,13 @@ def remove_same_split_normalized_duplicates(
             for samples in groups.values()
             if len(samples) == 1
         )
-        result[partition].extend(
-            samples[0] for samples in groups.values() if len(samples) == 1
-        )
+        result[partition].extend(samples[0] for samples in groups.values() if len(samples) == 1)
         for normalized_text in sorted(
             (text for text, samples in groups.items() if len(samples) > 1),
             key=lambda value: stable_order_key(seed, value),
         ):
             candidates = groups[normalized_text]
-            best_quality = min(
-                quality_priority[sample.annotation_quality] for sample in candidates
-            )
+            best_quality = min(quality_priority[sample.annotation_quality] for sample in candidates)
             candidates = [
                 sample
                 for sample in candidates
@@ -673,9 +665,7 @@ def write_dataset(
                 payload = sample.model_dump(mode="json")
                 file.write(json.dumps(payload, ensure_ascii=False, sort_keys=True) + "\n")
 
-    output_hashes = {
-        filename: sha256_file(output_dir / filename) for filename in known_outputs
-    }
+    output_hashes = {filename: sha256_file(output_dir / filename) for filename in known_outputs}
     test_digest = hashlib.sha256()
     for filename in sorted(name for name in known_outputs if name.startswith("test_")):
         test_digest.update(filename.encode("utf-8"))
@@ -686,9 +676,7 @@ def write_dataset(
         "seed": seed,
         "split_policy": "slot_coverage_normalized_near_similarity_v3",
         "filtering": filtering_report,
-        "inputs_sha256": {
-            name: sha256_file(path) for name, path in sorted(input_paths.items())
-        },
+        "inputs_sha256": {name: sha256_file(path) for name, path in sorted(input_paths.items())},
         "files_sha256": output_hashes,
         "test_set_sha256": test_digest.hexdigest(),
         "total": len(all_samples),
@@ -713,7 +701,6 @@ def build_dataset(
     output_dir: Path,
     templates_path: Path,
     slot_values_path: Path,
-    old_project_seed_path: Path,
     hard_cases_path: Path,
     regional_variants_path: Path,
     seed: int = 42,
@@ -721,16 +708,13 @@ def build_dataset(
     """Điều phối build từ mọi nguồn; hard-case là input chính thức, không augment tay."""
     massive = load_massive_samples(massive_path, seed)
     regional = generate_regional_samples(templates_path, slot_values_path, seed)
-    old_project = load_reviewed_seed(old_project_seed_path, seed)
     hard_cases = load_reviewed_seed(hard_cases_path, seed)
     normalizer = VietnameseNormalizer(regional_variants_path)
-    unfiltered = merge_partitions(massive, regional, old_project, hard_cases)
+    unfiltered = merge_partitions(massive, regional, hard_cases)
     cross_split_filtered = remove_cross_split_near_samples(unfiltered, seed, normalizer)
     merged = remove_same_split_normalized_duplicates(cross_split_filtered, seed, normalizer)
     before_samples = [sample for values in unfiltered.values() for sample in values]
-    cross_split_samples = [
-        sample for values in cross_split_filtered.values() for sample in values
-    ]
+    cross_split_samples = [sample for values in cross_split_filtered.values() for sample in values]
     after_samples = [sample for values in merged.values() for sample in values]
     before_by_source = Counter(sample.source.value for sample in before_samples)
     after_by_source = Counter(sample.source.value for sample in after_samples)
@@ -756,17 +740,17 @@ def build_dataset(
             for source in sorted(before_by_source)
         },
     }
+    input_paths = {
+        "massive_vi_v1": massive_path,
+        "regional_templates": templates_path,
+        "slot_values": slot_values_path,
+        "intent_hard_cases": hard_cases_path,
+        "regional_variants": regional_variants_path,
+    }
     return write_dataset(
         merged,
         output_dir,
-        {
-            "massive_vi_v1": massive_path,
-            "regional_templates": templates_path,
-            "slot_values": slot_values_path,
-            "old_project_seed": old_project_seed_path,
-            "intent_hard_cases": hard_cases_path,
-            "regional_variants": regional_variants_path,
-        },
+        input_paths,
         seed,
         filtering_report,
     )

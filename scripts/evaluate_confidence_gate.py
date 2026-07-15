@@ -53,10 +53,9 @@ def main() -> None:
         ("train.jsonl", "validation.jsonl"),
     )
     seed, candidates = load_training_config(ROOT / "configs" / "intent_training.yaml")
-    intent_report: dict[str, Any] = json.loads(
-        (ROOT / "reports" / "intent_training_report.json").read_text(encoding="utf-8")
-    )
-    selected_name = intent_report["training"]["selected_config"]["name"]
+    intent_metadata_path = ROOT / "models" / "intent_classifier.metadata.json"
+    intent_metadata: dict[str, Any] = json.loads(intent_metadata_path.read_text(encoding="utf-8"))
+    selected_name = intent_metadata["selected_candidate"]
     selected = next(candidate for candidate in candidates if candidate.name == selected_name)
     train_path = preprocessed_dir / "train.jsonl"
     validation_path = preprocessed_dir / "validation.jsonl"
@@ -108,13 +107,9 @@ def main() -> None:
             "train": sha256_file(samples_dir / "train.jsonl"),
             "validation": sha256_file(samples_dir / "validation.jsonl"),
             "regional_variants": sha256_file(normalizer_config_path),
-            "intent_training_config": sha256_file(
-                ROOT / "configs" / "intent_training.yaml"
-            ),
+            "intent_training_config": sha256_file(ROOT / "configs" / "intent_training.yaml"),
             "app_config": sha256_file(ROOT / "configs" / "app.yaml"),
-            "intent_training_report": sha256_file(
-                ROOT / "reports" / "intent_training_report.json"
-            ),
+            "intent_metadata": sha256_file(intent_metadata_path),
         },
         "configured_threshold": runtime.confidence_threshold,
         "configured_result": configured,
@@ -133,9 +128,7 @@ def main() -> None:
     )
     print(json.dumps(report, ensure_ascii=False, indent=2, sort_keys=True))
     if minimum_per_intent_coverage < 0.95:
-        raise SystemExit(
-            "configured confidence threshold violates per-intent coverage target"
-        )
+        raise SystemExit("configured confidence threshold violates per-intent coverage target")
 
 
 if __name__ == "__main__":

@@ -1,0 +1,46 @@
+{
+  "schema_version": 1,
+  "notice": "Metadata tối thiểu dùng để demo tra cứu; repository không phân phối file âm thanh.",
+  "tracks": [
+    {
+      "song": "nắng ấm xa dần",
+      "artist": "sơn tùng"
+    },
+    {
+      "song": "em của ngày hôm qua",
+      "artist": "sơn tùng"
+    },
+    {
+      "song": "nối vòng tay lớn",
+      "artist": "trịnh công sơn"
+    },
+    {
+      "song": "một cõi đi về",
+      "artist": "khánh ly"
+    },
+    {
+      "song": "để mị nói cho mà nghe",
+      "artist": "hoàng thùy linh"
+    },
+    {
+      "song": "đi để trở về",
+      "artist": "soobin hoàng sơn"
+    },
+    {
+      "song": "tháng tư là lời nói dối của em",
+      "artist": "hà anh tuấn"
+    },
+    {
+      "song": "có chắc yêu là đây",
+      "artist": "sơn tùng"
+    },
+    {
+      "song": "lạc trôi",
+      "artist": "sơn tùng"
+    },
+    {
+      "song": "phía sau một cô gái",
+      "artist": "soobin hoàng sơn"
+    }
+  ]
+}

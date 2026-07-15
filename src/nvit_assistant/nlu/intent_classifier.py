@@ -382,6 +382,10 @@ def save_classifier(
     label_map_path: Path,
 ) -> None:
     """Lưu pipeline và label map riêng để CLI/API load có kiểm tra rõ ràng."""
+    for component in classifier.pipeline.get_params(deep=True).values():
+        if isinstance(component, TfidfVectorizer):
+            # sklearn cache id(...) của stop_words; địa chỉ này thay đổi theo process.
+            component.__dict__.pop("_stop_words_id", None)
     model_path.parent.mkdir(parents=True, exist_ok=True)
     joblib.dump(classifier.pipeline, model_path)
     labels = sorted(str(label) for label in classifier.pipeline.classes_)

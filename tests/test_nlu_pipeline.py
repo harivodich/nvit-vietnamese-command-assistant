@@ -16,7 +16,7 @@ ROOT = Path(__file__).resolve().parents[1]
 
 @pytest.fixture(scope="module")
 def pipeline() -> NLUPipeline:
-    """Lắp pipeline bằng artifact thật của ngày 4 và config thật của dự án."""
+    """Lắp pipeline bằng artifact intent và config thật của dự án."""
     return NLUPipeline(
         VietnameseNormalizer(ROOT / "configs" / "regional_variants.yaml"),
         load_classifier(ROOT / "models" / "intent_classifier.joblib"),
@@ -28,6 +28,24 @@ def test_pipeline_parses_scheduled_call_as_reminder(pipeline: NLUPipeline) -> No
     result = pipeline.parse(ParseRequest(text="6h gọi mẹ"))
     assert result.intent is Intent.SET_REMINDER
     assert result.slots == {"datetime": "6h", "reminder_text": "gọi mẹ"}
+
+
+@pytest.mark.parametrize(
+    ("text", "expected_reminder"),
+    [
+        ("gọi cho mẹ lúc 6 giờ", "gọi cho mẹ"),
+        ("lúc 6 giờ gọi cho mẹ", "gọi cho mẹ"),
+        ("lúc 6 giờ gọi cho hoàng", "gọi cho hoàng"),
+        ("gọi số 0901234567 lúc 6 giờ", "gọi số 0901234567"),
+    ],
+)
+def test_pipeline_routes_scheduled_calls_to_reminder_regardless_of_word_order(
+    pipeline: NLUPipeline, text: str, expected_reminder: str
+) -> None:
+    result = pipeline.parse(ParseRequest(text=text))
+
+    assert result.intent is Intent.SET_REMINDER
+    assert result.slots == {"datetime": "6 giờ", "reminder_text": expected_reminder}
 
 
 def test_pipeline_normalizes_region_before_extracting_weather(pipeline: NLUPipeline) -> None:
@@ -78,9 +96,7 @@ def test_pipeline_accepts_keu_as_alarm_boundary(pipeline: NLUPipeline) -> None:
 
 
 @pytest.mark.parametrize("text", ["gọi dậy", "gọi em dậy", "kêu con dậy"])
-def test_pipeline_wake_up_without_time_asks_for_datetime(
-    pipeline: NLUPipeline, text: str
-) -> None:
+def test_pipeline_wake_up_without_time_asks_for_datetime(pipeline: NLUPipeline, text: str) -> None:
     result = pipeline.parse(ParseRequest(text=text))
 
     assert result.intent is Intent.SET_ALARM
@@ -110,12 +126,45 @@ def test_pipeline_routes_immediate_call_back_to_call_contact(
 def test_pipeline_routes_spoken_phone_to_call_even_when_model_confuses_intent(
     pipeline: NLUPipeline,
 ) -> None:
-    result = pipeline.parse(
-        ParseRequest(text="gọi số không chín không một hai ba bốn năm sáu bảy")
-    )
+    result = pipeline.parse(ParseRequest(text="gọi số không chín không một hai ba bốn năm sáu bảy"))
 
     assert result.intent is Intent.CALL_CONTACT
     assert result.slots == {"phone_number": "0901234567"}
+
+
+@pytest.mark.parametrize(
+    "text",
+    [
+        "gọi số 0901234567",
+        "0901234567 gọi đi",
+        "quay số 0901234567",
+        "bấm số 0901234567 giúp tôi",
+        "goi so 0901234567",
+    ],
+)
+def test_pipeline_routes_immediate_numeric_calls_to_contact(
+    pipeline: NLUPipeline, text: str
+) -> None:
+    result = pipeline.parse(ParseRequest(text=text))
+
+    assert result.intent is Intent.CALL_CONTACT
+    assert result.slots == {"phone_number": "0901234567"}
+
+
+def test_pipeline_keeps_explicit_now_call_immediate(pipeline: NLUPipeline) -> None:
+    result = pipeline.parse(ParseRequest(text="gọi mẹ bây giờ"))
+
+    assert result.intent is Intent.CALL_CONTACT
+    assert result.slots == {"contact_name": "mẹ"}
+
+
+def test_pipeline_does_not_treat_mai_in_contact_name_as_datetime(
+    pipeline: NLUPipeline,
+) -> None:
+    result = pipeline.parse(ParseRequest(text="nối máy với chị mai giúp tớ"))
+
+    assert result.intent is Intent.CALL_CONTACT
+    assert result.slots == {"contact_name": "chị mai"}
 
 
 def test_pipeline_keeps_dont_forget_call_as_reminder(

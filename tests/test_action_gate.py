@@ -172,3 +172,53 @@ def test_action_gate_keeps_dont_forget_scheduled_call() -> None:
     )
 
     assert decision.allowed
+
+
+@pytest.mark.parametrize(
+    ("text", "intent", "slots"),
+    [
+        ("hẹn giờ tới 6 giờ nhé", Intent.SET_ALARM, {"datetime": "6 giờ"}),
+        ("bấm số 0901234567 giúp tôi", Intent.CALL_CONTACT, {"phone_number": "0901234567"}),
+        ("lien lac voi me giup toi", Intent.CALL_CONTACT, {"contact_name": "mẹ"}),
+        ("bây giờ ngoài huế trời sao rồi", Intent.ASK_WEATHER, {"location": "huế"}),
+        ("mở bài lạc trôi", Intent.PLAY_MUSIC, {"song": "lạc trôi"}),
+    ],
+)
+def test_action_gate_keeps_legitimate_development_commands(
+    text: str, intent: Intent, slots: dict[str, str]
+) -> None:
+    decision = CommandActionGate().check(text, intent, slots)
+
+    assert decision.allowed
+    assert decision.reason == "intent_cue"
+
+
+@pytest.mark.parametrize(
+    ("text", "intent", "reason"),
+    [
+        ("tôi hẹn giờ mỗi ngày", Intent.SET_ALARM, "non_action_statement"),
+        ("tôi liên lạc với mẹ", Intent.CALL_CONTACT, "non_action_statement"),
+        ("tôi bấm số 0901234567", Intent.CALL_CONTACT, "non_action_statement"),
+        ("tôi sẽ gọi mẹ lúc 6 giờ", Intent.SET_REMINDER, "non_action_statement"),
+        ("đã bấm số 0901234567 chưa", Intent.CALL_CONTACT, "status_or_choice_question"),
+        ("mở bài lạc trôi chưa", Intent.PLAY_MUSIC, "status_or_choice_question"),
+    ],
+)
+def test_new_action_cues_do_not_open_statements_or_status_questions(
+    text: str, intent: Intent, reason: str
+) -> None:
+    decision = CommandActionGate().check(text, intent, {})
+
+    assert not decision.allowed
+    assert decision.reason == reason
+
+
+def test_scheduled_third_person_statement_is_not_a_reminder_command() -> None:
+    decision = CommandActionGate().check(
+        "lúc 6 giờ mẹ gọi tôi",
+        Intent.SET_REMINDER,
+        {"datetime": "6 giờ", "reminder_text": "mẹ gọi tôi"},
+    )
+
+    assert not decision.allowed
+    assert decision.reason == "non_action_statement"

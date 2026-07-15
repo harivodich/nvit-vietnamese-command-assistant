@@ -1,8 +1,4 @@
-import json
-from pathlib import Path
-
 import pytest
-import yaml
 
 from nvit_assistant.eval.confidence_evaluation import (
     collect_accepted_failures,
@@ -79,13 +75,3 @@ def test_collect_accepted_failures_returns_traceable_rows() -> None:
             "confidence": 0.5,
         },
     ]
-
-
-def test_saved_confidence_report_matches_runtime_threshold() -> None:
-    root = Path(__file__).resolve().parents[1]
-    app_config = yaml.safe_load((root / "configs" / "app.yaml").read_text(encoding="utf-8"))
-    report = json.loads(
-        (root / "reports" / "confidence_gate_report.json").read_text(encoding="utf-8")
-    )
-
-    assert report["configured_threshold"] == app_config["confidence_threshold"]

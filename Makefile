@@ -1,4 +1,4 @@
-.PHONY: install test lint typecheck data validate-data normalize audit-normalization evaluate-normalizer preprocess build-slot-lexicon train-intent train-semantic-intent evaluate-slots evaluate-confidence evaluate-action-safety run serve
+.PHONY: install test lint typecheck data validate-data normalize audit-normalization evaluate-normalizer preprocess build-slot-lexicon train-intent train-semantic-intent evaluate-slots evaluate-confidence evaluate-action-safety evaluate-final run serve
 
 install:
 	python -m pip install -e ".[dev]"
@@ -41,6 +41,7 @@ train-intent:
 
 train-semantic-intent:
 	python -c "import sys; sys.exit(0 if sys.argv[1] else 'Thiếu E5_MODEL_DIR')" "$(E5_MODEL_DIR)"
+	python scripts/train_intent.py
 	python scripts/train_semantic_intent.py --encoder-dir "$(E5_MODEL_DIR)"
 
 evaluate-slots:
@@ -51,6 +52,9 @@ evaluate-confidence:
 
 evaluate-action-safety:
 	python scripts/evaluate_action_safety.py
+
+evaluate-final:
+	python scripts/evaluate.py --post-audit --overwrite
 
 run:
 	python scripts/run_assistant.py "$(TEXT)"

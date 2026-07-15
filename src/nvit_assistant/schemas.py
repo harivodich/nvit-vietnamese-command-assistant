@@ -48,7 +48,6 @@ class DataSource(StrEnum):
     MANUAL = "manual"
     MASSIVE = "massive"
     WEB_MINED = "web_mined"
-    OLD_PROJECT = "old_project"
     ASR_NOISE = "asr_noise"
 
 
@@ -81,9 +80,11 @@ class ActionType(StrEnum):
 
 
 class ActionStatus(StrEnum):
-    """Trạng thái action; challenge hiện chỉ thực thi ở chế độ giả lập."""
+    """Trạng thái action để phân biệt giả lập, hoàn tất và dịch vụ tạm lỗi."""
 
     MOCKED = "mocked"
+    COMPLETED = "completed"
+    UNAVAILABLE = "unavailable"
 
 
 class ParseRequest(BaseModel):
@@ -130,17 +131,11 @@ class DatasetSample(BaseModel):
 
     allowed_slots: ClassVar[set[str]] = {slot.value for slot in SlotName}
     allowed_slots_by_intent: ClassVar[dict[Intent, frozenset[str]]] = {
-        Intent.SET_REMINDER: frozenset(
-            {SlotName.REMINDER_TEXT.value, SlotName.DATETIME.value}
-        ),
+        Intent.SET_REMINDER: frozenset({SlotName.REMINDER_TEXT.value, SlotName.DATETIME.value}),
         Intent.SET_ALARM: frozenset({SlotName.DATETIME.value}),
-        Intent.ASK_WEATHER: frozenset(
-            {SlotName.LOCATION.value, SlotName.DATETIME.value}
-        ),
+        Intent.ASK_WEATHER: frozenset({SlotName.LOCATION.value, SlotName.DATETIME.value}),
         Intent.PLAY_MUSIC: frozenset({SlotName.SONG.value, SlotName.ARTIST.value}),
-        Intent.CALL_CONTACT: frozenset(
-            {SlotName.CONTACT_NAME.value, SlotName.PHONE_NUMBER.value}
-        ),
+        Intent.CALL_CONTACT: frozenset({SlotName.CONTACT_NAME.value, SlotName.PHONE_NUMBER.value}),
     }
     required_slot_groups: ClassVar[dict[Intent, tuple[frozenset[str], ...]]] = {
         Intent.SET_REMINDER: (frozenset({SlotName.REMINDER_TEXT.value}),),
@@ -191,9 +186,7 @@ class DatasetSample(BaseModel):
 
     @field_validator("slots")
     @classmethod
-    def validate_slot_names(
-        cls, slots: dict[str, str | list[str]]
-    ) -> dict[str, str | list[str]]:
+    def validate_slot_names(cls, slots: dict[str, str | list[str]]) -> dict[str, str | list[str]]:
         """Chặn tên lạ và giá trị rỗng để nhãn slot luôn dùng được khi đánh giá."""
         unknown_slots = sorted(set(slots) - cls.allowed_slots)
         if unknown_slots:
@@ -217,11 +210,13 @@ class DatasetSample(BaseModel):
         if not any(group.issubset(slot_names) for group in valid_groups):
             expected_groups = [sorted(group) for group in valid_groups]
             raise ValueError(f"missing required slot group: one of {expected_groups}")
-        if self.source in {DataSource.MASSIVE, DataSource.OLD_PROJECT, DataSource.WEB_MINED}:
+        if self.source in {DataSource.MASSIVE, DataSource.WEB_MINED}:
             if not self.source_ref:
-                raise ValueError("external or legacy samples must have source_ref")
+                raise ValueError("external samples must have source_ref")
         if self.source is DataSource.MASSIVE and self.region is not Region.STANDARD:
-            raise ValueError("MASSIVE samples must use standard region because accent is not labeled")
+            raise ValueError(
+                "MASSIVE samples must use standard region because accent is not labeled"
+            )
         return self
 
 

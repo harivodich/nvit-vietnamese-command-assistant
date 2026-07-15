@@ -19,6 +19,8 @@ class ActionExecution:
 class ActionRouter(Protocol):
     """Interface nhỏ để sau này thay mock bằng adapter thiết bị thật."""
 
+    mode: str
+
     def execute(self, intent: Intent, slots: dict[str, Any]) -> ActionExecution:
         """Thực thi hoặc giả lập một action từ intent và slot đã hợp lệ."""
         ...
@@ -44,6 +46,8 @@ def _optional_string(slots: dict[str, Any], slot_name: SlotName) -> str | None:
 
 class MockActionRouter:
     """Tạo payload deterministic; không gọi API, thiết bị hoặc dữ liệu cá nhân thật."""
+
+    mode = "mock-actions"
 
     def execute(self, intent: Intent, slots: dict[str, Any]) -> ActionExecution:
         """Điều phối đúng action handler theo intent đã qua confidence/slot gate."""

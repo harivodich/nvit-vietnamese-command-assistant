@@ -96,7 +96,9 @@ def _masked_text(text: str, slots: dict[str, str | list[str]]) -> str:
             normalized_value = strip_diacritics(canonical_text(surface_value))
             if normalized_value:
                 replacements.append((normalized_value, f"<{slot_name}>"))
-    for surface_value, placeholder in sorted(replacements, key=lambda item: len(item[0]), reverse=True):
+    for surface_value, placeholder in sorted(
+        replacements, key=lambda item: len(item[0]), reverse=True
+    ):
         text = text.replace(surface_value, placeholder)
     text = re.sub(r"\b\d[\d\s]*\d\b", "<number>", text)
     return re.sub(r"\s+", " ", text).strip()
@@ -107,9 +109,7 @@ def masked_sample_text(sample: DatasetSample) -> str:
     return _masked_text(sample.text, sample.slots)
 
 
-def normalized_masked_sample_text(
-    sample: DatasetSample, normalizer: VietnameseNormalizer
-) -> str:
+def normalized_masked_sample_text(sample: DatasetSample, normalizer: VietnameseNormalizer) -> str:
     """Tạo template trên đúng text sau normalize mà intent model sẽ nhìn thấy."""
     normalized_text = normalizer.normalize(sample.text, sample.region).normalized_text
     normalized_slots: dict[str, str | list[str]] = {}
@@ -251,18 +251,14 @@ def validate_dataset_dir(
                 if manifest.get("total") != len(records):
                     errors.append("manifest total không khớp số sample")
                 test_digest = hashlib.sha256()
-                for filename in sorted(
-                    name for name in EXPECTED_FILES if name.startswith("test_")
-                ):
+                for filename in sorted(name for name in EXPECTED_FILES if name.startswith("test_")):
                     path = data_dir / filename
                     if path.is_file():
                         test_digest.update(filename.encode("utf-8"))
                         test_digest.update(path.read_bytes())
                 if manifest.get("test_set_sha256") != test_digest.hexdigest():
                     errors.append("manifest test_set_sha256 không khớp")
-                manifest_verified = not any(
-                    error.startswith("manifest") for error in errors
-                )
+                manifest_verified = not any(error.startswith("manifest") for error in errors)
 
     ids: dict[str, str] = {}
     groups_by_split: dict[str, set[str]] = defaultdict(set)
@@ -280,9 +276,7 @@ def validate_dataset_dir(
         exact = canonical_text(sample.text)
         previous_exact = exact_fingerprints.get(exact)
         if previous_exact and previous_exact[0] != sample.group_id:
-            errors.append(
-                f"câu trùng khác group: {sample.id} và {previous_exact[1]}"
-            )
+            errors.append(f"câu trùng khác group: {sample.id} và {previous_exact[1]}")
         exact_fingerprints[exact] = (sample.group_id, sample.id)
 
         accentless = strip_diacritics(exact)
@@ -306,7 +300,6 @@ def validate_dataset_dir(
 
         if sample.source_ref and sample.source in {
             DataSource.MASSIVE,
-            DataSource.OLD_PROJECT,
             DataSource.WEB_MINED,
         }:
             previous_ref = source_refs.get(sample.source_ref)
@@ -318,9 +311,7 @@ def validate_dataset_dir(
 
         expected_region = TEST_REGION_BY_FILE.get(filename)
         if expected_region is not None and sample.region is not expected_region:
-            errors.append(
-                f"{sample.id} có region={sample.region.value} nhưng nằm trong {filename}"
-            )
+            errors.append(f"{sample.id} có region={sample.region.value} nhưng nằm trong {filename}")
 
         for slot_name, slot_value in sample.slots.items():
             for surface_value in iter_slot_values(slot_value):
@@ -353,9 +344,7 @@ def validate_dataset_dir(
     split_intent_counts = Counter((split, sample.intent.value) for _, split, sample in records)
     split_region_counts = Counter((split, sample.region.value) for _, split, sample in records)
     split_slot_counts = Counter(
-        (split, slot_name)
-        for _, split, sample in records
-        for slot_name in sample.slots
+        (split, slot_name) for _, split, sample in records for slot_name in sample.slots
     )
 
     if enforce_minimums:
@@ -373,8 +362,12 @@ def validate_dataset_dir(
                 )
         errors.extend(_distribution_ratio_errors(split_counts, len(samples)))
 
-        test_records = [(filename, sample) for filename, split, sample in records if split == "test"]
-        test_breakdown = Counter((sample.region.value, sample.intent.value) for _, sample in test_records)
+        test_records = [
+            (filename, sample) for filename, split, sample in records if split == "test"
+        ]
+        test_breakdown = Counter(
+            (sample.region.value, sample.intent.value) for _, sample in test_records
+        )
         for region in (Region.NORTH, Region.CENTRAL, Region.SOUTH):
             for intent in (intent for intent in Intent if intent is not Intent.UNKNOWN):
                 if test_breakdown[(region.value, intent.value)] < 8:
@@ -412,15 +405,13 @@ def validate_dataset_dir(
         "variants": dict(sorted(variant_counts.items())),
         "by_split_intent": {
             split: {
-                intent: split_intent_counts[(split, intent)]
-                for intent in sorted(intent_counts)
+                intent: split_intent_counts[(split, intent)] for intent in sorted(intent_counts)
             }
             for split in ("train", "validation", "test")
         },
         "by_split_region": {
             split: {
-                region: split_region_counts[(split, region)]
-                for region in sorted(region_counts)
+                region: split_region_counts[(split, region)] for region in sorted(region_counts)
             }
             for split in ("train", "validation", "test")
         },

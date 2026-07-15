@@ -22,20 +22,19 @@
   },
   "filtering": {
     "after": 2094,
-    "before": 2421,
-    "dropped": 327,
+    "before": 2411,
+    "dropped": 317,
     "dropped_by_source": {
       "manual": 3,
       "massive": 1,
-      "old_project": 10,
       "synthetic": 313
     },
     "reason": "normalized_cross_split_near_and_same_split_exact_duplicates",
     "steps": {
       "cross_split_near_similarity": {
         "after": 2119,
-        "before": 2421,
-        "dropped": 302
+        "before": 2411,
+        "dropped": 292
       },
       "same_split_exact_after_normalization": {
         "after": 2094,
@@ -47,7 +46,6 @@
   "inputs_sha256": {
     "intent_hard_cases": "0a0a87224e70d6463ce7231f81ae2be673227b5be493059c42388cbb969650e9",
     "massive_vi_v1": "9dfff36bac20067085d836c30f1a617de968c16fd81bf4c5b802ddd637ab131a",
-    "old_project_seed": "151116af84d8908bc7d040bc707e8b27383d7e18f5ad94e67684e51ed1bbfd20",
     "regional_templates": "629ef79adabb4fd2f655162b21a0fd14c0094279e9d534cfe1e040ff55ee9d4e",
     "regional_variants": "7186267fd5da18cac4045582a4ca09352f79690f9deb3e57a43947add1c90184",
     "slot_values": "f08f91785c8f73b61f0dd617d012541a1f99c9a1f44888f7945c03a69c85ba05"

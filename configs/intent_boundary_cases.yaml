@@ -3,8 +3,26 @@ cases:
   - id: immediate_contact
     text: "gọi mẹ ngay đi"
     intent: call_contact
+  - id: immediate_contact_named_mai
+    text: "nối máy với chị mai giúp tớ"
+    intent: call_contact
+  - id: immediate_phone
+    text: "bấm số 0901234567 giúp tôi"
+    intent: call_contact
+  - id: phone_before_verb
+    text: "0901234567 gọi đi"
+    intent: call_contact
   - id: scheduled_contact
     text: "6h gọi mẹ"
+    intent: set_reminder
+  - id: scheduled_contact_suffix
+    text: "gọi cho mẹ lúc 6 giờ"
+    intent: set_reminder
+  - id: scheduled_contact_prefix
+    text: "lúc 6 giờ gọi cho mẹ"
+    intent: set_reminder
+  - id: scheduled_phone
+    text: "gọi số 0901234567 lúc 6 giờ"
     intent: set_reminder
   - id: wake_up
     text: "gọi tôi dậy lúc 6h"

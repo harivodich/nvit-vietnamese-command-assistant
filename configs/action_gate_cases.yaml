@@ -1,0 +1,137 @@
+# Case phát triển được review thủ công để giữ coverage vùng miền/no-diacritics.
+# Đây không phải dữ liệu người bản địa và không thuộc test split chính thức.
+positive_cases:
+  - id: north_reminder
+    variant: north
+    text: "8 giờ nhắc tớ uống thuốc nhá"
+    intent: set_reminder
+    region: north
+  - id: north_alarm
+    variant: north
+    text: "6 giờ gọi tớ dậy nhé"
+    intent: set_alarm
+    region: north
+  - id: north_weather
+    variant: north
+    text: "ngoài hà nội giời thế nào nhá"
+    intent: ask_weather
+    region: north
+  - id: north_music
+    variant: north
+    text: "mở bài lạc trôi cho tớ nghe nhá"
+    intent: play_music
+    region: north
+  - id: north_call
+    variant: north
+    text: "bấm số 0901234567 giúp tớ"
+    intent: call_contact
+    region: north
+  - id: central_reminder
+    variant: central
+    text: "8 giờ nhắc tui uống thuốc với hỉ"
+    intent: set_reminder
+    region: central
+  - id: central_alarm
+    variant: central
+    text: "6 giờ kêu tui dậy với hỉ"
+    intent: set_alarm
+    region: central
+  - id: central_weather
+    variant: central
+    text: "chừ ngoài huế trời răng rồi"
+    intent: ask_weather
+    region: central
+  - id: central_music
+    variant: central
+    text: "mở bài lạc trôi cho tui nghe hỉ"
+    intent: play_music
+    region: central
+  - id: central_call
+    variant: central
+    text: "gọi số 0901234567 cho tui hỉ"
+    intent: call_contact
+    region: central
+  - id: south_reminder
+    variant: south
+    text: "8 giờ nhắc tui uống thuốc dùm nghen"
+    intent: set_reminder
+    region: south
+  - id: south_alarm
+    variant: south
+    text: "đặt báo thức 6 giờ giùm tui"
+    intent: set_alarm
+    region: south
+  - id: south_weather
+    variant: south
+    text: "bữa nay ở cần thơ trời sao ta"
+    intent: ask_weather
+    region: south
+  - id: south_music
+    variant: south
+    text: "mở bài lạc trôi cho tui nghe nghen"
+    intent: play_music
+    region: south
+  - id: south_call
+    variant: south
+    text: "bấm số 0901234567 giùm tui nghen"
+    intent: call_contact
+    region: south
+  - id: plain_reminder
+    variant: no_diacritics
+    text: "nhac toi uong thuoc"
+    intent: set_reminder
+    region: standard
+  - id: plain_alarm
+    variant: no_diacritics
+    text: "dat bao thuc luc 6h"
+    intent: set_alarm
+    region: standard
+  - id: plain_weather
+    variant: no_diacritics
+    text: "thoi tiet o hue hom nay"
+    intent: ask_weather
+    region: standard
+  - id: plain_music
+    variant: no_diacritics
+    text: "mo nhac son tung"
+    intent: play_music
+    region: standard
+  - id: plain_call
+    variant: no_diacritics
+    text: "bam so 0901234567 giup toi"
+    intent: call_contact
+    region: standard
+
+negative_cases:
+  - id: alarm_statement
+    text: "tôi hẹn giờ mỗi ngày"
+    intent: set_alarm
+    reason: non_action_statement
+  - id: call_statement
+    text: "tôi liên lạc với mẹ"
+    intent: call_contact
+    reason: non_action_statement
+  - id: plain_call_statement
+    text: "toi bam so 0901234567"
+    intent: call_contact
+    reason: non_action_statement
+  - id: future_call_statement
+    text: "tôi sẽ gọi mẹ lúc 6 giờ"
+    intent: set_reminder
+    reason: non_action_statement
+  - id: scheduled_third_person_statement
+    text: "lúc 6 giờ mẹ gọi tôi"
+    intent: set_reminder
+    reason: non_action_statement
+  - id: call_status_question
+    text: "đã bấm số 0901234567 chưa"
+    intent: call_contact
+    reason: status_or_choice_question
+  - id: plain_negated_call
+    text: "dung bam so 0901234567"
+    intent: call_contact
+    reason: negated_command
+  - id: music_status_question
+    text: "mở bài lạc trôi chưa"
+    intent: play_music
+    reason: status_or_choice_question

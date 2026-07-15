@@ -157,7 +157,8 @@ MUSIC_ENTITY_STOP_ONLY = re.compile(
     r"^(?:đi|ngay|lên|thôi|nào|giúp tôi|chưa|không|à|hả|ư|vậy|thế|sao|phải|ai)$"
 )
 INVALID_LOCATION = re.compile(
-    r"(?:^|\s)(?:tôi|mình|bao nhiêu|mưa|gió|độ|là|nên|khu vực của)(?:\s|$)"
+    r"(?:^|\s)(?:tôi|mình|bao nhiêu|mưa|gió|độ|là|nên|khu vực của|"
+    r"đâu|dau|đây|day|chỗ nào|cho nao|nơi nào|noi nao)(?:\s|$)"
 )
 SPOKEN_DIGITS = {
     "không": "0",

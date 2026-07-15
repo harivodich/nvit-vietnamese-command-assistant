@@ -23,6 +23,11 @@ def build_argument_parser() -> argparse.ArgumentParser:
     )
     parser.add_argument("--json", action="store_true", help="In toàn bộ ParseResult dạng JSON")
     parser.add_argument(
+        "--live-weather",
+        action="store_true",
+        help="Gọi Open-Meteo thật; các action thiết bị khác vẫn chỉ giả lập",
+    )
+    parser.add_argument(
         "--project-root",
         type=Path,
         help="Repo root; mặc định tìm từ cwd hoặc biến NVIT_PROJECT_ROOT",
@@ -35,7 +40,10 @@ def main(argv: Sequence[str] | None = None) -> None:
     if hasattr(sys.stdout, "reconfigure"):
         sys.stdout.reconfigure(encoding="utf-8")
     args = build_argument_parser().parse_args(argv)
-    pipeline = build_pipeline(args.project_root)
+    pipeline = build_pipeline(
+        args.project_root,
+        action_mode="live-weather" if args.live_weather else None,
+    )
     region_hint = Region(args.region) if args.region else None
     result = pipeline.parse(ParseRequest(text=args.text, region_hint=region_hint))
     if args.json:
