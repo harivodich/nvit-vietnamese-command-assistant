@@ -1,218 +1,198 @@
-# Quyết định kỹ thuật
+# Technical Decisions
 
-Tôi viết tài liệu này để giải thích vì sao project có hình dạng hiện tại, thay vì chỉ liệt kê những gì
-đã làm. Các số liệu được trình bày theo snapshot code hiện tại; nơi nào dữ liệu hoặc cách đánh giá còn
-hạn chế, tôi ghi rõ thay vì cố biến chúng thành một kết luận mạnh hơn.
+This document follows the eight questions in the challenge brief. I have kept the claims limited to
+what the repository and evaluation can support.
 
-## 1. Hiểu bài toán và giới hạn phạm vi
+## 1. What I understood the problem to be
 
-Tôi hiểu yêu cầu cốt lõi là biến một transcript tiếng Việt ngắn thành intent và slot đủ để trợ lý biết
-người dùng muốn làm gì: spoken-command understanding theo hướng **text-first**, không phải chatbot tổng quát.
+The core task is not to build a general chatbot. It is to turn a short Vietnamese command into an
+intent and the details needed to carry it out, then produce an appropriate response or action.
 
-Đầu ra gồm một trong năm intent (`set_reminder`, `set_alarm`, `ask_weather`, `play_music`,
-`call_contact`), bảy slot liên quan, confidence, dấu vết match, action và câu phản hồi.
+What matters most is:
 
-Điều tôi ưu tiên nhất là ranh giới intent/slot đúng, cách xử lý tiếng Việt có thể giải thích, không làm
-rò rỉ dữ liệu giữa các split và một phép đánh giá trung thực. Điều ít quan trọng hơn ở giai đoạn này là
-giao diện đẹp, số lượng tích hợp thiết bị hay dùng model lớn chỉ để kiến trúc trông hiện đại.
+- clear intent and slot boundaries;
+- an explicit approach to Vietnamese lexical and diacritic variation;
+- a complete input-to-action path;
+- an evaluation that separates model quality from pipeline quality;
+- honest limits, especially around regional speech.
 
-Project chưa nhận audio và chưa có STT/TTS. Giữ phạm vi text-first giúp tách lỗi hiểu ngôn ngữ khỏi lỗi
-nhận dạng giọng nói, đồng thời tránh tuyên bố chất lượng audio khi chưa có corpus phù hợp.
+What matters less for this exercise is a polished interface, many external integrations, or a large
+model chosen only because it looks modern. I therefore built a text-first assistant with five
+intents and seven slots. STT/TTS and real device control are outside the completed scope.
 
-Mặc định mọi action đều là mock. Chế độ `live-weather` là demo opt-in duy nhất gọi dịch vụ thật;
-danh bạ và catalog nhạc vẫn là dữ liệu giả. Project không thực hiện cuộc gọi, đặt báo thức hay phát
-media trên thiết bị thật.
+## 2. How I analysed and scoped it
 
-## 2. Phân tích bài toán, dữ liệu và kế hoạch đánh giá
+I split the work into four layers:
 
-Tôi chia bài toán thành bốn phần: contract/dữ liệu, chuẩn hóa tiếng Việt, intent-slot NLU và
-runtime/evaluation. Project làm trọn luồng text đến mock action; STT/TTS và thiết bị thật được để lại vì
-chúng cần corpus, quyền hệ điều hành và benchmark riêng. Pydantic, YAML, builder, CLI/API và evaluator
-dùng chung contract để các phần không hiểu dữ liệu theo những cách khác nhau.
+1. a shared schema and a dataset with provenance;
+2. Vietnamese normalization and preprocessing;
+3. intent classification and intent-aware slot extraction;
+4. runtime gates, mock actions, CLI/API, and evaluation.
 
 ```text
 transcript
-  -> chuẩn hóa tiếng Việt và biến thể vùng miền đã biết
-  -> phân loại intent
+  -> Vietnamese and regional lexical normalization
+  -> intent classifier
   -> confidence gate
-  -> trích xuất slot theo intent
+  -> intent-aware slot extraction
   -> action-safety gate
-  -> kiểm tra slot bắt buộc
-  -> mock/live-weather action, hỏi bổ sung hoặc từ chối an toàn
+  -> required-slot check
+  -> action, clarification, or rejection
 ```
 
-Snapshot dữ liệu có 2.094 câu: train 1.363, validation 347 và test 384. Test gồm 174 câu standard và
-70 câu cho mỗi nhóm Bắc, Trung, Nam. MASSIVE giữ partition gốc; dữ liệu tự biên soạn được gom theo
-`group_id`/template family trước khi chia. Validator kiểm tra trùng nguyên văn, trùng sau khi bỏ dấu,
-near-duplicate và group leakage.
+The checked-in dataset has 2,094 samples: 1,363 train, 347 validation, and 384 test. MASSIVE keeps
+its original partitions. Generated template families are grouped before splitting so close variants
+do not appear on both sides of an evaluation. A validator checks exact, diacritic-insensitive, and
+near-similar leakage.
 
-Train được dùng để fit model và tạo slot lexicon. Validation dành cho việc chọn candidate, rule và
-confidence threshold. Test chỉ được mở sau khi những quyết định đó đã khóa. Cách tách này quan trọng
-hơn việc cố lấy thêm vài điểm từ một tập dữ liệu vốn không lớn.
+Train data fits the model and builds the slot lexicon. Validation selects the model candidate and
+confidence threshold. The selected runtime artifact is then fitted on train plus validation. The
+test snapshot is checksum-locked.
 
-Test snapshot có SHA-256
-`47cb9cf87cc53c5a210298453b4ae6ca75d045250c883bd5cca59709ddec9f2a`. Các tập normalization,
-intent-boundary và action-safety là regression set do project tự viết; chúng ngăn lỗi quay lại nhưng
-không thay thế test độc lập.
+All default actions are mocked. A live Open-Meteo adapter is available only as an opt-in demo;
+contacts and music remain fake local data. This keeps the evaluated path deterministic and avoids
+pretending that device permissions, privacy, or authentication have been solved.
 
-Trong model selection, mỗi candidate chỉ fit trên train rồi đo trên validation. Sau khi khóa candidate
-và threshold, artifact dùng cho CLI/API mới được fit lại trên train + validation. Không đo artifact
-này ngược trên validation rồi gọi đó là kết quả tổng quát hóa.
+## 3. Key choices and alternatives
 
-## 3. Lựa chọn kỹ thuật và phương án thay thế
+### Intent classification
 
-### Intent classifier
+I chose word/character TF-IDF with Logistic Regression. Word n-grams capture phrases such as
+`gọi cho` or `nhắc tôi`, while character n-grams help with missing diacritics and spelling noise.
+Logistic Regression trains quickly on CPU, produces probabilities for the confidence gate, and
+creates a small local artifact.
 
-Runtime dùng TF-IDF word/character n-gram + Logistic Regression. Word n-gram giữ tín hiệu cụm từ;
-character n-gram hỗ trợ lỗi không dấu, lỗi gõ/STT và biến thể bề mặt. Logistic Regression fit nhanh
-trên CPU, cho xác suất phục vụ confidence gate và tạo artifact nhỏ.
+Three TF-IDF configurations were fitted on train and compared by validation macro-F1. Two reached
+**98.17%** macro-F1; `word_1_2_char_3_5` won using a predefined tie-break, not test results.
 
-Ba candidate TF-IDF được chọn bằng macro-F1 trên validation vì năm intent cần được coi trọng ngang
-nhau. Hai candidate có character n-gram cùng đạt validation macro-F1 **98,17%** và accuracy **98,27%**.
-`word_1_2_char_3_5` thắng theo tie-break đã cố định trong config, không phải do xem test.
+I also considered or tested:
 
-Tôi bắt đầu bằng classifier rule-based vì nó dễ giải thích, nhưng kết quả cho thấy rule đơn thuần không
-đủ linh hoạt nên chỉ được giữ làm baseline. Thí nghiệm `multilingual-e5-small` kết hợp Logistic
-Regression đạt validation macro-F1 **86,06%** trên cùng split, thấp hơn TF-IDF và nặng hơn đáng kể;
-vì vậy E5 không đi vào runtime.
+- **rules only**: useful as an explainable baseline, but too brittle for runtime;
+- **Word2Vec/GloVe**: static embeddings offered no clear advantage for these short commands;
+- **multilingual-e5-small + Logistic Regression**: tested and reproducible, but reached only
+  **86.06% validation macro-F1** and required much more memory;
+- **PhoBERT or a joint transformer**: promising with more natural, speaker-reviewed data, but likely
+  to overfit this dataset and unnecessary for the current latency target;
+- **an ensemble**: not used because there was no evidence that the models corrected complementary
+  errors enough to justify extra complexity.
 
-Word2Vec và GloVe cũng được cân nhắc, nhưng embedding tĩnh không cho lợi thế rõ với những command ngắn
-này. Fine-tune PhoBERT hoặc một transformer có thể hợp lý khi có thêm câu thật và speaker thật; làm
-ngay trên bộ dữ liệu hiện tại sẽ tăng chi phí và nguy cơ overfit. Tôi cũng không dùng ensemble vì chưa
-có bằng chứng hai model sửa lỗi bổ sung cho nhau đủ để bù thêm latency và bộ nhớ.
+The project contribution is therefore not a new optimizer. It is the data mapping, leakage control,
+Vietnamese normalization, intent-boundary policy, model comparison, slot extraction, safety gates,
+and one runtime shared by CLI and API.
 
-Phần đóng góp không phải viết lại thuật toán tối ưu của scikit-learn. Công việc chính nằm ở contract,
-ánh xạ dữ liệu, kiểm soát leakage, normalizer tiếng Việt, boundary policy, candidate sweep, slot
-extractor, safety gate và một pipeline dùng chung cho CLI/API.
+### Slots and runtime
 
-### Slot, normalizer và runtime
+Slots use intent-aware regex and lexicons rather than a sequence tagger. With seven slots and limited
+labelled data, this is easy to inspect and debug. The trade-off is weaker handling of unseen entities
+and sentence forms.
 
-Slot dùng regex/rule theo intent thay vì sequence tagger. Với bảy slot và dữ liệu gán nhãn còn nhỏ,
-cách này dễ audit và có dấu vết match. Đổi lại, entity ngoài catalog hoặc cách nói mới vẫn có thể bị bỏ
-sót.
+The normalizer is deterministic: Unicode NFC, whitespace cleanup, known transcription/spelling
+variants, and selected regional terms. Longer phrases run before shorter ones, and ambiguous
+particles are changed only when the context is strong enough. Training and runtime use the same
+normalizer.
 
-Normalizer deterministic thực hiện Unicode NFC, khoảng trắng, lỗi STT đã liệt kê và một số ánh xạ từ
-vựng vùng miền. Rule dài chạy trước rule ngắn; tiểu từ như `hỉ`, `hen`, `nghen` chỉ được đổi khi ngữ
-cảnh đủ rõ. Train và runtime dùng cùng một normalizer.
+CLI and FastAPI call the same pipeline factory. FastAPI loads the model once at startup. Mock actions
+allow end-to-end tests without network calls or side effects.
 
-CLI và FastAPI gọi chung runtime factory. Model được nạp một lần trong API lifespan. Mock action giúp
-test end-to-end mà không tạo side effect hay yêu cầu credential.
+## 4. Vietnamese speech and regional variation
 
-## 4. Xử lý tiếng Việt và biến thể vùng miền
+The submission accepts text, so it handles the **lexical surface effects** associated with regional
+speech rather than audio accent itself. Examples include `bữa ni`, `răng`, `hông`, `tui`, and common
+no-diacritics forms. The normalizer returns both normalized text and the rules that matched, which
+makes its decisions inspectable.
 
-MASSIVE không có nhãn accent, nên các câu nguồn này mang `region=standard`; project không tự đoán vùng
-miền của chúng. Regional set là text template tự biên soạn để kiểm tra từ vựng địa phương, tiểu từ và
-dạng không dấu.
+MASSIVE has no Northern/Central/Southern speaker label, so all 969 mapped MASSIVE samples are marked
+`standard`. The regional test groups come from project-authored text templates. They cover declared
+vocabulary and particles, but they do not prove that the system understands real speakers from the
+three regions.
 
-Ví dụ, normalizer có thể đưa `Bữa ni ở Huế trời răng rồi hỉ` về `hôm nay ở huế trời sao rồi nhỉ` và
-giữ lại danh sách rule đã match. Cách này có lợi cho những pattern đã định nghĩa, nhưng không chứng minh
-hệ thống hiểu mọi phương ngữ.
+This is the most important limitation: there are no audio recordings and no independently reviewed
+native-speaker samples. A proper speech evaluation would require consented audio, balanced regional
+and provincial coverage, speaker-disjoint splits, and separate reporting of STT WER/CER and NLU
+intent/slot metrics.
 
-Giới hạn quan trọng nhất là dữ liệu Bắc/Trung/Nam hiện chủ yếu đến từ synthetic template. Số sample
-được native speaker review độc lập là 0 và số audio/call recording cũng là 0. Vì vậy region breakdown
-chỉ đo lexical variation trong văn bản, không đo accent âm thanh.
+## 5. Intent, slots, and evaluation
 
-Vì vậy tôi chỉ kết luận hệ thống xử lý được một tập pattern vùng miền đã khai báo. Muốn đánh giá ngoài
-đời cần thu thập audio có consent, cân bằng vùng/tỉnh, tách speaker giữa split và báo riêng WER/CER của
-STT với metric intent/slot của NLU.
+The supported intents are `set_reminder`, `set_alarm`, `ask_weather`, `play_music`, and
+`call_contact`. The most difficult policy boundary is the word `gọi`:
 
-## 5. Intent, slot và phương pháp đánh giá
+- `gọi mẹ ngay đi` is `call_contact`;
+- `6 giờ gọi mẹ` is `set_reminder`, because the future action should be remembered rather than run;
+- `gọi tôi dậy lúc 6 giờ` is `set_alarm`, because the goal is to wake the user.
 
-### Ranh giới intent
+Intent evaluation includes accuracy, per-class precision/recall/F1, macro-F1, weighted-F1, and a
+confusion matrix. Probability metrics include log loss, Brier score, ECE, and one-vs-rest ROC/PR
+because runtime decisions use confidence.
 
-Tôi định nghĩa `call_contact` là yêu cầu gọi ngay bằng tên liên hệ hoặc số điện thoại. Nếu việc gọi nằm
-ở tương lai, hệ thống tạo `set_reminder`; `set_alarm` chỉ dùng khi mục tiêu là đánh thức hoặc cảnh báo
-chính người dùng. Vì thế `gọi mẹ ngay đi` là `call_contact`, `6 giờ gọi mẹ` là `set_reminder`, còn
-`gọi tôi dậy lúc 6 giờ` là `set_alarm`. Các câu ranh giới trong config là development regression,
-không phải test cuối.
+Slots are reported in two ways. **Oracle slot** evaluation supplies the gold intent and isolates the
+extractor. **End-to-end slot** evaluation uses the pipeline's predicted intent and therefore includes
+upstream failures.
 
-### Metric phát triển
+Current results on the 384-sample locked test snapshot are:
 
-Intent được báo bằng accuracy, precision/recall/F1 từng lớp, macro-F1, weighted-F1 và confusion matrix.
-Report xác suất còn có log-loss, Brier, ECE và ROC/PR one-vs-rest vì runtime sử dụng confidence.
-
-Slot được đo bằng oracle slot với gold intent để tách lỗi extractor khỏi classifier, và end-to-end slot
-với intent thật sự do pipeline dự đoán.
-
-Trên validation, oracle slot đạt exact match **92,22%** và micro-F1 **94,42%**. MASSIVE chỉ đạt
-micro-F1 **83,49%**, trong khi synthetic đạt **98,35%**. Khoảng cách này cho thấy template dễ hơn câu
-bản địa hóa tự nhiên và không nên chỉ trình bày con số tổng.
-
-### Kết quả trên tập test
-
-Tập test có 384 câu và runtime không được truyền region label. Kết quả của snapshot hiện tại là:
-
-| Chỉ số | Kết quả |
+| Metric | Result |
 |---|---:|
-| Intent accuracy / macro-F1 | **92,71% / 92,25%** |
-| Runtime intent accuracy | **90,36%** |
-| Runtime coverage / selective accuracy | **92,45% / 97,75%** |
-| Oracle slot exact / micro-F1 | **81,77% / 86,89%** |
-| End-to-end slot exact / micro-F1 | **74,48% / 83,15%** |
-| Full-command success | **73,96%** |
+| Raw intent accuracy / macro-F1 | **92.71% / 92.25%** |
+| Runtime intent accuracy | **90.36%** |
+| Runtime coverage / selective accuracy | **92.45% / 97.75%** |
+| Oracle slot exact match / micro-F1 | **81.77% / 86.89%** |
+| End-to-end slot exact match / micro-F1 | **74.48% / 83.15%** |
+| Full-command success | **73.96%** |
 
-Con số intent cho biết classifier nhận đúng nhãn trong phần lớn câu. Khi chạy toàn pipeline, kết quả
-thấp hơn vì hệ thống còn phải trích đúng slot, vượt qua safety gate và tạo được action hợp lệ. Oracle
-slot micro-F1 **86,89%** nhưng end-to-end còn **83,15%**, cho thấy một phần lỗi slot bắt nguồn từ intent
-hoặc quyết định runtime trước extractor.
+The raw classifier score is not the final product score. Full-command success is lower because the
+pipeline must also extract slots, pass safety checks, and create a valid mock action.
 
-Runtime intent accuracy là Bắc **81,43%**, Trung **88,57%**, Nam **94,29%** và nhóm không dấu
-**76,85%**. Đây là kết quả trên text template và câu bản địa hóa, không phải phép đo accent từ audio.
-Ngoài ra, các lỗi của test đã được dùng cho error analysis ở giai đoạn cuối; vì vậy bảng này phù hợp để
-mô tả snapshot hiện tại nhưng không thay thế một holdout mới hoàn toàn độc lập.
+Results by lexical region are Northern **81.43%**, Central **88.57%**, and Southern **94.29%** runtime
+intent accuracy. No-diacritics commands reach **76.85%**. These groups are partly synthetic and do
+not represent audio accents.
 
-Confidence gate không phải OOD detector. Logistic Regression closed-set luôn phân xác suất vào năm
-label, nên action-safety gate vẫn cần tách riêng. Safety challenge 99 câu là tập regression được xây
-cùng rule, không phải independent red-team benchmark hay bảo đảm an toàn production.
+Late error analysis used failures from this test snapshot to improve runtime boundary and action
+rules. The current numbers are consequently regression results, not an untouched estimate for new
+data. The model and dataset were not fitted using test labels, but a fresh independently reviewed
+holdout is still required for a strong generalization claim.
 
-## 6. Ràng buộc on-device và vận hành
+## 6. On-device constraints
 
-Luồng chính không gọi LLM hay inference API. TF-IDF, normalizer và regex extractor chạy CPU và được
-nạp từ artifact cục bộ. Đây là lựa chọn thực dụng cho demo on-device, nhưng số đo hiện tại mới lấy trên
-laptop Windows/Python 3.12.
+The default path does not call an LLM or inference API. TF-IDF, normalization, and regex extraction
+run locally on CPU. The intent artifact is about 514 KB. In one Windows laptop run, median end-to-end
+parse latency was around 6 ms; this is a local diagnostic, not a mobile battery or cold-start
+benchmark.
 
-Ở lần chạy hiện tại: pipeline build **58,37 ms**, median **6,72 ms**, p95 **10,15 ms** và throughput
-tuần tự **137,87 lệnh/giây**. Nạp model làm RSS của tiến trình đã import thư viện tăng khoảng **2,28
-MB**; intent artifact khoảng **514 KB**. Đây chỉ là một lần đo local, không phải benchmark pin, cold
-start hoặc footprint native trên điện thoại.
+For a real device I would remove FastAPI from the inference path, package the model for the target
+runtime, cache artifacts, and measure cold start, memory, battery, and latency on the actual device.
+An offline STT engine would only be selected after measuring its WER/CER and its downstream effect
+on intent and slots.
 
-Nếu đưa lên thiết bị thật, tôi sẽ bỏ FastAPI/Python server khỏi đường chạy, đóng gói model theo runtime
-của nền tảng, cache các artifact và benchmark cold start, RAM, pin trên đúng máy đích. Normalizer và
-regex có thể giữ lại; STT offline chỉ được chọn sau khi đo WER/CER và tác động của nó lên intent/slot.
+The runtime pins scikit-learn because the joblib artifact depends on its version. The artifact is
+checksum-verified, but joblib must still only be loaded from a trusted source.
 
-Runtime khóa scikit-learn 1.9.0 vì artifact phụ thuộc phiên bản; E5 chỉ nằm trong extra `semantic`.
-Joblib không phải định dạng an toàn: SHA-256 giúp phát hiện artifact bị thay, không sandbox file lạ.
+## 7. Hardest part and remaining limitations
 
-## 7. Phần khó nhất và giới hạn còn lại
+The hardest part was defining and enforcing the boundary between reminder, alarm, and immediate
+call commands while preserving names, song titles, and regional wording during normalization.
+Leakage control was also important because generated variants can make validation results look much
+better than real generalization.
 
-Phần khó nhất không phải gọi hàm train, mà là quyết định ranh giới giữa `set_alarm`, `set_reminder` và
-`call_contact` khi cả ba có thể chứa từ “gọi” hoặc một mốc thời gian. Normalizer cũng phải đủ mạnh để
-xử lý cách nói vùng miền nhưng không được sửa nhầm tên người hay tên bài hát. Ở phía dữ liệu, các
-template gần giống phải nằm trong cùng split và slot lexicon không được học từ validation/test.
+The main remaining limitations are:
 
-Hệ thống hiện vẫn là closed-set classifier với slot extractor dựa trên regex và catalog. Confidence
-không thay thế được OOD detection, còn safety set được xây cùng rule nên chưa phải independent red-team
-benchmark. Full-command success hiện tại là **73,96%**, nên vẫn còn khoảng cách đáng kể giữa việc nhận
-đúng intent và hoàn thành trọn vẹn một command.
+- regional data is mainly generated text, with no native-speaker or audio benchmark;
+- the classifier is closed-set, so confidence is not a complete OOD detector;
+- regex and catalog-based slots miss unseen entities or phrasing;
+- full-command success is **73.96%**, leaving a clear gap after intent prediction;
+- the safety set is a development regression set, not an independent production red-team test;
+- actions do not cover device permissions, authentication, or privacy controls.
 
-Giới hạn lớn nhất vẫn là chưa có audio hoặc native-speaker benchmark. Mock action cũng chưa kiểm tra
-quyền thiết bị, authentication, privacy hay điều kiện vận hành production, và số đo hiệu năng chưa được
-chạy trên thiết bị di động đích.
+## 8. What I left out and how I would continue
 
-## 8. Phần chưa làm và hướng tiếp tục
+The completed scope is the text-first pipeline, dataset validation, intent model, slot extraction,
+CLI/API, mock actions, and evaluation. STT/TTS, real device actions, and production security are not
+implemented.
 
-Trong phạm vi challenge, pipeline text-first, kiểm tra dataset, intent classifier, slot extraction,
-CLI/API, mock action và evaluator đã hoàn thành. STT/TTS, thiết bị thật và production security chưa
-hoàn thành và không được mô tả như tính năng sẵn sàng sử dụng. Bảng số liệu ở mục 5 có thể tái tạo bằng
-`scripts/evaluate.py`.
+My first next step would be a new development and test set written or reviewed by speakers from all
+three regions. It should be kept independent from current error analysis. Only after that would I
+change rules or models and evaluate again.
 
-Nếu tiếp tục, việc đầu tiên tôi làm sẽ là thu một development/test set mới gồm câu tự nhiên và có người
-nói ba vùng rà soát, thay vì tiếp tục chỉnh theo failure của test cũ. Sau đó mới cải thiện action gate
-và đánh giá trên một holdout mới. Phase audio cần consent, speaker-disjoint split và phép đo WER/CER
-riêng trước khi nối STT với NLU.
-
-PhoBERT hoặc joint intent-slot chỉ đáng thử khi dữ liệu mới và error analysis cho thấy baseline nhẹ đã
-chạm trần. Authentication, privacy control và adapter thiết bị là bước sau cùng nếu project chuyển từ
-demo challenge sang một sản phẩm thực tế.
-
-TTS chỉ cần khi sản phẩm yêu cầu phản hồi bằng âm thanh; weather adapter và mock action không phải bằng chứng hệ thống đã sẵn sàng production.
+The audio phase would add consented recordings and speaker-disjoint splits, then report STT WER/CER
+separately from NLU metrics. PhoBERT or joint intent-slot learning would be justified only if the new
+data showed that the lightweight baseline had reached its limit. Real device adapters, permission
+handling, and TTS would come later if the project moved from a challenge prototype toward a product.

@@ -122,7 +122,7 @@ def _percent(value: float) -> str:
 
 
 def write_markdown_report(report: dict[str, Any], output_path: Path) -> None:
-    """Tạo bản tóm tắt đầy đủ nhưng đọc được; failure chi tiết giữ trong JSON."""
+    """Write a readable summary while keeping per-sample failures in JSON."""
     metrics = report["metrics"]
     raw = metrics["raw_model_intent"]
     runtime = metrics["runtime_intent"]
@@ -132,7 +132,7 @@ def write_markdown_report(report: dict[str, Any], output_path: Path) -> None:
     post_audit = provenance["stage"] == "post_audit_diagnostic"
     lines = [
         (
-            "# Final Evaluation sau audit — NVIT Vietnamese Command Assistant"
+            "# Post-audit Final Evaluation — NVIT Vietnamese Command Assistant"
             if post_audit
             else "# Final Evaluation — NVIT Vietnamese Command Assistant"
         ),
@@ -141,39 +141,39 @@ def write_markdown_report(report: dict[str, Any], output_path: Path) -> None:
     if post_audit:
         lines.extend(
             [
-                "> Kết quả hiện tại được chạy lại trên đúng 384 câu test đã từng được xem khi audit lỗi.",
-                "> Một số lỗi của tập này đã ảnh hưởng đến rule/pipeline, vì vậy đây là regression test sau sửa,",
-                "> **không phải holdout độc lập**. Model và dataset không được fit lại bằng nhãn test.",
+                "> These results rerun the same 384 test samples inspected during late error analysis.",
+                "> Some failures influenced runtime rules, so this is a post-fix regression run,",
+                "> **not an independent holdout**. The model and dataset were not fitted using test labels.",
             ]
         )
     else:
         lines.extend(
             [
-                "> Đây là lần đánh giá cuối trên tập test holdout đã khóa. Test không được dùng để chọn model,",
-                "> threshold, rule hoặc sửa dataset sau khi xem kết quả.",
+                "> This is the final evaluation on the locked holdout. The test set was not used to select",
+                "> a model, threshold, rule, or dataset change after viewing the results.",
             ]
         )
     lines.extend(
         [
             "",
-            "## Snapshot và phương pháp",
+            "## Snapshot and method",
             "",
-            f"- Số câu test: **{metrics['total_samples']}**.",
+            f"- Test samples: **{metrics['total_samples']}**.",
             f"- Test SHA-256: `{report['test_snapshot']['test_set_sha256']}`.",
-            f"- Giai đoạn đánh giá: `{provenance['stage']}`; holdout độc lập: "
-            f"**{'có' if provenance['independent_holdout'] else 'không'}**.",
-            "- Đầu vào là transcript dạng văn bản; runtime không nhận nhãn vùng miền thật.",
-            "- Runtime dùng TF-IDF + Logistic Regression đã được fit lại trên train + validation.",
-            "- Chế độ action khi đánh giá là `mock`; không gọi mạng hoặc thiết bị.",
-            "- Phần test regional là biến thể từ vựng/template, không phải benchmark giọng vùng miền từ audio.",
+            f"- Evaluation stage: `{provenance['stage']}`; independent holdout: "
+            f"**{'yes' if provenance['independent_holdout'] else 'no'}**.",
+            "- Inputs are text transcripts; runtime receives no gold region label.",
+            "- Runtime uses TF-IDF + Logistic Regression fitted on train + validation.",
+            "- Evaluation uses mock actions and does not call a network or device.",
+            "- Regional groups contain lexical/template variants, not an audio accent benchmark.",
             "",
         ]
     )
     lines.extend(
         [
-            "## Kết quả code hiện tại",
+            "## Current results",
             "",
-            "| Chỉ số | Kết quả |",
+            "| Metric | Result |",
             "|---|---:|",
             f"| Raw-model intent accuracy | {_percent(raw['accuracy'])} |",
             f"| Raw-model intent macro-F1 | {_percent(raw['macro_f1'])} |",
@@ -188,12 +188,11 @@ def write_markdown_report(report: dict[str, Any], output_path: Path) -> None:
             f"| Mock action generation rate | {_percent(metrics['action_execution_rate'])} |",
             f"| Full pipeline success (mock action) | {_percent(metrics['full_command_success'])} |",
             "",
-            "Raw-model intent là kết quả của classifier trước các bước confidence, boundary và safety. Runtime",
-            "intent là kết quả cuối người dùng nhận, nên có thể là `unknown` khi hệ thống từ chối thực hiện.",
-            "Trong lần đo này, action router ở chế độ mock; “generation” nghĩa là pipeline tạo được payload action,",
-            "không phải tác vụ đã chạy trên thiết bị thật.",
+            "Raw-model intent is the classifier output before confidence, boundary, and safety logic. Runtime",
+            "intent is the user-facing decision and may be `unknown` when execution is rejected. In this run,",
+            "action generation means that the mock router produced a payload, not that a real device acted.",
             "",
-            "## Raw-model intent theo lớp",
+            "## Raw-model intent by class",
             "",
             "| Intent | Precision | Recall | F1 | Support |",
             "|---|---:|---:|---:|---:|",
@@ -208,7 +207,7 @@ def write_markdown_report(report: dict[str, Any], output_path: Path) -> None:
     lines.extend(
         [
             "",
-            "## End-to-end slot theo loại",
+            "## End-to-end slots by type",
             "",
             "| Slot | Precision | Recall | F1 | Support |",
             "|---|---:|---:|---:|---:|",
@@ -231,7 +230,7 @@ def write_markdown_report(report: dict[str, Any], output_path: Path) -> None:
                 "",
                 f"## Breakdown: {dimension}",
                 "",
-                "| Nhóm | N | Runtime intent acc. | E2E slot exact | Frame exact | Full success |",
+                "| Group | N | Runtime intent acc. | E2E slot exact | Frame exact | Full success |",
                 "|---|---:|---:|---:|---:|---:|",
             ]
         )
@@ -255,67 +254,67 @@ def write_markdown_report(report: dict[str, Any], output_path: Path) -> None:
     lines.extend(
         [
             "",
-            "## Hiệu năng trên máy local",
+            "## Local performance",
             "",
-            f"- Thời gian tạo pipeline: **{report['performance']['pipeline_build_ms']:.2f} ms**.",
-            f"- Lệnh đầu tiên: **{latency['first_request_ms']:.2f} ms**.",
+            f"- Pipeline build: **{report['performance']['pipeline_build_ms']:.2f} ms**.",
+            f"- First request: **{latency['first_request_ms']:.2f} ms**.",
             f"- Median / p95 / p99: **{latency['median_ms']:.2f} / "
             f"{latency['p95_ms']:.2f} / {latency['p99_ms']:.2f} ms**.",
-            f"- Thông lượng tuần tự: **{latency['sequential_throughput_commands_per_second']:.2f} "
-            "lệnh/giây**.",
-            f"- RSS trước khi nạp / sau khi nạp / sau đánh giá: **{memory['before_load']:.2f} / "
+            f"- Sequential throughput: **{latency['sequential_throughput_commands_per_second']:.2f} "
+            "commands/second**.",
+            f"- RSS before load / after load / after evaluation: **{memory['before_load']:.2f} / "
             f"{memory['after_load']:.2f} / {memory['after_evaluation']:.2f} MB**.",
-            "- Độ trễ được đo bằng cách gọi tuần tự toàn bộ `pipeline.parse`; không gồm thời gian khởi động tiến",
-            "  trình, mạng hay JSON API.",
+            "- Latency measures sequential `pipeline.parse` calls. It excludes process startup, networking,",
+            "  and JSON API overhead.",
             "",
-            "## Phân tích lỗi",
+            "## Error analysis",
             "",
-            f"- Số câu lỗi: **{metrics['failure_count']} / {metrics['total_samples']}**.",
+            f"- Failed samples: **{metrics['failure_count']} / {metrics['total_samples']}**.",
         ]
     )
     if failure_reasons:
         for reason, count in sorted(failure_reasons.items()):
             lines.append(f"- `{reason}`: {count}.")
     else:
-        lines.append("- Không có câu lỗi theo tiêu chí full command success.")
+        lines.append("- No sample failed the full-command-success criterion.")
     rejected = metrics["total_samples"] - sum(metrics["action_statuses"].values())
-    lines.append(f"- Hệ thống không tạo mock action cho **{rejected}** câu.")
+    lines.append(f"- The pipeline generated no mock action for **{rejected}** samples.")
     for reason, count in gate_reasons.most_common():
-        lines.append(f"- Action gate `{reason}` xuất hiện ở **{count}** câu lỗi.")
+        lines.append(f"- Action gate `{reason}` appeared in **{count}** failed samples.")
     phone_oracle = oracle_slots["per_slot"].get("phone_number")
     phone_end_to_end = end_to_end_slots["per_slot"].get("phone_number")
     if phone_oracle is not None and phone_end_to_end is not None:
         lines.append(
             f"- `phone_number`: oracle F1 {_percent(phone_oracle['f1'])}, end-to-end F1 "
-            f"{_percent(phone_end_to_end['f1'])}; lỗi chủ yếu xảy ra trước/sau"
+            f"{_percent(phone_end_to_end['f1'])}; remaining failures occur before or after the"
         )
-        lines.append("  extractor, cụ thể ở bước intent hoặc action gate, không phải regex đọc số.")
+        lines.append("  extractor, mainly in intent or action-gate decisions rather than phone parsing.")
     limitation_lines = [
-        "- Danh sách từng câu lỗi, confidence, slot và matched features nằm trong",
-        "  `reports/final_evaluation.json` để tránh làm bản Markdown quá dài.",
+        "- Per-sample failures, confidence, slots, and matched features are kept in",
+        "  `reports/final_evaluation.json` to keep this Markdown report readable.",
         "",
-        "## Giới hạn phải đọc cùng kết quả",
+        "## Limitations to read with these results",
         "",
-        "- Phần test regional là biến thể từ vựng/template, không chứng minh khả năng nhận dạng giọng vùng miền.",
-        "- Một phần test là dữ liệu synthetic; kết quả nhóm này thường lạc quan hơn dữ liệu MASSIVE.",
-        "- Intent classifier là closed-set; tập safety hiện chỉ là development regression, không phải tập",
-        "  red-team độc lập cho production.",
-        "- Truy vấn thời tiết thật, STT/TTS và thiết bị không nằm trong phép đánh giá cuối này.",
+        "- Regional groups contain lexical/template variants and do not prove audio accent recognition.",
+        "- Part of the test set is synthetic and is generally easier than MASSIVE.",
+        "- The intent classifier is closed-set. The safety set is a development regression set, not an",
+        "  independent production red-team benchmark.",
+        "- Live weather, STT/TTS, and real devices are outside this final evaluation.",
     ]
     if post_audit:
         limitation_lines.extend(
             [
-                "- Test đã được xem và đã ảnh hưởng đến rule/pipeline. Vì vậy không dùng các số hiện tại như",
-                "  ước lượng không thiên lệch cho dữ liệu hoàn toàn mới.",
+                "- The test set was inspected and influenced runtime rules. These results are not an",
+                "  unbiased estimate for completely new data.",
             ]
         )
     else:
-        limitation_lines.append("- Không dùng kết quả test cuối để quay lại chỉnh model hoặc rule.")
+        limitation_lines.append("- Final test results were not used to revise the model or rules.")
     lines.extend(
         limitation_lines
         + [
             "",
-            "Ma trận nhầm lẫn: `reports/figures/final_test_confusion_matrix.png`.",
+            "Confusion matrix: `reports/figures/final_test_confusion_matrix.png`.",
             "",
         ]
     )

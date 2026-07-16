@@ -1,58 +1,58 @@
 # NVIT Vietnamese Command Assistant
 
-Một trợ lý hiểu lệnh tiếng Việt theo hướng **text-first NLU**. Chương trình nhận transcript, chuẩn hóa
-cách viết và từ vựng vùng miền, dự đoán intent, trích xuất slot rồi tạo action giả lập hoặc câu hỏi bổ
-sung. Luồng mặc định chạy cục bộ, không cần LLM và không gọi mạng.
+A text-first NLU assistant for short Vietnamese commands. It accepts a transcript, normalizes
+known spelling and regional lexical variants, predicts an intent, extracts slots, and returns a
+mock action or a clarification. The default pipeline runs locally without an LLM or network call.
 
-Project tập trung vào phần khó nhất của challenge: hiểu đúng câu lệnh ngắn, xử lý một số biến thể
-Bắc/Trung/Nam, kiểm soát leakage và đánh giá cả model lẫn pipeline. STT/TTS và điều khiển thiết bị thật
-không nằm trong phạm vi đã hoàn thành.
+This submission focuses on the core of the challenge: Vietnamese command understanding, regional
+variation in text, leakage-aware evaluation, and a complete path from input to action. It does not
+claim to solve speech recognition or real-world accent recognition.
 
-## Phạm vi
+## Scope
 
-Năm intent được hỗ trợ:
+The assistant supports five intents:
 
-- `set_reminder`: tạo lời nhắc;
-- `set_alarm`: đặt báo thức;
-- `ask_weather`: hỏi thời tiết;
-- `play_music`: phát nhạc;
-- `call_contact`: gọi một liên hệ hoặc số điện thoại ngay lúc đó.
+- `set_reminder`: create a reminder;
+- `set_alarm`: set an alarm;
+- `ask_weather`: ask for weather information;
+- `play_music`: request a song or artist;
+- `call_contact`: call a contact or phone number immediately.
 
-Bảy slot: `datetime`, `location`, `song`, `artist`, `contact_name`, `phone_number` và
-`reminder_text`.
+It extracts seven slots: `datetime`, `location`, `song`, `artist`, `contact_name`, `phone_number`,
+and `reminder_text`.
 
-Đầu ra có intent, confidence, slot, các dấu vết match, action và câu phản hồi. Action mặc định có
-`status=mocked`: chương trình không tự gọi điện, đặt báo thức hay phát nhạc trên máy của người dùng.
+All actions use `status=mocked` by default. The program will not place calls, set device alarms, or
+play media. A live Open-Meteo weather demo is available as an explicit opt-in.
 
-## Chạy nhanh
+## Quick start
 
-Project yêu cầu Python 3.11 trở lên. Dependency chính gồm Pydantic, PyYAML, NumPy, scikit-learn,
-joblib, FastAPI và Uvicorn; phiên bản cụ thể nằm trong `pyproject.toml`. Cài runtime:
+Python 3.11 or newer is required.
 
 ```powershell
 python -m pip install -e .
 ```
 
-Chạy CLI:
+Run the CLI:
 
 ```powershell
 nvit-assistant "nhắc tôi uống thuốc lúc 8 giờ"
 nvit-assistant --json "Bữa ni ở Huế trời răng rồi hỉ"
 ```
 
-Nếu chưa cài entrypoint, có thể chạy thẳng từ source:
+The command is registered through the `[project.scripts]` entry in `pyproject.toml`. The same CLI
+can be run directly from source if the entry point is not installed:
 
 ```powershell
 python scripts/run_assistant.py --json "mở nhạc Mỹ Tâm cho tui nghe"
 ```
 
-Khởi động API:
+Start the API:
 
 ```powershell
 python -m uvicorn nvit_assistant.api:app --app-dir src --host 127.0.0.1 --port 8000
 ```
 
-Swagger UI ở `http://127.0.0.1:8000/docs`. `POST /parse` nhận payload:
+Swagger UI is available at `http://127.0.0.1:8000/docs`. `POST /parse` accepts:
 
 ```json
 {
@@ -61,9 +61,9 @@ Swagger UI ở `http://127.0.0.1:8000/docs`. `POST /parse` nhận payload:
 }
 ```
 
-## Ba ví dụ thực tế
+## Examples
 
-Các kết quả dưới đây được lấy từ CLI hiện tại và rút gọn còn những trường chính.
+These shortened outputs come from the current CLI.
 
 ```text
 Input:  Bữa ni ở Huế trời răng rồi hỉ
@@ -83,65 +83,72 @@ Output: intent=play_music
 Input:  nhắc tôi uống thuốc lúc 8 giờ
 Output: intent=set_reminder
         slots={datetime: "8 giờ", reminder_text: "uống thuốc"}
-        response="Đã giả lập tạo lời nhắc “uống thuốc” vào 8 giờ."
+        response="Đã giả lập tạo lời nhắc ‘uống thuốc’ vào 8 giờ."
 ```
 
-## Luồng xử lý
+## Pipeline
 
 ```text
-transcript
-  -> chuẩn hóa Unicode, lỗi STT đã biết và từ vựng vùng miền
-  -> TF-IDF word/character n-gram + Logistic Regression
+text transcript
+  -> Unicode, known STT/spelling, and regional lexical normalization
+  -> word/character TF-IDF + Logistic Regression
   -> confidence gate
-  -> trích xuất slot theo intent
+  -> intent-aware slot extraction
   -> action-safety gate
-  -> kiểm tra slot bắt buộc
-  -> mock/live-weather action, hỏi bổ sung hoặc từ chối an toàn
+  -> required-slot check
+  -> mock/live-weather action, clarification, or safe rejection
 ```
 
-CLI và FastAPI dùng cùng một pipeline factory nên không có hai bản logic riêng. Model được nạp một
-lần khi API khởi động.
+The CLI and FastAPI application use the same pipeline factory. The API loads the model once during
+startup rather than rebuilding it for every request.
 
-## Cấu trúc repository
+## Repository layout
 
 ```text
-configs/                         cấu hình model, slot, vùng miền và data template
-data/raw_sources/                nguồn đầu vào có provenance
-data/samples/                    JSONL train, validation và test
-models/                          artifact intent và slot lexicon
-scripts/                         build, validate, train, evaluate và demo
+configs/                         model, slot, regional, and data-generation settings
+data/raw_sources/                source data retained with provenance
+data/samples/                    train, validation, and locked test JSONL files
+models/                          intent artifact and train-only slot lexicon
+scripts/                         build, validate, train, evaluate, and demo commands
 src/nvit_assistant/
-  actions/                       mock router và live-weather adapter tùy chọn
-  eval/                          hàm metric và final evaluator
-  nlu/                           normalizer, intent, slot và pipeline
-tests/                           unit, regression và integration tests
+  actions/                       mock router and optional live-weather adapter
+  eval/                          metrics and final evaluator
+  nlu/                           normalization, intent, slots, and runtime pipeline
+tests/                           unit, regression, and integration tests
 ```
 
-Lý do chọn cách làm và các phương án đã loại được trình bày trong [DECISIONS.md](DECISIONS.md).
+The reasoning behind the scope and technical choices is in [DECISIONS.md](DECISIONS.md).
 
 ## Dataset
 
-Snapshot hiện có 2.094 câu cho đủ năm intent:
+The checked-in snapshot contains 2,094 samples across all five intents:
 
-| Split | Số câu |
+| Split | Samples |
 |---|---:|
-| Train | 1.363 |
+| Train | 1,363 |
 | Validation | 347 |
 | Test | 384 |
 
-Test gồm 174 câu standard và 70 câu cho mỗi nhóm Bắc, Trung, Nam. Nguồn chính là MASSIVE `vi-VN`
-đã lọc cùng dữ liệu template lexical do project tự biên soạn. Chi tiết provenance và license nằm ở
-[data/SOURCES.md](data/SOURCES.md).
+The test set contains 174 standard Vietnamese samples and 70 samples for each Northern, Central,
+and Southern lexical group. The data combines 969 mapped Vietnamese MASSIVE samples, 1,106
+template-generated samples, and 19 manually reviewed hard cases. Provenance and licensing details
+are documented in [data/SOURCES.md](data/SOURCES.md).
 
-Các câu cùng template family được gom bằng `group_id` trước khi chia tập. Validator còn kiểm tra trùng
-nguyên văn, trùng sau khi bỏ dấu, near-duplicate và leakage giữa split. Slot lexicon chỉ được build từ
-train, không đọc validation/test.
+Template families are grouped before splitting. The validator checks exact duplicates,
+diacritic-insensitive duplicates, near-similar samples, and group leakage across splits. The slot
+lexicon is built from training data only.
 
-Regional set hiện đo biến thể từ vựng trên **văn bản**, không đo accent âm thanh. Số transcript/audio
-được native speaker review theo protocol chính thức vẫn là 0. Vì vậy project không tuyên bố hiểu đầy
-đủ giọng Bắc/Trung/Nam ngoài đời.
+The regional benchmark measures **textual lexical variation**, not speech accent. No sample has
+been independently reviewed under a native-speaker protocol, and no audio is included. Regional
+scores should therefore not be read as evidence of real-world accent recognition.
 
-Build và kiểm tra lại dataset sau khi tải MASSIVE 1.0 `vi-VN.jsonl`:
+The locked test snapshot has SHA-256:
+
+```text
+47cb9cf87cc53c5a210298453b4ae6ca75d045250c883bd5cca59709ddec9f2a
+```
+
+To rebuild the dataset from MASSIVE 1.0 `vi-VN.jsonl`:
 
 ```powershell
 python scripts/build_dataset.py --massive-jsonl path\to\vi-VN.jsonl
@@ -150,56 +157,52 @@ python scripts/audit_normalization.py --data-dir data/samples
 python scripts/build_slot_lexicon.py
 ```
 
-Test snapshot được khóa bằng SHA-256:
+## Model choice
 
-```text
-47cb9cf87cc53c5a210298453b4ae6ca75d045250c883bd5cca59709ddec9f2a
-```
+The runtime model is word/character TF-IDF with Logistic Regression. Word n-grams preserve useful
+command phrases, while character n-grams improve tolerance to missing diacritics and surface noise.
+The classifier is small, fast on CPU, and provides probabilities for the confidence gate.
 
-## Model và lựa chọn kỹ thuật
-
-Model chính là TF-IDF word/character n-gram kết hợp Logistic Regression. Character n-gram giúp chịu
-được câu không dấu và lỗi bề mặt; Logistic Regression nhẹ, có xác suất cho confidence gate và chạy
-nhanh trên CPU.
-
-Ba cấu hình TF-IDF được fit trên train rồi chọn bằng macro-F1 trên validation. Candidate thắng đạt
-validation macro-F1 **98,17%**. Một thí nghiệm riêng dùng `multilingual-e5-small` + Logistic Regression
-đạt **86,06%** trên cùng split, nên E5 không được đưa vào runtime. Extra `semantic` chỉ phục vụ tái tạo
-thí nghiệm này:
+Three TF-IDF candidates were fitted on train and selected by validation macro-F1. The selected
+candidate reached **98.17% validation macro-F1**. A separate `multilingual-e5-small` plus Logistic
+Regression experiment reached **86.06%** on the same validation split, so E5 was not included in
+runtime. The optional experiment remains reproducible without adding its large model to the repo:
 
 ```powershell
 python -m pip install -e ".[semantic]"
 ```
 
-Slot được trích bằng rule/regex theo intent. Cách này hợp với bảy slot và lượng dữ liệu hiện tại, dễ
-audit hơn một sequence tagger nhưng sẽ yếu hơn với entity hoặc cách diễn đạt chưa từng gặp.
+Slots are extracted with intent-aware rules and regular expressions. This is easy to inspect and
+fits the seven-slot scope, but it is less robust to unseen entities and phrasing than a trained
+sequence tagger.
 
-## Kết quả đánh giá
+## Evaluation
 
-Tập test gồm 384 câu, bao phủ năm intent, bảy slot, tiếng Việt chuẩn, ba nhóm từ vựng vùng miền và câu
-không dấu. Runtime không được truyền sẵn region label.
+The current 384-sample test snapshot gives:
 
-| Chỉ số | Kết quả |
+| Metric | Result |
 |---|---:|
-| Intent accuracy / macro-F1 | **92,71% / 92,25%** |
-| Runtime intent accuracy | **90,36%** |
-| Runtime coverage / selective accuracy | **92,45% / 97,75%** |
-| Oracle slot exact match / micro-F1 | **81,77% / 86,89%** |
-| End-to-end slot exact match / micro-F1 | **74,48% / 83,15%** |
-| Full-command success | **73,96%** |
+| Raw intent accuracy / macro-F1 | **92.71% / 92.25%** |
+| Runtime intent accuracy | **90.36%** |
+| Runtime coverage / selective accuracy | **92.45% / 97.75%** |
+| Oracle slot exact match / micro-F1 | **81.77% / 86.89%** |
+| End-to-end slot exact match / micro-F1 | **74.48% / 83.15%** |
+| Full-command success | **73.96%** |
 
-Intent accuracy đo riêng classifier. Runtime intent phản ánh kết quả sau confidence, boundary và safety
-gate; full-command success chỉ đạt khi intent, slot và mock action đều đúng. Khoảng cách giữa **92,71%**
-intent accuracy và **73,96%** full-command success cho thấy phần còn yếu nằm nhiều ở slot và policy,
-không chỉ ở classifier.
+Raw intent accuracy evaluates the classifier alone. Runtime intent includes confidence, boundary,
+and safety decisions. Full-command success requires the intent, slots, and mock action to all be
+correct, so **73.96%** is the most representative end-to-end number.
 
-Runtime intent accuracy hiện tại theo vùng là Bắc **81,43%**, Trung **88,57%**, Nam **94,29%**;
-nhóm không dấu đạt **76,85%**. Đây vẫn chỉ là text benchmark có nhiều biến thể tự tạo, không đại diện
-cho khả năng hiểu accent từ audio ngoài đời.
+Runtime intent accuracy by lexical region is Northern **81.43%**, Central **88.57%**, and Southern
+**94.29%**. The no-diacritics subset reaches **76.85%**. These figures come from a partly synthetic
+text benchmark and must be interpreted with the limitations above.
 
-## Kiểm tra và tái tạo
+The final test was inspected during late error analysis and influenced runtime rules. The current
+figures are therefore regression results on the locked snapshot, not a fresh unbiased holdout. The
+model and dataset were not fitted using test labels. A new independently reviewed holdout is the
+next required step before making a generalization claim.
 
-Cài công cụ phát triển rồi chạy quality gate:
+## Reproduce the checks
 
 ```powershell
 python -m pip install -e ".[dev]"
@@ -210,30 +213,23 @@ python scripts/validate_data.py --data-dir data/samples
 python scripts/audit_normalization.py --data-dir data/samples
 ```
 
-Snapshot hiện tại qua **297 test**, Ruff, mypy, dependency check, data validator và leakage audit.
+The current snapshot passes **297 tests**, Ruff, mypy, dependency validation, dataset validation,
+and the normalization/leakage audit.
 
-Để tái tạo bảng đánh giá chi tiết:
+Regenerate the detailed local evaluation report and confusion matrix with:
 
 ```powershell
 python scripts/evaluate.py --post-audit --overwrite
 ```
 
-Evaluator kiểm tra checksum test rồi sinh JSON, Markdown và confusion matrix vào `reports/` ở máy
-local. Thư mục này được Git bỏ qua vì đây là output có thể tái tạo, không phải source cần nộp. Các lỗi
-trong tập test đã được dùng cho error analysis ở giai đoạn cuối, nên số hiện tại cần được đọc như kết
-quả hồi quy; một holdout mới vẫn là bước tiếp theo để đo khả năng tổng quát hóa.
+Generated reports are intentionally ignored by Git because they are reproducible artifacts. The
+headline results and their limitations are kept in this README and in `DECISIONS.md`.
 
-## Action và phần chưa làm
-
-Mock action là mặc định để test và evaluation deterministic. Có thể bật demo Open-Meteo riêng cho
-weather:
+## Optional live-weather demo and remaining scope
 
 ```powershell
 nvit-assistant --live-weather "thời tiết ở Huế ngày mai"
 ```
 
-Danh bạ và catalog nhạc trong `data/` chỉ là dữ liệu giả. Project chưa có STT/TTS, authentication,
-privacy controls hay tích hợp thiết bị thật. Đây là các phần mở rộng production, không phải tính năng
-đã hoàn thành của bản challenge.
-
-Các giới hạn, trade-off và hướng tiếp tục được ghi ngắn gọn trong [DECISIONS.md](DECISIONS.md).
+This mode calls Open-Meteo only for weather. Contacts and the music catalog are fake demo data.
+STT/TTS, authentication, privacy controls, and real device integrations are not implemented.
